@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  database:
+    image: 'postgres:latest'
+
+    volumes:
+      # :Z due to https://stackoverflow.com/a/31334443/19309268
+      - ./../db-data:/var/lib/postgresql/data:Z
+
+    ports:
+      - "5432:5432"
+
+    env_file:
+      - '.env'
