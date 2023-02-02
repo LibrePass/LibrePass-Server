@@ -12,3 +12,9 @@ class LoginRequest {
     lateinit var email: String
     lateinit var password: String
 }
+
+class RefreshRequest {
+    lateinit var refreshToken: String
+}
+
+class UserCredentials(val accessToken: String, val refreshToken: String)

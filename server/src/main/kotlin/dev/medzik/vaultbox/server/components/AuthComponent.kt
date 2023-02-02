@@ -54,13 +54,15 @@ class AuthComponent
      * @param token Token to be parsed.
      * @return User ID or null.
      */
-    fun parseToken(token: String): String? {
+    fun parseToken(type: TokenType, token: String): String? {
         return try {
             val claims = Jwts.parserBuilder()
                 .setSigningKey(publicKey)
                 .build()
                 .parseClaimsJws(token)
                 .body
+
+            if (claims["typ"] != type.type) return null
 
             claims["sub"] as String
         } catch (e: Exception) {

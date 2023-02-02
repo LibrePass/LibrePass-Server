@@ -6,10 +6,10 @@ import dev.medzik.vaultbox.server.components.AuthComponent
 import dev.medzik.vaultbox.server.components.TokenType
 import dev.medzik.vaultbox.server.database.UserRepository
 import dev.medzik.vaultbox.server.database.UserTable
+import dev.medzik.vaultbox.types.api.auth.UserCredentials
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-
-class UserCredentials(val accessToken: String, val refreshToken: String)
+import java.util.*
 
 @Service
 class UserService {
@@ -50,6 +50,16 @@ class UserService {
         return UserCredentials(
             authComponent.generateToken(TokenType.ACCESS_TOKEN, user.id),
             authComponent.generateToken(TokenType.REFRESH_TOKEN, user.id)
+        )
+    }
+
+    fun refreshToken(refreshToken: String): UserCredentials? {
+        val userId = authComponent.parseToken(TokenType.REFRESH_TOKEN, refreshToken) ?: return null
+        val userUuid = UUID.fromString(userId)
+
+        return UserCredentials(
+            authComponent.generateToken(TokenType.ACCESS_TOKEN, userUuid),
+            authComponent.generateToken(TokenType.REFRESH_TOKEN, userUuid)
         )
     }
 
