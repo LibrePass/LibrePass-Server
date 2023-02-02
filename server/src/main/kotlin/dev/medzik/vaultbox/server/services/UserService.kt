@@ -63,6 +63,18 @@ class UserService {
         )
     }
 
+    /**
+     * Find user in database using access token and return it or null if token is invalid.
+     * @param accessToken Access token
+     * @return [UserTable] or null
+     */
+    fun getUserByToken(accessToken: String): UserTable? {
+        val userId = authComponent.parseToken(TokenType.ACCESS_TOKEN, accessToken) ?: return null
+        val userUuid = UUID.fromString(userId)
+
+        return userRepository.findById(userUuid).orElse(null)
+    }
+
     fun generateSalt(): ByteArray {
         return Salt.generate(saltLength)
     }
