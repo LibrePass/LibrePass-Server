@@ -1,4 +1,4 @@
-package dev.medzik.vaultbox.server.controllers
+package dev.medzik.vaultbox.server.controllers.advice
 
 import dev.medzik.vaultbox.server.utils.Response
 import dev.medzik.vaultbox.server.utils.ResponseError

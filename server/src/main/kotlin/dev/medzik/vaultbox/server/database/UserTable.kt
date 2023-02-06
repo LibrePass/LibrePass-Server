@@ -27,7 +27,6 @@ class UserTable {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(insertable = false, updatable = false)
     var created: Date? = null
-
     @LastModifiedDate
     @Temporal(TemporalType.TIMESTAMP)
     @Column(insertable = false, updatable = false)
