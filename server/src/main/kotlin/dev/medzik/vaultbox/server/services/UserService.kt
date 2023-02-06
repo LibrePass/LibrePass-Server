@@ -48,6 +48,7 @@ class UserService {
         }
 
         return UserCredentials(
+            user.id,
             authComponent.generateToken(TokenType.ACCESS_TOKEN, user.id),
             authComponent.generateToken(TokenType.REFRESH_TOKEN, user.id)
         )
@@ -58,6 +59,7 @@ class UserService {
         val userUuid = UUID.fromString(userId)
 
         return UserCredentials(
+            userUuid,
             authComponent.generateToken(TokenType.ACCESS_TOKEN, userUuid),
             authComponent.generateToken(TokenType.REFRESH_TOKEN, userUuid)
         )
