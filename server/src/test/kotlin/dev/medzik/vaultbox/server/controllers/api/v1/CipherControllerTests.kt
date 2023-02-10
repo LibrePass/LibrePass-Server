@@ -91,6 +91,28 @@ class CipherControllerTests {
         return responseData.data
     }
 
+    fun updateCipher(userCredentials: UserCredentials, cipher: EncryptedCipher): InsertResponse {
+        cipher.type = 2
+        cipher.data = "test2"
+        cipher.favorite = true
+        cipher.rePrompt = true
+
+        val json = Gson().toJson(cipher)
+        val mvcResult = mockMvc.perform(
+            MockMvcRequestBuilders.put(urlPrefix)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json)
+                .header("Authorization", "Bearer ${userCredentials.accessToken}")
+        ).andExpect(MockMvcResultMatchers.status().isCreated)
+            .andReturn()
+
+        val responseBody = mvcResult.response.contentAsString
+        val responseData: ResponseData<InsertResponse> = Gson()
+            .fromJson(responseBody, object : TypeToken<ResponseData<InsertResponse>>() {}.type)
+
+        return responseData.data
+    }
+
     fun listCiphers(userCredentials: UserCredentials) {
         mockMvc.perform(
             MockMvcRequestBuilders.get(urlPrefix)
@@ -131,6 +153,14 @@ class CipherControllerTests {
     fun insertCipher() {
         val userCredentials = init()
         insertCipher(userCredentials)
+    }
+
+    @Test
+    fun updateCipher() {
+        val userCredentials = init()
+        val insertResponse = insertCipher(userCredentials)
+        val cipher = getCipher(userCredentials, insertResponse.id.toString())
+        updateCipher(userCredentials, cipher)
     }
 
     @Test
