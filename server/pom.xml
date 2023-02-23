@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
-    <groupId>dev.medzik.vaultbox</groupId>
+    <groupId>dev.medzik.librepass</groupId>
     <artifactId>server</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>server</name>
@@ -100,7 +100,7 @@
 <!--        </dependency>-->
 
         <dependency>
-            <groupId>dev.medzik.vaultbox</groupId>
+            <groupId>dev.medzik.librepass</groupId>
             <artifactId>core</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>

@@ -1,7 +1,7 @@
-# VaultBox Core Infrastructure
+# LibrePass Core Infrastructure
 
-The VaultBox Server project contains a set of APIs, database, and other services
-needed for the backend of the VaultBox project.
+The LibrePass Server project contains a set of APIs, database, and other services
+needed for the backend of the LibrePass project.
 
 The server is written in Kotlin using Spring Boot framework and Spring Boot JPA for DataBase integration.
 
@@ -24,7 +24,7 @@ Next. You will set up environment variables:
 If you want to build the server you need to use the following commands:
 ```bash
 # Clone the repository
-git clone https://github.com/VaultBox/server.git
+git clone https://github.com/LibrePass/server.git
 cd server
 # Build using maven
 ./mvnw clean package
