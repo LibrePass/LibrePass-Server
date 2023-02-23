@@ -12,7 +12,7 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
-          POSTGRES_DB: vaultbox
+          POSTGRES_DB: librepass
         ports:
           - 5432:5432
         # needed because the postgres container does not provide a healthcheck
@@ -41,4 +41,4 @@ jobs:
           POSTGRES_PORT: 5432
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
-          POSTGRES_DB: vaultbox
+          POSTGRES_DB: librepass
