@@ -101,8 +101,8 @@
 
         <dependency>
             <groupId>dev.medzik.librepass</groupId>
-            <artifactId>core</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <artifactId>types</artifactId>
+            <version>${version}</version>
         </dependency>
 <!--        <dependency>-->
 <!--            <groupId>com.google.code.gson</groupId>-->
