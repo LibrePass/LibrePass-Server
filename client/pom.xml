@@ -10,6 +10,8 @@
     </parent>
 
     <artifactId>client</artifactId>
+    <name>LibrePass API Client</name>
+    <description>LibrePass API Client for Kotlin</description>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -17,8 +19,35 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>5.0.0-alpha.11</version>
+        </dependency>
+
+        <dependency>
+            <groupId>dev.medzik.librepass</groupId>
+            <artifactId>types</artifactId>
+            <version>${version}</version>
+        </dependency>
+
+        <!--    Test    -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+            <version>5.9.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.9.2</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
-        <!--        <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>-->
+        <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
     </build>
 </project>

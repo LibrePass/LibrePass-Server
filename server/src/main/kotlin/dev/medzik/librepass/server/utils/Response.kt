@@ -8,34 +8,27 @@ typealias Response = ResponseEntity<Any>
 object ResponseHandler {
     fun generateResponse(status: HttpStatus): Response {
         val map = createMap()
-        map["status"] = status.value()
-
-        return createResponse(map)
+        return createResponse(map, status)
     }
 
     fun generateResponse(data: Any, status: HttpStatus): Response {
-        val map = createMap()
-        map["data"] = data
-        map["status"] = status.value()
-
-        return createResponse(map)
+        return createResponse(data, status)
     }
 
     fun generateErrorResponse(error: String, status: HttpStatus): Response {
         val map = createMap()
-        map["code"] = error
+        map["error"] = error
         map["status"] = status.value()
 
-        return createResponse(map)
+        return createResponse(map, status)
     }
 
     private fun createMap(): MutableMap<String, Any> {
         return HashMap()
     }
 
-    private fun createResponse(map: Map<String, Any>): Response {
-        val status = map["status"] as Int
-        return ResponseEntity.status(status).body(map)
+    private fun createResponse(data: Any, status: HttpStatus): Response {
+        return ResponseEntity.status(status).body(data)
     }
 }
 
