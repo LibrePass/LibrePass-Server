@@ -8,7 +8,7 @@
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>LibrePass</name>
-    <description>LibrePass</description>
+    <description>The core LibrePass infrastructure</description>
 
     <modules>
         <module>server</module>
@@ -62,9 +62,6 @@
     </dependencies>
 
     <build>
-<!--        <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>-->
-<!--        <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>-->
-
         <plugins>
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
