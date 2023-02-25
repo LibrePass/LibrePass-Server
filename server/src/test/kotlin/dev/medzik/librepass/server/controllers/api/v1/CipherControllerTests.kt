@@ -2,11 +2,9 @@ package dev.medzik.librepass.server.controllers.api.v1
 
 import com.github.javafaker.Faker
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import dev.medzik.libcrypto.Pbkdf2
 import dev.medzik.libcrypto.Salt
 import dev.medzik.librepass.types.api.EncryptedCipher
-import dev.medzik.librepass.types.api.ResponseData
 import dev.medzik.librepass.types.api.auth.LoginRequest
 import dev.medzik.librepass.types.api.auth.RegisterRequest
 import dev.medzik.librepass.types.api.auth.UserCredentials
@@ -62,10 +60,7 @@ class CipherControllerTests {
             .andReturn()
 
         val responseBody = mvcResult.response.contentAsString
-        val responseData: ResponseData<UserCredentials> = Gson()
-            .fromJson(responseBody, object : TypeToken<ResponseData<UserCredentials>>() {}.type)
-
-        return responseData.data
+        return Gson().fromJson(responseBody, UserCredentials::class.java)
     }
 
     fun insertCipher(userCredentials: UserCredentials): InsertResponse {
@@ -85,10 +80,7 @@ class CipherControllerTests {
             .andReturn()
 
         val responseBody = mvcResult.response.contentAsString
-        val responseData: ResponseData<InsertResponse> = Gson()
-            .fromJson(responseBody, object : TypeToken<ResponseData<InsertResponse>>() {}.type)
-
-        return responseData.data
+        return Gson().fromJson(responseBody, InsertResponse::class.java)
     }
 
     fun updateCipher(userCredentials: UserCredentials, cipher: EncryptedCipher): InsertResponse {
@@ -107,10 +99,7 @@ class CipherControllerTests {
             .andReturn()
 
         val responseBody = mvcResult.response.contentAsString
-        val responseData: ResponseData<InsertResponse> = Gson()
-            .fromJson(responseBody, object : TypeToken<ResponseData<InsertResponse>>() {}.type)
-
-        return responseData.data
+        return Gson().fromJson(responseBody, InsertResponse::class.java)
     }
 
     fun listCiphers(userCredentials: UserCredentials) {
@@ -130,10 +119,7 @@ class CipherControllerTests {
             .andReturn()
 
         val responseBody = mvcResult.response.contentAsString
-        val responseData: ResponseData<EncryptedCipher> = Gson()
-            .fromJson(responseBody, object : TypeToken<ResponseData<EncryptedCipher>>() {}.type)
-
-        return responseData.data
+        return Gson().fromJson(responseBody, EncryptedCipher::class.java)
     }
 
     fun deleteCipher(userCredentials: UserCredentials, cipherId: String) {
