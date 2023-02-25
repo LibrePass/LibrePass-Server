@@ -5,7 +5,7 @@ import dev.medzik.librepass.server.database.CipherTable
 import dev.medzik.librepass.types.api.EncryptedCipher
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.util.UUID
+import java.util.*
 
 @Service
 class CipherService {

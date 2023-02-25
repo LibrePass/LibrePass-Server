@@ -8,7 +8,6 @@ import dev.medzik.librepass.types.api.auth.RefreshRequest
 import dev.medzik.librepass.types.api.auth.RegisterRequest
 import dev.medzik.librepass.types.api.auth.UserCredentials
 import java.io.IOException
-import java.util.HashMap
 
 const val EncryptionKeyIterations = 5000 // 5k iterations
 const val PasswordIterations = 100000 // 100k iterations
