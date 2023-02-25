@@ -1,9 +1,5 @@
 package dev.medzik.librepass.client
 
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import dev.medzik.librepass.types.api.ResponseData
-import dev.medzik.librepass.types.api.auth.UserCredentials
 import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
