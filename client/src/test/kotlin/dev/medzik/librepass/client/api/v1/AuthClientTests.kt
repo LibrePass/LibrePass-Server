@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
-class AuthTests {
-    private val authClient = Auth("http://localhost:8080")
+class AuthClientTests {
+    private val authClient = AuthClient("http://localhost:8080")
 
     @Test
     @Order(1)

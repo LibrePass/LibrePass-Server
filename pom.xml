@@ -53,7 +53,7 @@
             <version>2.10.1</version>
         </dependency>
 
-        <!--- Tests -->
+        <!-- Tests -->
         <dependency>
             <groupId>com.github.javafaker</groupId>
             <artifactId>javafaker</artifactId>
