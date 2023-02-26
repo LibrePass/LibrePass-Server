@@ -1,30 +1,29 @@
 package dev.medzik.librepass.client.api.v1
 
-import org.junit.jupiter.api.MethodOrderer
-import org.junit.jupiter.api.Order
+import com.github.javafaker.Faker
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestMethodOrder
 
-@TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 class AuthClientTests {
     private val authClient = AuthClient("http://localhost:8080")
 
+    private val email = Faker().internet().emailAddress()
+    private val password = Faker().internet().password()
+
     @Test
-    @Order(1)
     fun register() {
-        authClient.register("test", "test")
+        authClient.register(email, password)
     }
 
     @Test
-    @Order(2)
     fun login() {
-        authClient.login("test", "test")
+        register() // register user first
+        authClient.login(email, password)
     }
 
     @Test
-    @Order(3)
     fun refresh() {
-        val credentials = authClient.login("test", "test")
+        register() // register user first
+        val credentials = authClient.login(email, password)
         authClient.refresh(credentials.refreshToken)
     }
 }

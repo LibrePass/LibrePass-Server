@@ -12,7 +12,6 @@ import java.util.*
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
-//@TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 class CipherClientTests {
     private val encryptionKey = Pbkdf2(1).sha256("encryptionKey", Salt.generate(32))
 
