@@ -23,14 +23,14 @@ class CipherClientTests {
         @BeforeAll
         @JvmStatic
         fun setup() {
-            val authClient = Auth("http://localhost:8080")
+            val authClient = AuthClient("http://localhost:8080")
             authClient.register("test_cipher", "test")
         }
 
         @AfterAll
         @JvmStatic
         fun cleanup() {
-            val authClient = Auth("http://localhost:8080")
+            val authClient = AuthClient("http://localhost:8080")
             val credentials = authClient.login("test_cipher", "test")
 
             val cipherClient = CipherClient(credentials.accessToken, "http://localhost:8080")
@@ -43,7 +43,7 @@ class CipherClientTests {
 
     @BeforeEach
     fun beforeEach() {
-        val authClient = Auth("http://localhost:8080")
+        val authClient = AuthClient("http://localhost:8080")
         val credentials = authClient.login("test_cipher", "test")
 
         cipherClient = CipherClient(credentials.accessToken, "http://localhost:8080")
