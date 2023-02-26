@@ -12,7 +12,7 @@ import java.io.IOException
 const val EncryptionKeyIterations = 5000 // 5k iterations
 const val PasswordIterations = 100000 // 100k iterations
 
-class Auth(private val apiUrl: String = Client.DefaultApiUrl) {
+class Auth(apiUrl: String = Client.DefaultApiUrl) {
     private val apiEndpoint = "/api/v1/auth"
 
     private val client = Client(null, apiUrl)
