@@ -95,4 +95,8 @@ class EncryptedCipher {
         cipher.from(this, key)
         return cipher
     }
+
+    fun toJson(): String {
+        return Gson().toJson(this)
+    }
 }
