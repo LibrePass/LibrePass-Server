@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test
 class AuthClientTests {
     private val authClient = AuthClient("http://localhost:8080")
 
-    private val email = Faker().internet().emailAddress()
+    private val email = "_test_" + Faker().internet().emailAddress()
     private val password = Faker().internet().password()
 
     @Test

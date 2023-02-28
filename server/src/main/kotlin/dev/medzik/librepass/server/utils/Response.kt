@@ -42,6 +42,7 @@ object ResponseError {
     val Unauthorized = generateErrorResponse("unauthorized", HttpStatus.UNAUTHORIZED)
     val NotFound = generateErrorResponse("not_found", HttpStatus.NOT_FOUND)
     val Conflict = generateErrorResponse("conflict", HttpStatus.CONFLICT)
+    val TooManyRequests = generateErrorResponse("too_many_requests", HttpStatus.TOO_MANY_REQUESTS)
 
     // database errors
     val DatabaseDuplicatedKey = generateErrorResponse("database_duplicated_key", HttpStatus.CONFLICT)
