@@ -60,6 +60,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Rate Limiter -->
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j-core</artifactId>
+            <version>8.1.1</version>
+        </dependency>
+
         <!-- Dotenv loader in resources -->
         <dependency>
             <groupId>me.paulschwarz</groupId>
