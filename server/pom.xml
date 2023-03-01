@@ -9,23 +9,16 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
+    <name>server</name>
+    <description>LibrePass Server infrastructure</description>
     <groupId>dev.medzik.librepass</groupId>
     <artifactId>server</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>server</name>
-    <description>server</description>
 
     <properties>
         <java.version>17</java.version>
         <kotlin.version>1.7.22</kotlin.version>
     </properties>
-
-    <repositories>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-    </repositories>
 
     <dependencies>
         <dependency>
@@ -100,29 +93,11 @@
             <scope>runtime</scope>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>com.github.MedzikUser</groupId>-->
-<!--            <artifactId>libcrypto-java</artifactId>-->
-<!--            <version>v0.1.2</version>-->
-<!--        </dependency>-->
-
         <dependency>
             <groupId>dev.medzik.librepass</groupId>
             <artifactId>types</artifactId>
             <version>${version}</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.google.code.gson</groupId>-->
-<!--            <artifactId>gson</artifactId>-->
-<!--            <version>2.10.1</version>-->
-<!--        </dependency>-->
-
-<!--        &lt;!&ndash;- Tests &ndash;&gt;-->
-<!--        <dependency>-->
-<!--            <groupId>com.github.javafaker</groupId>-->
-<!--            <artifactId>javafaker</artifactId>-->
-<!--            <version>1.0.2</version>-->
-<!--        </dependency>-->
     </dependencies>
 
     <build>
