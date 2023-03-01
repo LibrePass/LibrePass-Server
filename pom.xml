@@ -21,12 +21,12 @@
         <kotlin.version>1.8.0</kotlin.version>
     </properties>
 
-    <repositories>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-    </repositories>
+<!--    <repositories>-->
+<!--        <repository>-->
+<!--            <id>jitpack.io</id>-->
+<!--            <url>https://jitpack.io</url>-->
+<!--        </repository>-->
+<!--    </repositories>-->
 
     <dependencies>
         <dependency>
@@ -42,9 +42,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.MedzikUser</groupId>
-            <artifactId>libcrypto-java</artifactId>
-            <version>v0.1.2</version>
+            <groupId>dev.medzik</groupId>
+            <artifactId>libcrypto</artifactId>
+            <version>0.1.2</version>
         </dependency>
 
         <dependency>
