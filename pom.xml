@@ -5,7 +5,7 @@
 
     <groupId>dev.medzik.librepass</groupId>
     <artifactId>core</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>LibrePass</name>
     <description>The core LibrePass infrastructure</description>

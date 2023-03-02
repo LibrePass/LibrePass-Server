@@ -25,7 +25,7 @@ class UserService {
         userRepository.save(user)
     }
 
-    fun register(email: String, password: String, passwordHint: String?, encryptionKey: String) {
+    fun register(email: String, password: String, passwordHint: String?, encryptionKey: String): String {
         val salt = generateSalt()
         val passwordHash = hashPassword(password, salt)
 
@@ -37,6 +37,8 @@ class UserService {
         user.encryptionKey = encryptionKey
 
         createUser(user)
+
+        return authComponent.generateToken(TokenType.VERIFICATION_TOKEN, user.id)
     }
 
     fun login(email: String, password: String): UserCredentials? {
