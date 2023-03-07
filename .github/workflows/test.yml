@@ -42,3 +42,10 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
           POSTGRES_DB: librepass
+          MAIL_SMTP: ${{ secrets.MAIL_SMTP }}
+          MAIL_SMTP_PORT: ${{ secrets.MAIL_SMTP_PORT }}
+          MAIL_SMTP_USERNAME: ${{ secrets.MAIL_SMTP_USERNAME }}
+          MAIL_SMTP_PASSWORD: ${{ secrets.MAIL_SMTP_PASSWORD }}
+          MAIL_SMTP_AUTH: true
+          MAIL_SMTP_TLS_ENABLED: true
+          SMTP_EMAIL_ADDRESS: ${{ secrets.SMTP_EMAIL_ADDRESS }}
