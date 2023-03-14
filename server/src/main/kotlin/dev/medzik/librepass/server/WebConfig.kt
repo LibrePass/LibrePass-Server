@@ -10,8 +10,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @Configuration
 class WebConfig : WebMvcConfigurer {
-    @Value("cors.allowedOrigins")
-    private lateinit var allowedOrigins: String
+    @Value("cors.allowedOrigin")
+    private lateinit var allowedOrigin: String
 
     @Autowired
     private lateinit var authorizedUserArgumentResolver: AuthorizedUserArgumentResolver
@@ -21,13 +21,7 @@ class WebConfig : WebMvcConfigurer {
     }
 
     override fun addCorsMappings(registry: CorsRegistry) {
-        val origins = allowedOrigins.split(" ").toTypedArray()
-
         registry.addMapping("/**")
-            .allowedOrigins(*origins)
-            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-            .allowedHeaders("*")
-            .allowCredentials(true)
-            .maxAge(3600)
+            .allowedOrigins(allowedOrigin)
     }
 }
