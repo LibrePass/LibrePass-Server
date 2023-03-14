@@ -15,7 +15,7 @@ class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
     /**
      * Inserts a new cipher.
      * @param cipher The cipher to insert.
-     * @param encryptionKey The encryption key to encrypt cipher.
+     * @param encryptionKey The encryption key to use for encrypting the cipher.
      * @return [InsertResponse]
      */
     fun insert(cipher: Cipher, encryptionKey: String): InsertResponse {
@@ -42,7 +42,7 @@ class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
     }
 
     /**
-     * Gets a cipher.
+     * Gets a cipher by its ID.
      * @param id The UUID of the cipher.
      * @return [EncryptedCipher]
      */
@@ -53,7 +53,7 @@ class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
 
     /**
      * Get all cipher IDs.
-     * @return List of all cipher IDs
+     * @return List of cipher IDs
      */
     fun getAll(): List<UUID> {
         val response = client.get(apiEndpoint)
@@ -63,7 +63,7 @@ class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
     /**
      * Updates a cipher.
      * @param cipher The cipher to update.
-     * @param encryptionKey The encryption key to encrypt cipher.
+     * @param encryptionKey The encryption key to use for encrypting the cipher.
      * @return [InsertResponse]
      */
     fun update(cipher: Cipher, encryptionKey: String): InsertResponse {
