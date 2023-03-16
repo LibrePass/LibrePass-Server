@@ -32,11 +32,11 @@ interface CipherRepository : CrudRepository<CipherTable, UUID> {
     fun checkIfCipherExistsAndOwnedBy(@Param("id") id: UUID, @Param("owner") owner: UUID): Boolean
 
     /**
-     * Get a list of all ciphers that are in a collection owned by the user.
+     * Get a list of all cipher ids that are in a collection owned by the user.
      * @param collection The collection to get ciphers from.
      * @param owner The owner of the collection.
      * @return A list of all ciphers that are in a collection owned by the user.
      */
-    @Query("SELECT p.cipher FROM #{#entityName} p WHERE p.collection = :collection AND p.owner = :owner")
+    @Query("SELECT p.id FROM #{#entityName} p WHERE p.collection = :collection AND p.owner = :owner")
     fun getAllIdsByCollection(@Param("collection") collection: UUID, @Param("owner") owner: UUID): List<UUID>
 }
