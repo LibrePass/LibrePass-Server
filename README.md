@@ -29,5 +29,5 @@ cd server
 # Build using maven
 ./mvnw clean package
 # Now you can run the server
-java -jar ./server/target/server-0.0.1-SNAPSHOT.jar
+java -jar ./server/target/server-0.1.0-SNAPSHOT.jar
 ```
