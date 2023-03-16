@@ -29,7 +29,7 @@ class Cipher {
     lateinit var data: CipherData
 
     var favorite: Boolean = false
-    var directory: UUID? = null
+    var collection: UUID? = null
     var rePrompt: Boolean = false
 
     var created: Date? = null
@@ -42,7 +42,7 @@ class Cipher {
         this.type = cipher.type
         this.data = cipher.decrypt(key)
         this.favorite = cipher.favorite
-        this.directory = cipher.directory
+        this.collection = cipher.collection
         this.rePrompt = cipher.rePrompt
 
         this.created = cipher.created
@@ -65,7 +65,7 @@ class EncryptedCipher {
     lateinit var data: String
 
     var favorite: Boolean = false
-    var directory: UUID? = null
+    var collection: UUID? = null
     var rePrompt: Boolean = false
 
     var created: Date? = null
@@ -83,7 +83,7 @@ class EncryptedCipher {
         this.type = cipher.type
         this.data = cipher.data.encrypt(key)
         this.favorite = cipher.favorite
-        this.directory = cipher.directory
+        this.collection = cipher.collection
         this.rePrompt = cipher.rePrompt
 
         this.created = cipher.created

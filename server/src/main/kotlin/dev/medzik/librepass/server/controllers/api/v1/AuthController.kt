@@ -22,23 +22,26 @@ import org.springframework.web.bind.annotation.RestController
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 
-class AuthRateLimitConfig {
-    private var cache: Map<String, Bucket> = ConcurrentHashMap()
-
-    fun resolveBucket(key: String): Bucket {
-        return cache[key] ?: newBucket().also { cache += key to it }
-    }
-
-    private fun newBucket(): Bucket {
-        return Bucket.builder()
-            .addLimit(Bandwidth.classic(20, Refill.intervally(10, Duration.ofMinutes(1))))
-            .build()
-    }
-}
-
 @RestController
 @RequestMapping("/api/v1/auth")
 class AuthController {
+    /**
+     * Rate limit for login endpoint per IP address.
+     */
+    class AuthRateLimitConfig {
+        private var cache: Map<String, Bucket> = ConcurrentHashMap()
+
+        fun resolveBucket(key: String): Bucket {
+            return cache[key] ?: newBucket().also { cache += key to it }
+        }
+
+        private fun newBucket(): Bucket {
+            return Bucket.builder()
+                .addLimit(Bandwidth.classic(20, Refill.intervally(10, Duration.ofMinutes(1))))
+                .build()
+        }
+    }
+
     @Autowired
     private lateinit var userService: UserService
     @Autowired

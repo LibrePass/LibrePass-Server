@@ -21,7 +21,7 @@ class CipherTable {
     lateinit var data: String
 
     var favorite: Boolean = false
-    var directory: UUID? = null
+    var collection: UUID? = null
     var rePrompt: Boolean = false
 
     // TODO: fix created and lastModified fields
@@ -44,7 +44,7 @@ class CipherTable {
         this.data = cipher.data
 
         this.favorite = cipher.favorite
-        this.directory = cipher.directory
+        this.collection = cipher.collection
         this.rePrompt = cipher.rePrompt
     }
 }
