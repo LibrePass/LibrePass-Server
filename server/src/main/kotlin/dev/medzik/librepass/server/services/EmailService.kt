@@ -10,12 +10,15 @@ import org.springframework.stereotype.Service
 class EmailService {
     @Autowired
     private lateinit var emailSender: JavaMailSender
+    @Value("\${smtp.mail.address}")
+    private lateinit var senderAddress: String
+
     @Value("\${librepass.api.domain}")
     private lateinit var apiDomain: String
 
     fun send(to: String, subject: String, body: String) {
         val message = SimpleMailMessage()
-//        message.from = senderAddress
+        message.from = "LibrePass <$senderAddress>"
         message.setTo(to)
         message.subject = subject
         message.text = body
