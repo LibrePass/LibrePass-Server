@@ -14,11 +14,7 @@ import io.github.bucket4j.Refill
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 
@@ -78,7 +74,11 @@ class AuthController {
     }
 
     @GetMapping("/verifyEmail")
-    fun verifyEmail(): Response {
-        return ResponseHandler.generateResponse(HttpStatus.NOT_IMPLEMENTED)
+    fun verifyEmail(@RequestParam("code") code: String): Response {
+        return if (userService.verifyEmail(code)) {
+            ResponseHandler.generateResponse(HttpStatus.OK)
+        } else {
+            ResponseError.InvalidCredentials
+        }
     }
 }

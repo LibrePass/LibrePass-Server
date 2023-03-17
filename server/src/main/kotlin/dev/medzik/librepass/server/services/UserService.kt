@@ -67,6 +67,18 @@ class UserService {
         )
     }
 
+    fun verifyEmail(verificationToken: String): Boolean {
+        val userId = authComponent.parseToken(TokenType.VERIFICATION_TOKEN, verificationToken) ?: return false
+        val userUuid = UUID.fromString(userId)
+
+        val user = userRepository.findById(userUuid).orElse(null) ?: return false
+
+        user.emailVerified = true
+        userRepository.save(user)
+
+        return true
+    }
+
     /**
      * Find user in database using access token and return it or null if token is invalid.
      * @param accessToken Access token
