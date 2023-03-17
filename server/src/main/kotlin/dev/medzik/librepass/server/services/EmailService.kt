@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service
 class EmailService {
     @Autowired
     private lateinit var emailSender: JavaMailSender
-    @Value("librepass.api.domain")
+    @Value("\${librepass.api.domain}")
     private lateinit var apiDomain: String
 
     fun send(to: String, subject: String, body: String) {
