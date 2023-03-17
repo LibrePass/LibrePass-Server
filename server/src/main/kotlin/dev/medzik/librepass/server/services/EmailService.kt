@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service
 class EmailService {
     @Autowired
     private lateinit var emailSender: JavaMailSender
-//    @Value("smtp.mail.address")
-//    private lateinit var senderAddress: String
+    @Value("librepass.api.domain")
+    private lateinit var apiDomain: String
 
     fun send(to: String, subject: String, body: String) {
         val message = SimpleMailMessage()
@@ -25,7 +25,7 @@ class EmailService {
 
     fun sendEmailVerification(to: String, code: String) {
         val subject = "Activate your LibrePass account"
-        val body = "Click here to activate your account https://example.com/api/v1/auth/verifyEmail?code=$code"
+        val body = "Click here to activate your account https://$apiDomain/api/v1/auth/verifyEmail?code=$code"
         send(to, subject, body)
     }
 }

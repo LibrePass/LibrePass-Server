@@ -37,6 +37,7 @@ jobs:
       - name: Run tests
         run: ./mvnw clean test
         env:
+          API_DOMAIN: example.com
           PORT: 8080
           CORS_ALLOWED_ORIGIN: '*'
           POSTGRES_HOST: localhost
