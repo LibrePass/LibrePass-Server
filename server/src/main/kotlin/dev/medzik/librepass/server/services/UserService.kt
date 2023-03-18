@@ -42,12 +42,12 @@ class UserService {
     }
 
     fun login(email: String, password: String): UserCredentials? {
+        if (email.isEmpty() || password.isEmpty()) return null
+
         val user = userRepository.findByEmail(email) ?: return null
         val passwordHash = hashPassword(password, user.passwordSalt)
 
-        if (passwordHash != user.password) {
-            return null
-        }
+        if (passwordHash != user.password) return null
 
         return UserCredentials(
             user.id,
