@@ -7,6 +7,7 @@ import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseError
 import dev.medzik.librepass.server.utils.ResponseHandler
 import dev.medzik.librepass.types.api.EncryptedCipher
+import dev.medzik.librepass.types.api.cipher.EncryptionKeyResponse
 import dev.medzik.librepass.types.api.cipher.InsertResponse
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -68,5 +69,11 @@ class CipherController {
 
         cipherService.deleteCipher(id)
         return ResponseHandler.generateResponse(InsertResponse(id), HttpStatus.OK)
+    }
+
+    @GetMapping("/encryptionKey")
+    fun encryptionKey(@AuthorizedUser user: UserTable?): Response {
+        if (user == null) return ResponseError.Unauthorized
+        return ResponseHandler.generateResponse(EncryptionKeyResponse(user.encryptionKey), HttpStatus.OK)
     }
 }
