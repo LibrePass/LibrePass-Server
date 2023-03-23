@@ -1,11 +1,15 @@
 package dev.medzik.librepass.client.api.v1
 
 import com.google.gson.Gson
+import dev.medzik.libcrypto.AesCbc
+import dev.medzik.libcrypto.EncryptException
+import dev.medzik.libcrypto.Pbkdf2
 import dev.medzik.librepass.client.Client
 import dev.medzik.librepass.types.api.Cipher
 import dev.medzik.librepass.types.api.EncryptedCipher
+import dev.medzik.librepass.types.api.cipher.EncryptionKeyResponse
 import dev.medzik.librepass.types.api.cipher.InsertResponse
-import java.util.UUID
+import java.util.*
 
 class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
     private val apiEndpoint = "/api/v1/cipher"
@@ -94,5 +98,20 @@ class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
      */
     fun delete(id: String) {
         client.delete("$apiEndpoint/$id")
+    }
+
+    /**
+     * Gets the encryption key.
+     * @return The encryption key.
+     */
+    @Throws(EncryptException::class)
+    fun encryptionKey(email: String, password: String): String {
+        val response = client.get("$apiEndpoint/encryptionKey")
+
+        val encryptionKey = Gson().fromJson(response, EncryptionKeyResponse::class.java).encryptionKey
+
+        val basePassword = Pbkdf2(PasswordIterations).sha256(password, email.encodeToByteArray())
+
+        return AesCbc.decrypt(encryptionKey, basePassword)
     }
 }
