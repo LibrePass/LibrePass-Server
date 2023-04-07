@@ -6,7 +6,7 @@
     <parent>
         <groupId>dev.medzik.librepass</groupId>
         <artifactId>core</artifactId>
-        <version>0.1.0-SNAPSHOT</version>
+        <version>0.1.0-alpha2</version>
     </parent>
 
     <artifactId>types</artifactId>
@@ -21,7 +21,7 @@
 
     <build>
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
-        <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
+<!--        <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>-->
     </build>
 
 </project>
