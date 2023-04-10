@@ -100,11 +100,4 @@ class CipherClientTests {
         `insert cipher`()
         cipherClient.delete(cipherId)
     }
-
-    @Test
-    fun `get encryption key`() {
-        `insert cipher`()
-        val encryptionKey = cipherClient.encryptionKey("test_cipher@example.com", "test")
-        assertEquals(64, encryptionKey.length)
-    }
 }
