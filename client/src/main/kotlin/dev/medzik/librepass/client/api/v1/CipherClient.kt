@@ -18,6 +18,7 @@ class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
      * @param encryptionKey The encryption key to use for encrypting the cipher.
      * @return [InsertResponse]
      */
+    @Throws(Exception::class)
     fun insert(cipher: Cipher, encryptionKey: String): InsertResponse {
         return insert(cipher.toEncryptedCipher(encryptionKey))
     }
@@ -27,6 +28,7 @@ class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
      * @param cipher The cipher to insert.
      * @return [InsertResponse]
      */
+    @Throws(Exception::class)
     fun insert(cipher: EncryptedCipher): InsertResponse {
         val response = client.put(apiEndpoint, cipher.toJson())
         return Gson().fromJson(response, InsertResponse::class.java)
@@ -37,6 +39,7 @@ class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
      * @param id The UUID of the cipher.
      * @return [EncryptedCipher]
      */
+    @Throws(Exception::class)
     fun get(id: UUID): EncryptedCipher {
         return get(id.toString())
     }
@@ -46,6 +49,7 @@ class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
      * @param id The UUID of the cipher.
      * @return [EncryptedCipher]
      */
+    @Throws(Exception::class)
     fun get(id: String): EncryptedCipher {
         val response = client.get("$apiEndpoint/$id")
         return Gson().fromJson(response, EncryptedCipher::class.java)
@@ -55,6 +59,7 @@ class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
      * Get all cipher IDs.
      * @return List of cipher IDs
      */
+    @Throws(Exception::class)
     fun getAll(): List<UUID> {
         val response = client.get(apiEndpoint)
         return Gson().fromJson(response, List::class.java).map { UUID.fromString(it.toString())}
@@ -66,6 +71,7 @@ class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
      * @param encryptionKey The encryption key to use for encrypting the cipher.
      * @return [InsertResponse]
      */
+    @Throws(Exception::class)
     fun update(cipher: Cipher, encryptionKey: String): InsertResponse {
         return update(cipher.toEncryptedCipher(encryptionKey))
     }
@@ -75,6 +81,7 @@ class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
      * @param cipher The cipher to update.
      * @return [InsertResponse]
      */
+    @Throws(Exception::class)
     fun update(cipher: EncryptedCipher): InsertResponse {
         val response = client.patch("$apiEndpoint/${cipher.id}", cipher.toJson())
         return Gson().fromJson(response, InsertResponse::class.java)
@@ -84,6 +91,7 @@ class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
      * Deletes a cipher.
      * @param id The UUID of the cipher.
      */
+    @Throws(Exception::class)
     fun delete(id: UUID) {
         delete(id.toString())
     }
@@ -92,6 +100,7 @@ class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
      * Deletes a cipher.
      * @param id The UUID of the cipher.
      */
+    @Throws(Exception::class)
     fun delete(id: String) {
         client.delete("$apiEndpoint/$id")
     }
