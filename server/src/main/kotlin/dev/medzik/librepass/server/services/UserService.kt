@@ -50,9 +50,10 @@ class UserService {
         if (passwordHash != user.password) return null
 
         return UserCredentials(
-            user.id,
-            authComponent.generateToken(TokenType.ACCESS_TOKEN, user.id),
-            authComponent.generateToken(TokenType.REFRESH_TOKEN, user.id)
+            userId = user.id,
+            accessToken = authComponent.generateToken(TokenType.ACCESS_TOKEN, user.id),
+            refreshToken = authComponent.generateToken(TokenType.REFRESH_TOKEN, user.id),
+            encryptionKey = user.encryptionKey
         )
     }
 
@@ -60,10 +61,13 @@ class UserService {
         val userId = authComponent.parseToken(TokenType.REFRESH_TOKEN, refreshToken) ?: return null
         val userUuid = UUID.fromString(userId)
 
+        val user = userRepository.findById(userUuid).orElse(null) ?: return null
+
         return UserCredentials(
-            userUuid,
-            authComponent.generateToken(TokenType.ACCESS_TOKEN, userUuid),
-            authComponent.generateToken(TokenType.REFRESH_TOKEN, userUuid)
+            userId = userUuid,
+            accessToken = authComponent.generateToken(TokenType.ACCESS_TOKEN, userUuid),
+            refreshToken = authComponent.generateToken(TokenType.REFRESH_TOKEN, userUuid),
+            encryptionKey = user.encryptionKey,
         )
     }
 
