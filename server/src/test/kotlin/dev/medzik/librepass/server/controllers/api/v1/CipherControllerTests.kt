@@ -8,7 +8,6 @@ import dev.medzik.librepass.types.api.EncryptedCipher
 import dev.medzik.librepass.types.api.auth.LoginRequest
 import dev.medzik.librepass.types.api.auth.RegisterRequest
 import dev.medzik.librepass.types.api.auth.UserCredentials
-import dev.medzik.librepass.types.api.cipher.EncryptionKeyResponse
 import dev.medzik.librepass.types.api.cipher.InsertResponse
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -173,21 +172,5 @@ class CipherControllerTests {
         val userCredentials = init()
         val insertResponse = insertCipher(userCredentials)
         deleteCipher(userCredentials, insertResponse.id.toString())
-    }
-
-    @Test
-    fun encryptionKey() {
-        val userCredentials = init()
-
-        val mvcResult = mockMvc.perform(
-            MockMvcRequestBuilders.get("$urlPrefix/encryptionKey")
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer ${userCredentials.accessToken}")
-        ).andExpect(MockMvcResultMatchers.status().isOk)
-            .andReturn()
-
-        val responseBody = mvcResult.response.contentAsString
-
-        assert(Gson().fromJson(responseBody, EncryptionKeyResponse::class.java) != null)
     }
 }
