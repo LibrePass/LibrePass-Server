@@ -57,12 +57,12 @@ class AuthController {
 
     @PostMapping("/login")
     fun login(httpServletRequest: HttpServletRequest, @RequestBody request: LoginRequest): Response {
-        val credentials = userService.login(request.email, request.password) ?: return ResponseError.InvalidCredentials
-
         val ip = httpServletRequest.remoteAddr
         if (!rateLimit.resolveBucket(ip).tryConsume(1)) {
             return ResponseError.TooManyRequests
         }
+
+        val credentials = userService.login(request.email, request.password) ?: return ResponseError.InvalidCredentials
 
         return ResponseHandler.generateResponse(credentials, HttpStatus.OK)
     }
