@@ -10,7 +10,6 @@ import dev.medzik.librepass.types.api.auth.RefreshRequest
 import dev.medzik.librepass.types.api.auth.RegisterRequest
 import dev.medzik.librepass.types.api.auth.UserCredentials
 import org.apache.commons.codec.binary.Hex
-import java.io.IOException
 
 const val EncryptionKeyIterations = 500 // 500 iterations
 const val PasswordIterations = 65000 // 65k iterations
@@ -20,12 +19,12 @@ class AuthClient(apiUrl: String = Client.DefaultApiUrl) {
 
     private val client = Client(null, apiUrl)
 
-    @Throws(IOException::class)
+    @Throws(Exception::class)
     fun register(email: String, password: String) {
         register(email, password, null)
     }
 
-    @Throws(IOException::class)
+    @Throws(Exception::class)
     fun register(email: String, password: String, passwordHint: String?) {
         // compute the PBKDF2 sha256 hash of the password with 65k iterations and with email as salt
         val basePassword = Pbkdf2(PasswordIterations).sha256(password, email.encodeToByteArray())
@@ -46,7 +45,7 @@ class AuthClient(apiUrl: String = Client.DefaultApiUrl) {
         client.post("$apiEndpoint/register", request.toJson())
     }
 
-    @Throws(IOException::class)
+    @Throws(Exception::class)
     fun login(email: String, password: String): UserCredentials {
         val basePassword = Pbkdf2(PasswordIterations).sha256(password, email.encodeToByteArray())
         val finalPassword = Pbkdf2(EncryptionKeyIterations).sha256(basePassword, email.encodeToByteArray())
@@ -60,7 +59,7 @@ class AuthClient(apiUrl: String = Client.DefaultApiUrl) {
         return Gson().fromJson(body, UserCredentials::class.java)
     }
 
-    @Throws(IOException::class)
+    @Throws(Exception::class)
     fun refresh(refreshToken: String): UserCredentials {
         val request = RefreshRequest()
         request.refreshToken = refreshToken
