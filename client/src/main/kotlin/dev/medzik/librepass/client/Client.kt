@@ -8,20 +8,24 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
 
 class Client(
-    private val accessToken: String?,
+    accessToken: String?,
     private val apiURL: String
 ) {
     companion object {
-        @JvmStatic
-        val DefaultApiUrl = "https://librepass-api.medzik.dev"
+        const val DefaultApiUrl = "https://librepass-api.medzik.dev"
     }
 
-    private val JSON: MediaType = "application/json; charset=utf-8".toMediaType()
+    private val mediaTypeJson: MediaType = "application/json; charset=utf-8".toMediaType()
 
     private val client = OkHttpClient()
 
     private val authorizationHeader = if (accessToken.isNullOrEmpty()) "" else "Bearer $accessToken"
 
+    /**
+     * Send a GET request to the API
+     * @param endpoint endpoint of the API
+     * @return response body
+     */
     @Throws(IOException::class)
     fun get(endpoint: String): String {
         val request = Request.Builder()
@@ -33,6 +37,11 @@ class Client(
         return executeAndExtractBody(request)
     }
 
+    /**
+     * Send a DELETE request to the API
+     * @param endpoint endpoint of the API
+     * @return response body
+     */
     @Throws(IOException::class)
     fun delete(endpoint: String): String {
         val request = Request.Builder()
@@ -44,9 +53,15 @@ class Client(
         return executeAndExtractBody(request)
     }
 
+    /**
+     * Send a POST request to the API
+     * @param endpoint endpoint of the API
+     * @param json JSON body of the request
+     * @return response body
+     */
     @Throws(IOException::class)
     fun post(endpoint: String, json: String): String {
-        val body = json.toRequestBody(JSON)
+        val body = json.toRequestBody(mediaTypeJson)
 
         val request = Request.Builder()
             .url(apiURL + endpoint)
@@ -57,9 +72,15 @@ class Client(
         return executeAndExtractBody(request)
     }
 
+    /**
+     * Send a PATCH request to the API
+     * @param endpoint endpoint of the API
+     * @param json JSON body of the request
+     * @return response body
+     */
     @Throws(IOException::class)
     fun patch(endpoint: String, json: String): String {
-        val body = json.toRequestBody(JSON)
+        val body = json.toRequestBody(mediaTypeJson)
 
         val request = Request.Builder()
             .url(apiURL + endpoint)
@@ -70,9 +91,15 @@ class Client(
         return executeAndExtractBody(request)
     }
 
+    /**
+     * Send a PUT request to the API
+     * @param endpoint endpoint of the API
+     * @param json JSON body of the request
+     * @return response body
+     */
     @Throws(IOException::class)
     fun put(endpoint: String, json: String): String {
-        val body = json.toRequestBody(JSON)
+        val body = json.toRequestBody(mediaTypeJson)
 
         val request = Request.Builder()
             .url(apiURL + endpoint)
@@ -83,13 +110,21 @@ class Client(
         return executeAndExtractBody(request)
     }
 
+    /**
+     * Execute a request and extract the body
+     * @param request request to execute
+     * @return response body
+     */
     @Throws(IOException::class)
     private fun executeAndExtractBody(request: Request): String {
         // send request
         val response = client.newCall(request).execute()
+
+        // extract from response
         val statusCode = response.code
         val body = response.body.string()
 
+        // error handling
         if (statusCode >= 300) {
             throw IOException("status = $statusCode, body = $body")
         }

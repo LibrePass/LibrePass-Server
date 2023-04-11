@@ -32,4 +32,4 @@ class RefreshRequest {
     }
 }
 
-class UserCredentials(val userId: UUID, val accessToken: String, val refreshToken: String, val encryptionKey: String)
+data class UserCredentials(val userId: UUID, val accessToken: String, val refreshToken: String, val encryptionKey: String)
