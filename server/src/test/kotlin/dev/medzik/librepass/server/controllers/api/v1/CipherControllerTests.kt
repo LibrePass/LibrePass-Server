@@ -4,6 +4,7 @@ import com.github.javafaker.Faker
 import com.google.gson.Gson
 import dev.medzik.libcrypto.Pbkdf2
 import dev.medzik.libcrypto.Salt
+import dev.medzik.librepass.types.api.CipherType
 import dev.medzik.librepass.types.api.EncryptedCipher
 import dev.medzik.librepass.types.api.auth.LoginRequest
 import dev.medzik.librepass.types.api.auth.RegisterRequest
@@ -32,11 +33,13 @@ class CipherControllerTests {
     var passwordSalt: ByteArray = Salt.generate(16)
 
     fun createUser() {
-        val request = RegisterRequest()
-        request.email = email
-        request.password = Pbkdf2(100).sha256(password, passwordSalt)
-        request.encryptionKey = Pbkdf2(100).sha256(password, Salt.generate(16))
-        request.passwordHint = Faker().lorem().characters()
+        val request = RegisterRequest(
+            email = email,
+            // NOTE: This is not how you encrypt passwords in real life
+            password = Pbkdf2(100).sha256(password, passwordSalt),
+            encryptionKey = Pbkdf2(100).sha256(password, Salt.generate(16)),
+            passwordHint = Faker().lorem().characters()
+        )
 
         val json = Gson().toJson(request)
         mockMvc.perform(
@@ -47,9 +50,11 @@ class CipherControllerTests {
     }
 
     fun login(): UserCredentials {
-        val request = LoginRequest()
-        request.email = email
-        request.password = Pbkdf2(100).sha256(password, passwordSalt)
+        val request = LoginRequest(
+            email = email,
+            // NOTE: This is not how you encrypt passwords in real life
+            password = Pbkdf2(100).sha256(password, passwordSalt)
+        )
 
         val json = Gson().toJson(request)
         val mvcResult = mockMvc.perform(
@@ -64,11 +69,12 @@ class CipherControllerTests {
     }
 
     fun insertCipher(userCredentials: UserCredentials): InsertResponse {
-        val request = EncryptedCipher()
-        request.id = UUID.randomUUID()
-        request.owner = userCredentials.userId
-        request.type = 1
-        request.data = "test"
+        val request = EncryptedCipher(
+            id = UUID.randomUUID(),
+            owner = userCredentials.userId,
+            type = CipherType.Login.type,
+            data = "test"
+        )
 
         val json = Gson().toJson(request)
         val mvcResult = mockMvc.perform(
