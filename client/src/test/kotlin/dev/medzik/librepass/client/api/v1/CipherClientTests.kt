@@ -53,14 +53,16 @@ class CipherClientTests {
 
     @Test
     fun `insert cipher`() {
-        val cipherData = CipherData()
-        cipherData.name = "test_cipher"
+        val cipherData = CipherData(
+            name = "test_cipher"
+        )
 
-        val cipher = Cipher()
-        cipher.id = UUID.randomUUID()
-        cipher.owner = userId
-        cipher.type = 0
-        cipher.data = cipherData
+        val cipher = Cipher(
+            id = UUID.randomUUID(),
+            owner = userId,
+            type = 0,
+            data = cipherData
+        )
 
         val response = cipherClient.insert(cipher, encryptionKey)
 
