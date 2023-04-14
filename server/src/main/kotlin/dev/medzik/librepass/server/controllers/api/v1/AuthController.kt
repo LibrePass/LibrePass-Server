@@ -50,7 +50,11 @@ class AuthController {
         val verificationToken = userService.register(request.email, request.password, request.passwordHint, request.encryptionKey)
 
         // TODO: run in background
-        emailService.sendEmailVerification(request.email, verificationToken)
+        try {
+            emailService.sendEmailVerification(request.email, verificationToken)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 
         return ResponseHandler.generateResponse(HttpStatus.CREATED)
     }

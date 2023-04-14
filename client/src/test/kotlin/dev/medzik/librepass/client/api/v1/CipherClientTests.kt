@@ -23,14 +23,14 @@ class CipherClientTests {
         @BeforeAll
         @JvmStatic
         fun setup() {
-            val authClient = AuthClient()
+            val authClient = AuthClient("http://localhost:8080")
             authClient.register("test_cipher@example.com", "test")
         }
 
         @AfterAll
         @JvmStatic
         fun cleanup() {
-            val authClient = AuthClient()
+            val authClient = AuthClient("http://localhost:8080")
             val credentials = authClient.login("test_cipher@example.com", "test")
 
             val cipherClient = CipherClient(credentials.accessToken, "http://localhost:8080")
