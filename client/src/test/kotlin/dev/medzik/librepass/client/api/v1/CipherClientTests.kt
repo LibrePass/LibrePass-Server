@@ -13,7 +13,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
 class CipherClientTests {
-    private val encryptionKey = Pbkdf2(1).sha256("encryptionKey", Salt.generate(32))
+    // NOTE: This is a test key, do not use it in production
+    private val encryptionKey = Pbkdf2(100).sha256("encryptionKey", Salt.generate(16))
 
     private lateinit var cipherClient: CipherClient
     private lateinit var userId: UUID
@@ -22,14 +23,14 @@ class CipherClientTests {
         @BeforeAll
         @JvmStatic
         fun setup() {
-            val authClient = AuthClient("http://localhost:8080")
+            val authClient = AuthClient()
             authClient.register("test_cipher@example.com", "test")
         }
 
         @AfterAll
         @JvmStatic
         fun cleanup() {
-            val authClient = AuthClient("http://localhost:8080")
+            val authClient = AuthClient()
             val credentials = authClient.login("test_cipher@example.com", "test")
 
             val cipherClient = CipherClient(credentials.accessToken, "http://localhost:8080")

@@ -38,6 +38,11 @@ jobs:
           openssl genrsa -out privateKey.pem 2048
           openssl rsa -in privateKey.pem -outform PEM -pubout -out publicKey.pem
 
+      - name: Build and run server for tests
+        run: |
+          ./mvnw clean package -DskipTests
+          java -jar server/target/librepass-*.jar &
+
       - name: Run tests
         run: ./mvnw clean test
         env:

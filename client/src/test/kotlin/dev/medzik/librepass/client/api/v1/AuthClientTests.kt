@@ -4,7 +4,7 @@ import com.github.javafaker.Faker
 import org.junit.jupiter.api.Test
 
 class AuthClientTests {
-    private val authClient = AuthClient("http://localhost:8080")
+    private val authClient = AuthClient()
 
     private val email = "_test_" + Faker().internet().emailAddress()
     private val password = Faker().internet().password()
