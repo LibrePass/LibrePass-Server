@@ -29,11 +29,13 @@ class AuthControllerTests {
     var passwordSalt: ByteArray = Salt.generate(16)
 
     fun createUser() {
-        val request = RegisterRequest()
-        request.email = email
-        request.password = Pbkdf2(100).sha256(password, passwordSalt)
-        request.encryptionKey = Pbkdf2(100).sha256(password, Salt.generate(16))
-        request.passwordHint = Faker().lorem().characters()
+        val request = RegisterRequest(
+            email = email,
+            // NOTE: This is not how you encrypt passwords in real life
+            password = Pbkdf2(100).sha256(password, passwordSalt),
+            encryptionKey = Pbkdf2(100).sha256(password, Salt.generate(16)),
+            passwordHint = Faker().lorem().characters()
+        )
 
         val json = Gson().toJson(request)
         mockMvc.perform(
@@ -43,9 +45,11 @@ class AuthControllerTests {
     }
 
     fun login(expect: ResultMatcher) {
-        val request = LoginRequest()
-        request.email = email
-        request.password = Pbkdf2(100).sha256(password, passwordSalt)
+        val request = LoginRequest(
+            email = email,
+            // NOTE: This is not how you encrypt passwords in real life
+            password = Pbkdf2(100).sha256(password, passwordSalt)
+        )
 
         val json = Gson().toJson(request)
         mockMvc.perform(
