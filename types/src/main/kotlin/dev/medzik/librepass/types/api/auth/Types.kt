@@ -1,35 +1,37 @@
 package dev.medzik.librepass.types.api.auth
 
-import com.google.gson.Gson
 import java.util.*
 
-class RegisterRequest {
-    lateinit var email: String
-    lateinit var password: String
-    var passwordHint: String? = null
+/**
+ * RegisterRequest is a representation of a request to register endpoint.
+ */
+data class RegisterRequest(
+    val email: String,
+    val password: String,
+    val passwordHint: String? = null,
+    val encryptionKey: String
+)
 
-    lateinit var encryptionKey: String
+/**
+ * LoginRequest is a representation of a request to login endpoint.
+ */
+data class LoginRequest(
+    val email: String,
+    val password: String
+)
 
-    fun toJson(): String {
-        return Gson().toJson(this)
-    }
-}
+/**
+ * RefreshRequest is a representation of a request to refresh endpoint.
+ */
+data class RefreshRequest(val refreshToken: String)
 
-class LoginRequest {
-    lateinit var email: String
-    lateinit var password: String
-
-    fun toJson(): String {
-        return Gson().toJson(this)
-    }
-}
-
-class RefreshRequest {
-    lateinit var refreshToken: String
-
-    fun toJson(): String {
-        return Gson().toJson(this)
-    }
-}
-
-data class UserCredentials(val userId: UUID, val accessToken: String, val refreshToken: String, val encryptionKey: String)
+/**
+ * UserCredentials is a representation of a user credentials.
+ * Server returns this object after successful login or refresh.
+ */
+data class UserCredentials(
+    val userId: UUID,
+    val accessToken: String,
+    val refreshToken: String,
+    val encryptionKey: String
+)
