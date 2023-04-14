@@ -5,7 +5,7 @@
 
     <groupId>dev.medzik.librepass</groupId>
     <artifactId>core</artifactId>
-    <version>0.1.0-alpha3</version>
+    <version>${revision}</version>
     <packaging>pom</packaging>
     <name>LibrePass</name>
     <description>The core LibrePass infrastructure</description>
@@ -39,14 +39,8 @@
     <properties>
         <java.version>17</java.version>
         <kotlin.version>1.8.0</kotlin.version>
+        <revision>0.1.0-alpha3</revision>
     </properties>
-
-<!--    <repositories>-->
-<!--        <repository>-->
-<!--            <id>jitpack.io</id>-->
-<!--            <url>https://jitpack.io</url>-->
-<!--        </repository>-->
-<!--    </repositories>-->
 
     <dependencies>
         <dependency>

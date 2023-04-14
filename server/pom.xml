@@ -3,24 +3,31 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.2</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <groupId>dev.medzik.librepass</groupId>
+        <artifactId>core</artifactId>
+        <version>${revision}</version>
     </parent>
 
     <name>server</name>
     <description>LibrePass Server infrastructure</description>
-    <groupId>dev.medzik.librepass</groupId>
     <artifactId>server</artifactId>
-    <version>0.1.0-alpha3</version>
 
     <properties>
-        <java.version>17</java.version>
-        <kotlin.version>1.8.0</kotlin.version>
-
         <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <!-- Import dependency management from Spring Boot -->
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>3.0.5</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
