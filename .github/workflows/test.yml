@@ -41,7 +41,22 @@ jobs:
       - name: Build and run server for tests
         run: |
           ./mvnw clean package -DskipTests
-          java -jar server/target/librepass-*.jar &
+          rm -r server/target/server-*-sources.jar
+          java -jar server/target/server-*.jar &
+        env:
+          API_DOMAIN: example.com
+          PORT: 8080
+          CORS_ALLOWED_ORIGINS: 'https://example.com,https://www.example.com'
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: librepass
+          MAIL_SMTP: localhost
+          MAIL_SMTP_PORT: 1025
+          MAIL_SMTP_AUTH: false
+          MAIL_SMTP_TLS_ENABLED: false
+          SMTP_EMAIL_ADDRESS: librepass@localhost
 
       - name: Run tests
         run: ./mvnw clean test
