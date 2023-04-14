@@ -95,11 +95,7 @@ class UserService {
         return userRepository.findById(userUuid).orElse(null)
     }
 
-    fun generateSalt(): ByteArray {
-        return Salt.generate(saltLength)
-    }
+    fun generateSalt(): ByteArray = Salt.generate(saltLength)
 
-    fun hashPassword(password: String, salt: ByteArray): String {
-        return Pbkdf2(passwordIterations).sha256(password, salt)
-    }
+    fun hashPassword(password: String, salt: ByteArray): String = Pbkdf2(passwordIterations).sha256(password, salt)
 }

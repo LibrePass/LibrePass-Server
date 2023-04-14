@@ -19,6 +19,8 @@ class AuthClient(apiUrl: String = Client.DefaultApiUrl) {
 
     private val client = Client(null, apiUrl)
 
+    private val gson = Gson()
+
     /**
      * Register a new user
      * @param email email of the user
@@ -37,13 +39,14 @@ class AuthClient(apiUrl: String = Client.DefaultApiUrl) {
         val encryptionKeyBase = Pbkdf2(EncryptionKeyIterations).sha256(Hex.encodeHexString(Salt.generate(16)), Salt.generate(16))
         val encryptionKey = AesCbc.encrypt(encryptionKeyBase, basePassword)
 
-        val request = RegisterRequest()
-        request.email = email
-        request.password = finalPassword
-        request.passwordHint = passwordHint
-        request.encryptionKey = encryptionKey
+        val request = RegisterRequest(
+            email = email,
+            password = finalPassword,
+            passwordHint = passwordHint,
+            encryptionKey = encryptionKey
+        )
 
-        client.post("$apiEndpoint/register", request.toJson())
+        client.post("$apiEndpoint/register", gson.toJson(request))
     }
 
     /**
@@ -58,11 +61,12 @@ class AuthClient(apiUrl: String = Client.DefaultApiUrl) {
         val basePassword = if (passwordIsBaseHash) password else Pbkdf2(PasswordIterations).sha256(password, email.encodeToByteArray())
         val finalPassword = computeFinalPasswordHash(basePassword, email)
 
-        val request = LoginRequest()
-        request.email = email
-        request.password = finalPassword
+        val request = LoginRequest(
+            email = email,
+            password = finalPassword
+        )
 
-        val body = client.post("$apiEndpoint/login", request.toJson())
+        val body = client.post("$apiEndpoint/login", gson.toJson(request))
 
         return Gson().fromJson(body, UserCredentials::class.java)
     }
@@ -74,10 +78,9 @@ class AuthClient(apiUrl: String = Client.DefaultApiUrl) {
      */
     @Throws(Exception::class)
     fun refresh(refreshToken: String): UserCredentials {
-        val request = RefreshRequest()
-        request.refreshToken = refreshToken
+        val request = RefreshRequest(refreshToken = refreshToken)
 
-        val body = client.post("$apiEndpoint/refresh", request.toJson())
+        val body = client.post("$apiEndpoint/refresh", gson.toJson(request))
 
         return Gson().fromJson(body, UserCredentials::class.java)
     }

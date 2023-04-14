@@ -2,4 +2,4 @@ package dev.medzik.librepass.types.api.cipher
 
 import java.util.*
 
-class InsertResponse(var id: UUID)
+data class InsertResponse(val id: UUID)
