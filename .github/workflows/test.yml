@@ -54,7 +54,7 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
           POSTGRES_DB: librepass
-          MAIL_SMTP: librepass@localhost
+          MAIL_SMTP: localhost
           MAIL_SMTP_PORT: 1025
           MAIL_SMTP_AUTH: false
           MAIL_SMTP_TLS_ENABLED: false
