@@ -1,11 +1,11 @@
 package dev.medzik.librepass.server.controllers.api.v1
 
-import com.github.javafaker.Faker
 import com.google.gson.Gson
 import dev.medzik.libcrypto.Pbkdf2
 import dev.medzik.libcrypto.Salt
 import dev.medzik.librepass.types.api.auth.LoginRequest
 import dev.medzik.librepass.types.api.auth.RegisterRequest
+import net.datafaker.Faker
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -24,7 +24,7 @@ class AuthControllerTests {
 
     private final val urlPrefix = "/api/v1/auth"
 
-    var email: String = Faker().internet().safeEmailAddress()
+    var email: String = "_test_" + Faker().internet().safeEmailAddress()
     var password: String = Faker().internet().password(true)
     var passwordSalt: ByteArray = Salt.generate(16)
 

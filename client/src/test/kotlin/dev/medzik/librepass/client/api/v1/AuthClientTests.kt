@@ -1,6 +1,6 @@
 package dev.medzik.librepass.client.api.v1
 
-import com.github.javafaker.Faker
+import net.datafaker.Faker
 import org.junit.jupiter.api.Test
 
 class AuthClientTests {

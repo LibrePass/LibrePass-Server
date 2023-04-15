@@ -1,6 +1,5 @@
 package dev.medzik.librepass.server.controllers.api.v1
 
-import com.github.javafaker.Faker
 import com.google.gson.Gson
 import dev.medzik.libcrypto.Pbkdf2
 import dev.medzik.libcrypto.Salt
@@ -10,6 +9,7 @@ import dev.medzik.librepass.types.api.auth.LoginRequest
 import dev.medzik.librepass.types.api.auth.RegisterRequest
 import dev.medzik.librepass.types.api.auth.UserCredentials
 import dev.medzik.librepass.types.api.cipher.InsertResponse
+import net.datafaker.Faker
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
