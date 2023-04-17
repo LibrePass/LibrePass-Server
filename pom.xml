@@ -37,9 +37,12 @@
     </modules>
 
     <properties>
+        <revision>0.1.0-alpha4</revision>
+
         <java.version>17</java.version>
         <kotlin.version>1.8.0</kotlin.version>
-        <revision>0.1.0-alpha3</revision>
+
+        <kotlinx.coroutines.version>1.6.4</kotlinx.coroutines.version>
     </properties>
 
     <repositories>

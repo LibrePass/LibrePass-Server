@@ -26,7 +26,7 @@ class EmailService {
         emailSender.send(message)
     }
 
-    fun sendEmailVerification(to: String, code: String) {
+    suspend fun sendEmailVerification(to: String, code: String) {
         val subject = "Activate your LibrePass account"
         val body = "Click here to activate your account https://$apiDomain/api/v1/auth/verifyEmail?code=$code"
         send(to, subject, body)
