@@ -49,17 +49,17 @@ class AuthController {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
+    val scope = CoroutineScope(Dispatchers.IO)
+
     @PostMapping("/register")
-    suspend fun register(@RequestBody request: RegisterRequest): Response {
+    fun register(@RequestBody request: RegisterRequest): Response {
         val verificationToken = userService.register(request.email, request.password, request.passwordHint, request.encryptionKey)
 
-        coroutineScope {
-            launch(Dispatchers.IO) {
-                try {
-                    emailService.sendEmailVerification(request.email, verificationToken)
-                } catch (e: Exception) {
-                    logger.error("Failed to send email verification", e)
-                }
+        scope.launch {
+            try {
+                emailService.sendEmailVerification(request.email, verificationToken)
+            } catch (e: Exception) {
+                logger.error("Failed to send email verification", e)
             }
         }
 
