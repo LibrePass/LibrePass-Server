@@ -1,5 +1,9 @@
 package dev.medzik.librepass.client
 
+import com.google.gson.Gson
+import dev.medzik.librepass.client.errors.ApiException
+import dev.medzik.librepass.client.errors.ClientException
+import dev.medzik.librepass.types.api.ResponseError
 import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -26,7 +30,7 @@ class Client(
      * @param endpoint endpoint of the API
      * @return response body
      */
-    @Throws(IOException::class)
+    @Throws(ClientException::class, ApiException::class)
     fun get(endpoint: String): String {
         val request = Request.Builder()
             .url(apiURL + endpoint)
@@ -42,7 +46,7 @@ class Client(
      * @param endpoint endpoint of the API
      * @return response body
      */
-    @Throws(IOException::class)
+    @Throws(ClientException::class, ApiException::class)
     fun delete(endpoint: String): String {
         val request = Request.Builder()
             .url(apiURL + endpoint)
@@ -59,7 +63,7 @@ class Client(
      * @param json JSON body of the request
      * @return response body
      */
-    @Throws(IOException::class)
+    @Throws(ClientException::class, ApiException::class)
     fun post(endpoint: String, json: String): String {
         val body = json.toRequestBody(mediaTypeJson)
 
@@ -78,7 +82,7 @@ class Client(
      * @param json JSON body of the request
      * @return response body
      */
-    @Throws(IOException::class)
+    @Throws(ClientException::class, ApiException::class)
     fun patch(endpoint: String, json: String): String {
         val body = json.toRequestBody(mediaTypeJson)
 
@@ -97,7 +101,7 @@ class Client(
      * @param json JSON body of the request
      * @return response body
      */
-    @Throws(IOException::class)
+    @Throws(ClientException::class, ApiException::class)
     fun put(endpoint: String, json: String): String {
         val body = json.toRequestBody(mediaTypeJson)
 
@@ -115,20 +119,27 @@ class Client(
      * @param request request to execute
      * @return response body
      */
-    @Throws(IOException::class)
+    @Throws(ClientException::class, ApiException::class)
     private fun executeAndExtractBody(request: Request): String {
-        // send request
-        val response = client.newCall(request).execute()
+        try {
+            // send request
+            val response = client.newCall(request).execute()
 
-        // extract from response
-        val statusCode = response.code
-        val body = response.body.string()
+            // extract from response
+            val statusCode = response.code
+            val body = response.body.string()
 
-        // error handling
-        if (statusCode >= 300) {
-            throw IOException("status = $statusCode, body = $body")
+            // error handling
+            if (statusCode >= 300) {
+                throw ApiException(
+                    status = statusCode,
+                    error = Gson().fromJson(body, ResponseError::class.java).error
+                )
+            }
+
+            return body
+        } catch (e: IOException) {
+            throw ClientException(e)
         }
-
-        return body
     }
 }

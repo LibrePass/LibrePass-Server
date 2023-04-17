@@ -5,6 +5,8 @@ import dev.medzik.libcrypto.AesCbc
 import dev.medzik.libcrypto.Pbkdf2
 import dev.medzik.libcrypto.Salt
 import dev.medzik.librepass.client.Client
+import dev.medzik.librepass.client.errors.ApiException
+import dev.medzik.librepass.client.errors.ClientException
 import dev.medzik.librepass.types.api.auth.LoginRequest
 import dev.medzik.librepass.types.api.auth.RefreshRequest
 import dev.medzik.librepass.types.api.auth.RegisterRequest
@@ -27,7 +29,7 @@ class AuthClient(apiUrl: String = Client.DefaultApiUrl) {
      * @param password password of the user
      * @param passwordHint password hint of the user (optional)
      */
-    @Throws(Exception::class)
+    @Throws(ClientException::class, ApiException::class)
     fun register(email: String, password: String, passwordHint: String? = null) {
         // compute the PBKDF2 sha256 hash of the password with 65k iterations and with email as salt
         val basePassword = computeBasePasswordHash(password, email)
@@ -56,7 +58,7 @@ class AuthClient(apiUrl: String = Client.DefaultApiUrl) {
      * @param passwordIsBaseHash if the password is already the base password hash (default false)
      * @return [UserCredentials]
      */
-    @Throws(Exception::class)
+    @Throws(ClientException::class, ApiException::class)
     fun login(email: String, password: String, passwordIsBaseHash: Boolean = false): UserCredentials {
         val basePassword = if (passwordIsBaseHash) password else Pbkdf2(PasswordIterations).sha256(password, email.encodeToByteArray())
         val finalPassword = computeFinalPasswordHash(basePassword, email)
@@ -76,7 +78,7 @@ class AuthClient(apiUrl: String = Client.DefaultApiUrl) {
      * @param refreshToken refresh token of the user
      * @return [UserCredentials]
      */
-    @Throws(Exception::class)
+    @Throws(ClientException::class, ApiException::class)
     fun refresh(refreshToken: String): UserCredentials {
         val request = RefreshRequest(refreshToken = refreshToken)
 
