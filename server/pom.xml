@@ -8,12 +8,14 @@
         <version>${revision}</version>
     </parent>
 
-    <name>server</name>
-    <description>LibrePass Server infrastructure</description>
     <artifactId>server</artifactId>
+    <name>LibrePass Server infrastructure</name>
+    <description>LibrePass Server infrastructure with Spring Boot framework</description>
 
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
+
+        <spring-boot.version>3.0.5</spring-boot.version>
     </properties>
 
     <dependencyManagement>
@@ -22,7 +24,7 @@
                 <!-- Import dependency management from Spring Boot -->
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>3.0.5</version>
+                <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -106,6 +108,18 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Kotlin coroutines -->
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-coroutines-core</artifactId>
+            <version>${kotlinx.coroutines.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-coroutines-reactor</artifactId>
+            <version>${kotlinx.coroutines.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>dev.medzik.librepass</groupId>
             <artifactId>types</artifactId>
@@ -120,6 +134,8 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot.version}</version>
+
                 <configuration>
                     <mainClass>dev.medzik.librepass.server.ServerApplicationKt</mainClass>
                 </configuration>
@@ -160,14 +176,14 @@
                     </dependency>
                 </dependencies>
             </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>8</source>
-                    <target>8</target>
-                </configuration>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-compiler-plugin</artifactId>-->
+<!--                <configuration>-->
+<!--                    <source>8</source>-->
+<!--                    <target>8</target>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
         </plugins>
     </build>
 </project>
