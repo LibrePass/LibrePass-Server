@@ -12,6 +12,8 @@ import io.github.bucket4j.Bandwidth
 import io.github.bucket4j.Bucket
 import io.github.bucket4j.Refill
 import jakarta.servlet.http.HttpServletRequest
+import kotlinx.coroutines.*
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -45,15 +47,20 @@ class AuthController {
 
     private val rateLimit = AuthRateLimitConfig()
 
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     @PostMapping("/register")
-    fun register(@RequestBody request: RegisterRequest): Response {
+    suspend fun register(@RequestBody request: RegisterRequest): Response {
         val verificationToken = userService.register(request.email, request.password, request.passwordHint, request.encryptionKey)
 
-        // TODO: run in background
-        try {
-            emailService.sendEmailVerification(request.email, verificationToken)
-        } catch (e: Exception) {
-            e.printStackTrace()
+        coroutineScope {
+            launch(Dispatchers.IO) {
+                try {
+                    emailService.sendEmailVerification(request.email, verificationToken)
+                } catch (e: Exception) {
+                    logger.error("Failed to send email verification", e)
+                }
+            }
         }
 
         return ResponseHandler.generateResponse(HttpStatus.CREATED)
