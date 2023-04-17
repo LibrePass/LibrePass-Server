@@ -1,7 +1,10 @@
 package dev.medzik.librepass.types.api
 
-import com.google.gson.Gson
 import dev.medzik.libcrypto.AesCbc
+import dev.medzik.librepass.types.api.serializers.DateSerializer
+import dev.medzik.librepass.types.api.serializers.UUIDSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import java.util.*
 
 /**
@@ -11,7 +14,7 @@ import java.util.*
 data class Cipher(
     val id: UUID,
     val owner: UUID,
-    var type: Number,
+    var type: Int,
     var data: CipherData,
     var favorite: Boolean = false,
     var collection: UUID? = null,
@@ -54,15 +57,21 @@ data class Cipher(
  * All sensitive data is encrypted.
  * This is the representation of the cipher that is stored in the server database.
  */
+@Serializable
 data class EncryptedCipher(
+    @Serializable(with = UUIDSerializer::class)
     val id: UUID,
+    @Serializable(with = UUIDSerializer::class)
     val owner: UUID,
-    var type: Number = CipherType.Login.type,
+    var type: Int = CipherType.Login.type,
     var data: String,
     var favorite: Boolean = false,
+    @Serializable(with = UUIDSerializer::class)
     var collection: UUID? = null,
     var rePrompt: Boolean = false,
+    @Serializable(with = DateSerializer::class)
     var created: Date? = null,
+    @Serializable(with = DateSerializer::class)
     var lastModified: Date? = null
 ) {
     companion object {
@@ -94,7 +103,7 @@ data class EncryptedCipher(
      */
     fun decrypt(key: String): CipherData {
         val data = AesCbc.decrypt(this.data, key)
-        return Gson().fromJson(data, CipherData::class.java)
+        return Json.decodeFromString(CipherData.serializer(), data)
     }
 
     /**
@@ -108,7 +117,7 @@ data class EncryptedCipher(
      * Converts the cipher to a JSON string.
      * @return The JSON string.
      */
-    fun toJson(): String = Gson().toJson(this)
+    fun toJson(): String = Json.encodeToString(serializer(), this)
 }
 
 /**
@@ -120,7 +129,7 @@ data class EncryptedCipher(
  * - Card: A card cipher.
  * - Identity: An identity cipher.
  */
-enum class CipherType(val type: Number) {
+enum class CipherType(val type: Int) {
     Login(1),
     SecureNote(2),
     Card(3),
@@ -131,6 +140,7 @@ enum class CipherType(val type: Number) {
  * CipherData is a representation of the data of a cipher.
  * In [EncryptedCipher] the data is encrypted.
  */
+@Serializable
 data class CipherData(
     var name: String,
     var username: String? = null,
@@ -146,7 +156,7 @@ data class CipherData(
      * @return The encrypted cipher data.
      */
     fun encrypt(key: String): String {
-        val data = Gson().toJson(this)
+        val data = Json.encodeToString(serializer(), this)
         return AesCbc.encrypt(data, key)
     }
 }
