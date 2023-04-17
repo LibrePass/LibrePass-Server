@@ -33,5 +33,7 @@ build/
 
 /.env
 
+/db-data/
+
 /privateKey.pem
 /publicKey.pem

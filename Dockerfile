@@ -1,13 +1,14 @@
-FROM eclipse-temurin:17-jdk-alpine as build
+FROM eclipse-temurin:17-jdk as build
 
 WORKDIR /workspace/app
 
 COPY . .
 
-RUN ./mvnw install -DskipTests
+RUN --mount=type=cache,target=/root/.m2 ./mvnw install -DskipTests -Dgpg.skip=true
+RUN rm -r server/target/server-*-sources.jar
 RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../../server/target/*.jar)
 
-FROM eclipse-temurin:17-jdk-alpine
+FROM eclipse-temurin:17-jre
 
 VOLUME /tmp
 
@@ -17,4 +18,6 @@ COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
 COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
 COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
 
-ENTRYPOINT ["java", "-cp", "app:app/lib/*", "dev.medzik.librepass.server.ServerApplicationKt"]
+WORKDIR /app
+
+ENTRYPOINT ["java", "-cp", ".:lib/*", "dev.medzik.librepass.server.ServerApplicationKt"]
