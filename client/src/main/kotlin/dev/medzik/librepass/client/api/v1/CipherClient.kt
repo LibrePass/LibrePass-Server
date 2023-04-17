@@ -1,12 +1,14 @@
 package dev.medzik.librepass.client.api.v1
 
-import com.google.gson.Gson
 import dev.medzik.librepass.client.Client
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
 import dev.medzik.librepass.types.api.Cipher
 import dev.medzik.librepass.types.api.EncryptedCipher
 import dev.medzik.librepass.types.api.cipher.InsertResponse
+import dev.medzik.librepass.types.api.serializers.UUIDSerializer
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
 import java.util.*
 
 class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
@@ -33,7 +35,7 @@ class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
     @Throws(ClientException::class, ApiException::class)
     fun insert(cipher: EncryptedCipher): InsertResponse {
         val response = client.put(apiEndpoint, cipher.toJson())
-        return Gson().fromJson(response, InsertResponse::class.java)
+        return Json.decodeFromString(InsertResponse.serializer(), response)
     }
 
     /**
@@ -54,7 +56,7 @@ class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
     @Throws(ClientException::class, ApiException::class)
     fun get(id: String): EncryptedCipher {
         val response = client.get("$apiEndpoint/$id")
-        return Gson().fromJson(response, EncryptedCipher::class.java)
+        return Json.decodeFromString(EncryptedCipher.serializer(), response)
     }
 
     /**
@@ -64,7 +66,7 @@ class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
     @Throws(ClientException::class, ApiException::class)
     fun getAll(): List<UUID> {
         val response = client.get(apiEndpoint)
-        return Gson().fromJson(response, List::class.java).map { UUID.fromString(it.toString())}
+        return Json.decodeFromString(ListSerializer(UUIDSerializer), response)
     }
 
     /**
@@ -86,7 +88,7 @@ class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
     @Throws(ClientException::class, ApiException::class)
     fun update(cipher: EncryptedCipher): InsertResponse {
         val response = client.patch("$apiEndpoint/${cipher.id}", cipher.toJson())
-        return Gson().fromJson(response, InsertResponse::class.java)
+        return Json.decodeFromString(InsertResponse.serializer(), response)
     }
 
     /**
