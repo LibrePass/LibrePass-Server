@@ -1,9 +1,9 @@
 package dev.medzik.librepass.client
 
-import com.google.gson.Gson
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
 import dev.medzik.librepass.types.api.ResponseError
+import kotlinx.serialization.json.Json
 import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -133,7 +133,7 @@ class Client(
             if (statusCode >= 300) {
                 throw ApiException(
                     status = statusCode,
-                    error = Gson().fromJson(body, ResponseError::class.java).error
+                    error = Json.decodeFromString(ResponseError.serializer(), body).error
                 )
             }
 

@@ -1,6 +1,5 @@
 package dev.medzik.librepass.server.controllers.api.v1
 
-import com.google.gson.Gson
 import dev.medzik.libcrypto.Pbkdf2
 import dev.medzik.libcrypto.Salt
 import dev.medzik.librepass.types.api.CipherType
@@ -9,6 +8,7 @@ import dev.medzik.librepass.types.api.auth.LoginRequest
 import dev.medzik.librepass.types.api.auth.RegisterRequest
 import dev.medzik.librepass.types.api.auth.UserCredentials
 import dev.medzik.librepass.types.api.cipher.InsertResponse
+import kotlinx.serialization.json.Json
 import net.datafaker.Faker
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -41,7 +41,7 @@ class CipherControllerTests {
             passwordHint = Faker().lorem().characters()
         )
 
-        val json = Gson().toJson(request)
+        val json = Json.encodeToString(RegisterRequest.serializer(), request)
         mockMvc.perform(
             MockMvcRequestBuilders.post("/api/v1/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -56,7 +56,7 @@ class CipherControllerTests {
             password = Pbkdf2(100).sha256(password, passwordSalt)
         )
 
-        val json = Gson().toJson(request)
+        val json = Json.encodeToString(LoginRequest.serializer(), request)
         val mvcResult = mockMvc.perform(
             MockMvcRequestBuilders.post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -65,7 +65,7 @@ class CipherControllerTests {
             .andReturn()
 
         val responseBody = mvcResult.response.contentAsString
-        return Gson().fromJson(responseBody, UserCredentials::class.java)
+        return Json.decodeFromString(UserCredentials.serializer(), responseBody)
     }
 
     fun insertCipher(userCredentials: UserCredentials): InsertResponse {
@@ -76,7 +76,7 @@ class CipherControllerTests {
             data = "test"
         )
 
-        val json = Gson().toJson(request)
+        val json = Json.encodeToString(EncryptedCipher.serializer(), request)
         val mvcResult = mockMvc.perform(
             MockMvcRequestBuilders.put(urlPrefix)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -86,7 +86,7 @@ class CipherControllerTests {
             .andReturn()
 
         val responseBody = mvcResult.response.contentAsString
-        return Gson().fromJson(responseBody, InsertResponse::class.java)
+        return Json.decodeFromString(InsertResponse.serializer(), responseBody)
     }
 
     fun updateCipher(userCredentials: UserCredentials, cipher: EncryptedCipher): InsertResponse {
@@ -95,7 +95,7 @@ class CipherControllerTests {
         cipher.favorite = true
         cipher.rePrompt = true
 
-        val json = Gson().toJson(cipher)
+        val json = Json.encodeToString(EncryptedCipher.serializer(), cipher)
         val mvcResult = mockMvc.perform(
             MockMvcRequestBuilders.put(urlPrefix)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -105,7 +105,7 @@ class CipherControllerTests {
             .andReturn()
 
         val responseBody = mvcResult.response.contentAsString
-        return Gson().fromJson(responseBody, InsertResponse::class.java)
+        return Json.decodeFromString(InsertResponse.serializer(), responseBody)
     }
 
     fun listCiphers(userCredentials: UserCredentials) {
@@ -125,7 +125,7 @@ class CipherControllerTests {
             .andReturn()
 
         val responseBody = mvcResult.response.contentAsString
-        return Gson().fromJson(responseBody, EncryptedCipher::class.java)
+        return Json.decodeFromString(EncryptedCipher.serializer(), responseBody)
     }
 
     fun deleteCipher(userCredentials: UserCredentials, cipherId: String) {

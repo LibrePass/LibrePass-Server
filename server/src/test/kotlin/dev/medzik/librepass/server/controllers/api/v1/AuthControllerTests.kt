@@ -1,10 +1,10 @@
 package dev.medzik.librepass.server.controllers.api.v1
 
-import com.google.gson.Gson
 import dev.medzik.libcrypto.Pbkdf2
 import dev.medzik.libcrypto.Salt
 import dev.medzik.librepass.types.api.auth.LoginRequest
 import dev.medzik.librepass.types.api.auth.RegisterRequest
+import kotlinx.serialization.json.Json
 import net.datafaker.Faker
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -37,7 +37,7 @@ class AuthControllerTests {
             passwordHint = Faker().lorem().characters()
         )
 
-        val json = Gson().toJson(request)
+        val json = Json.encodeToString(RegisterRequest.serializer(), request)
         mockMvc.perform(
             post("${urlPrefix}/register")
                 .contentType(MediaType.APPLICATION_JSON).content(json)
@@ -51,7 +51,7 @@ class AuthControllerTests {
             password = Pbkdf2(100).sha256(password, passwordSalt)
         )
 
-        val json = Gson().toJson(request)
+        val json = Json.encodeToString(LoginRequest.serializer(), request)
         mockMvc.perform(
             post("${urlPrefix}/login")
                 .contentType(MediaType.APPLICATION_JSON).content(json)

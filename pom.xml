@@ -40,9 +40,10 @@
         <revision>0.1.0-alpha4</revision>
 
         <java.version>17</java.version>
-        <kotlin.version>1.8.0</kotlin.version>
 
-        <kotlinx.coroutines.version>1.6.4</kotlinx.coroutines.version>
+        <kotlin.version>1.8.0</kotlin.version>
+        <serialization.version>1.5.0</serialization.version>
+        <coroutines.version>1.6.4</coroutines.version>
     </properties>
 
     <repositories>
@@ -77,10 +78,15 @@
             <version>0.1.2</version>
         </dependency>
 
+<!--        <dependency>-->
+<!--            <groupId>com.google.code.gson</groupId>-->
+<!--            <artifactId>gson</artifactId>-->
+<!--            <version>2.10.1</version>-->
+<!--        </dependency>-->
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.10.1</version>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-serialization-json</artifactId>
+            <version>${serialization.version}</version>
         </dependency>
 
         <!-- Tests -->
@@ -113,9 +119,22 @@
                         </goals>
                     </execution>
                 </executions>
+
                 <configuration>
                     <jvmTarget>1.8</jvmTarget>
+
+                    <compilerPlugins>
+                        <plugin>kotlinx-serialization</plugin>
+                    </compilerPlugins>
                 </configuration>
+
+                <dependencies>
+                    <dependency>
+                        <groupId>org.jetbrains.kotlin</groupId>
+                        <artifactId>kotlin-maven-serialization</artifactId>
+                        <version>${kotlin.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
 
             <plugin>

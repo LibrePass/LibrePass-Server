@@ -1,6 +1,5 @@
 package dev.medzik.librepass.client.api.v1
 
-import com.google.gson.Gson
 import dev.medzik.libcrypto.AesCbc
 import dev.medzik.libcrypto.Pbkdf2
 import dev.medzik.libcrypto.Salt
@@ -11,6 +10,7 @@ import dev.medzik.librepass.types.api.auth.LoginRequest
 import dev.medzik.librepass.types.api.auth.RefreshRequest
 import dev.medzik.librepass.types.api.auth.RegisterRequest
 import dev.medzik.librepass.types.api.auth.UserCredentials
+import kotlinx.serialization.json.Json
 import org.apache.commons.codec.binary.Hex
 
 const val EncryptionKeyIterations = 500 // 500 iterations
@@ -20,8 +20,6 @@ class AuthClient(apiUrl: String = Client.DefaultApiUrl) {
     private val apiEndpoint = "/api/v1/auth"
 
     private val client = Client(null, apiUrl)
-
-    private val gson = Gson()
 
     /**
      * Register a new user
@@ -48,7 +46,7 @@ class AuthClient(apiUrl: String = Client.DefaultApiUrl) {
             encryptionKey = encryptionKey
         )
 
-        client.post("$apiEndpoint/register", gson.toJson(request))
+        client.post("$apiEndpoint/register", Json.encodeToString(RegisterRequest.serializer(), request))
     }
 
     /**
@@ -68,9 +66,9 @@ class AuthClient(apiUrl: String = Client.DefaultApiUrl) {
             password = finalPassword
         )
 
-        val body = client.post("$apiEndpoint/login", gson.toJson(request))
+        val body = client.post("$apiEndpoint/login", Json.encodeToString(LoginRequest.serializer(), request))
 
-        return Gson().fromJson(body, UserCredentials::class.java)
+        return Json.decodeFromString(UserCredentials.serializer(), body)
     }
 
     /**
@@ -82,9 +80,9 @@ class AuthClient(apiUrl: String = Client.DefaultApiUrl) {
     fun refresh(refreshToken: String): UserCredentials {
         val request = RefreshRequest(refreshToken = refreshToken)
 
-        val body = client.post("$apiEndpoint/refresh", gson.toJson(request))
+        val body = client.post("$apiEndpoint/refresh", Json.encodeToString(RefreshRequest.serializer(), request))
 
-        return Gson().fromJson(body, UserCredentials::class.java)
+        return Json.decodeFromString(UserCredentials.serializer(), body)
     }
 
     companion object {
