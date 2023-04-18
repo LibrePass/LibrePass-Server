@@ -47,6 +47,9 @@ jobs:
           API_DOMAIN: example.com
           PORT: 8080
           CORS_ALLOWED_ORIGINS: 'https://example.com,https://www.example.com'
+          SSL_ENABLED: false
+          SSL_KEYSTORE: none
+          SSL_KEYSTORE_PASSWORD: none
           POSTGRES_HOST: localhost
           POSTGRES_PORT: 5432
           POSTGRES_USER: postgres
@@ -64,6 +67,9 @@ jobs:
           API_DOMAIN: example.com
           PORT: 8080
           CORS_ALLOWED_ORIGINS: 'https://example.com,https://www.example.com'
+          SSL_ENABLED: false
+          SSL_KEYSTORE: none
+          SSL_KEYSTORE_PASSWORD: none
           POSTGRES_HOST: localhost
           POSTGRES_PORT: 5432
           POSTGRES_USER: postgres
