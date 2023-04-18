@@ -37,3 +37,5 @@ build/
 
 /privateKey.pem
 /publicKey.pem
+
+*.p12
