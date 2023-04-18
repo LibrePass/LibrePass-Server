@@ -37,7 +37,7 @@
     </modules>
 
     <properties>
-        <revision>0.1.0-alpha4</revision>
+        <revision>0.1.0-alpha3</revision>
 
         <java.version>17</java.version>
 
@@ -71,22 +71,16 @@
             <version>${kotlin.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-serialization-json</artifactId>
+            <version>${serialization.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>dev.medzik</groupId>
             <artifactId>libcrypto</artifactId>
             <version>0.1.2</version>
-        </dependency>
-
-<!--        <dependency>-->
-<!--            <groupId>com.google.code.gson</groupId>-->
-<!--            <artifactId>gson</artifactId>-->
-<!--            <version>2.10.1</version>-->
-<!--        </dependency>-->
-        <dependency>
-            <groupId>org.jetbrains.kotlinx</groupId>
-            <artifactId>kotlinx-serialization-json</artifactId>
-            <version>${serialization.version}</version>
         </dependency>
 
         <!-- Tests -->
