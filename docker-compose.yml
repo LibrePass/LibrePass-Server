@@ -10,9 +10,11 @@ services:
     volumes:
       - ./privateKey.pem:/app/privateKey.pem:Z
       - ./publicKey.pem:/app/publicKey.pem:Z
+      - ./ssl-keystore.p12:/app/ssl-keystore.p12:Z
 
     ports:
       - "80:8080"
+      - "443:8443"
 
     depends_on:
       - postgres
