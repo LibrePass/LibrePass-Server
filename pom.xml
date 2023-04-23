@@ -5,7 +5,7 @@
 
     <groupId>dev.medzik.librepass</groupId>
     <artifactId>core</artifactId>
-    <version>${revision}</version>
+    <version>0.1.0-alpha5</version>
     <packaging>pom</packaging>
     <name>LibrePass</name>
     <description>The core LibrePass infrastructure</description>
@@ -37,8 +37,6 @@
     </modules>
 
     <properties>
-        <revision>0.1.0-alpha4</revision>
-
         <java.version>17</java.version>
 
         <kotlin.version>1.8.0</kotlin.version>
