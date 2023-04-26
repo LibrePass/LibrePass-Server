@@ -10,10 +10,30 @@ import java.security.PrivateKey
 import java.security.PublicKey
 import java.util.*
 
-enum class TokenType(val type: String) {
-    ACCESS_TOKEN("access_token"),
-    REFRESH_TOKEN("refresh_token"),
-    VERIFICATION_TOKEN("verification_token")
+/**
+ * One hour in milliseconds.
+ */
+private const val HourTime = 1000L * 60 * 60
+
+/**
+ * Time in milliseconds for which the access token is valid.
+ */
+const val AccessTokenExpirationTime = 10 * HourTime // 10 hours
+
+/**
+ * Time in milliseconds for which the refresh token is valid.
+ */
+const val RefreshTokenExpirationTime = 90 * 24 * HourTime // 90 days
+
+/**
+ * Time in milliseconds for which the verification token is valid.
+ */
+const val VerificationTokenExpirationTime = 24 * HourTime // 24 hours
+
+enum class TokenType(val type: String, val expirationTime: Long) {
+    ACCESS_TOKEN("access_token", AccessTokenExpirationTime),
+    REFRESH_TOKEN("refresh_token", RefreshTokenExpirationTime),
+    VERIFICATION_TOKEN("verification_token", VerificationTokenExpirationTime)
 }
 
 @Component
@@ -27,33 +47,34 @@ class AuthComponent
 
     init {
         this.publicKey = KeyParser.parsePublicKey(publicKeyFile)
-        this.privateKey = KeyParser.parsePrivateKey(privateKeyFile);
+        this.privateKey = KeyParser.parsePrivateKey(privateKeyFile)
     }
 
     /**
      * Generates a token for the given user.
-     * @param type Type of the token.
+     * @param tokenType Type of the token.
      * @param userId User ID.
      * @return Generated token.
      */
-    fun generateToken(type: TokenType, userId: UUID): String {
+    fun generateToken(tokenType: TokenType, userId: UUID): String {
         val claims: MutableMap<String, Any> = HashMap()
-        claims["typ"] = type.type
+        claims["typ"] = tokenType.type
         claims["sub"] = userId
 
         return Jwts.builder()
             .setClaims(claims)
-            .setExpiration(Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // TODO: get from config
+            .setExpiration(Date(System.currentTimeMillis() + tokenType.expirationTime))
             .signWith(privateKey, SignatureAlgorithm.RS256)
             .compact()
     }
 
     /**
      * Parses a token and returns the user id. Returns null if the token is invalid.
+     * @param tokenType Type of the token.
      * @param token Token to be parsed.
      * @return User ID or null.
      */
-    fun parseToken(type: TokenType, token: String): String? {
+    fun parseToken(tokenType: TokenType, token: String): String? {
         return try {
             val claims = Jwts.parserBuilder()
                 .setSigningKey(publicKey)
@@ -61,7 +82,8 @@ class AuthComponent
                 .parseClaimsJws(token)
                 .body
 
-            if (claims["typ"] != type.type) return null
+            // check if the token type is correct
+            if (claims["typ"] != tokenType.type) return null
 
             claims["sub"] as String
         } catch (e: Exception) {
