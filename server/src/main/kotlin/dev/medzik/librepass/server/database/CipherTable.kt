@@ -24,16 +24,25 @@ class CipherTable {
     var collection: UUID? = null
     var rePrompt: Boolean = false
 
-    // TODO: fix created and lastModified fields
     @CreatedDate
-    @Temporal(TemporalType.TIMESTAMP)
-//    @Column(nullable = false)
-    var created: Date? = null
+    lateinit var created: Date
 
     @LastModifiedDate
-    @Temporal(TemporalType.TIMESTAMP)
-//    @Column(nullable = false)
-    var lastModified: Date? = null
+    lateinit var lastModified: Date
+
+    fun toEncryptedCipher(): EncryptedCipher = EncryptedCipher(
+        id = this.id,
+        owner = this.owner,
+        type = this.type.toInt(),
+        data = this.data,
+        favorite = this.favorite,
+        collection = this.collection,
+        rePrompt = this.rePrompt,
+        created = this.created,
+        lastModified = this.lastModified
+    )
+
+    fun toJson() = toEncryptedCipher().toJson()
 
     fun from(cipher: EncryptedCipher) {
         this.id = cipher.id
@@ -46,5 +55,8 @@ class CipherTable {
         this.favorite = cipher.favorite
         this.collection = cipher.collection
         this.rePrompt = cipher.rePrompt
+
+        this.created = cipher.created ?: Date()
+        this.lastModified = cipher.lastModified ?: Date()
     }
 }
