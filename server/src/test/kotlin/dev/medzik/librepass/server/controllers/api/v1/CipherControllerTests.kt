@@ -171,6 +171,9 @@ class CipherControllerTests {
 
         assert(cipher.id == insertResponse.id)
         assert(cipher.owner == userCredentials.userId)
+
+        assert(cipher.created != null)
+        assert(cipher.lastModified != null)
     }
 
     @Test

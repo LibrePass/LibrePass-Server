@@ -6,6 +6,9 @@ import dev.medzik.librepass.server.services.CipherService
 import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseError
 import dev.medzik.librepass.server.utils.ResponseHandler
+import dev.medzik.librepass.types.api.Cipher
+import dev.medzik.librepass.types.api.CipherData
+import dev.medzik.librepass.types.api.CipherType
 import dev.medzik.librepass.types.api.EncryptedCipher
 import dev.medzik.librepass.types.api.cipher.InsertResponse
 import org.springframework.beans.factory.annotation.Autowired
@@ -42,7 +45,7 @@ class CipherController {
     fun getCipher(@AuthorizedUser user: UserTable?, @PathVariable id: UUID): Response {
         if (user == null) return ResponseError.Unauthorized
         val cipher = cipherService.getCipher(id, user.id) ?: return ResponseError.NotFound
-        return ResponseHandler.generateResponse(cipher, HttpStatus.OK)
+        return ResponseHandler.generateResponse(cipher.toJson(), HttpStatus.OK)
     }
 
     @PatchMapping("/{id}")
