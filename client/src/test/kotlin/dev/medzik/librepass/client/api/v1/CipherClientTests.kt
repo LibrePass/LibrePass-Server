@@ -36,7 +36,7 @@ class CipherClientTests {
             val cipherClient = CipherClient(credentials.accessToken, "http://localhost:8080")
 
             cipherClient.getAll().forEach {
-                cipherClient.delete(it)
+                cipherClient.delete(it.id)
             }
         }
     }
@@ -53,7 +53,7 @@ class CipherClientTests {
     private lateinit var cipherId: UUID
 
     @Test
-    fun `insert cipher`() {
+    fun insertCipher() {
         val cipherData = CipherData(
             name = "test_cipher"
         )
@@ -71,23 +71,32 @@ class CipherClientTests {
     }
 
     @Test
-    fun `get cipher`() {
-        `insert cipher`() // insert cipher before getting it
+    fun getCipher() {
+        insertCipher() // insert cipher before getting it
         cipherClient.get(cipherId)
     }
 
     @Test
-    fun `get all ciphers`() {
+    fun getAllCiphers() {
         val response = cipherClient.getAll()
         assertNotEquals(0, response.size)
     }
 
     @Test
-    fun `update cipher`() {
-        `insert cipher`()
+    fun syncCiphers() {
+        val lastSync = Date()
+        val response = cipherClient.sync(lastSync)
+
+        assert(response.ids.size >= 0)
+        assert(response.ciphers.isEmpty())
+    }
+
+    @Test
+    fun updateCipher() {
+        insertCipher()
         val cipher = cipherClient.get(cipherId)
 
-        assertEquals(0, cipher.type.toInt())
+        assertEquals(0, cipher.type)
 
         cipher.type = 1
 
@@ -95,12 +104,12 @@ class CipherClientTests {
 
         val updatedCipher = cipherClient.get(cipherId)
 
-        assertEquals(1, updatedCipher.type.toInt())
+        assertEquals(1, updatedCipher.type)
     }
 
     @Test
-    fun `delete cipher`() {
-        `insert cipher`()
+    fun deleteCipher() {
+        insertCipher()
         cipherClient.delete(cipherId)
     }
 }

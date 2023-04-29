@@ -8,6 +8,9 @@ import dev.medzik.librepass.types.api.auth.LoginRequest
 import dev.medzik.librepass.types.api.auth.RegisterRequest
 import dev.medzik.librepass.types.api.auth.UserCredentials
 import dev.medzik.librepass.types.api.cipher.InsertResponse
+import dev.medzik.librepass.types.api.cipher.SyncResponse
+import dev.medzik.librepass.types.api.serializers.UUIDSerializer
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import net.datafaker.Faker
 import org.junit.jupiter.api.Test
@@ -108,12 +111,15 @@ class CipherControllerTests {
         return Json.decodeFromString(InsertResponse.serializer(), responseBody)
     }
 
-    fun listCiphers(userCredentials: UserCredentials) {
-        mockMvc.perform(
+    fun listCiphers(userCredentials: UserCredentials): List<EncryptedCipher> {
+        val response = mockMvc.perform(
             MockMvcRequestBuilders.get(urlPrefix)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer ${userCredentials.accessToken}")
         ).andExpect(MockMvcResultMatchers.status().isOk)
+
+        val responseBody = response.andReturn().response.contentAsString
+        return Json.decodeFromString(ListSerializer(EncryptedCipher.serializer()), responseBody)
     }
 
     fun getCipher(userCredentials: UserCredentials, cipherId: String): EncryptedCipher {
@@ -160,7 +166,9 @@ class CipherControllerTests {
         val userCredentials = init()
         insertCipher(userCredentials)
         insertCipher(userCredentials)
-        listCiphers(userCredentials)
+
+        val ciphers = listCiphers(userCredentials)
+        assert(ciphers.size == 2)
     }
 
     @Test
@@ -174,6 +182,29 @@ class CipherControllerTests {
 
         assert(cipher.created != null)
         assert(cipher.lastModified != null)
+    }
+
+    @Test
+    fun syncCiphers() {
+        val userCredentials = init()
+        insertCipher(userCredentials)
+
+        // wait 1 second to make sure the timestamp is different
+        Thread.sleep(1000)
+
+        val timestamp = Date().time / 1000
+
+        val mvcResult = mockMvc.perform(
+            MockMvcRequestBuilders.get("$urlPrefix/sync/$timestamp")
+                .header("Authorization", "Bearer ${userCredentials.accessToken}")
+        ).andExpect(MockMvcResultMatchers.status().isOk)
+            .andReturn()
+
+        val responseBody = mvcResult.response.contentAsString
+        val response = Json.decodeFromString(SyncResponse.serializer(), responseBody)
+
+        assert(response.ids.size == 1)
+        assert(response.ciphers.isEmpty())
     }
 
     @Test
