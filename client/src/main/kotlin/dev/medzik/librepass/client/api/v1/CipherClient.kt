@@ -6,6 +6,7 @@ import dev.medzik.librepass.client.errors.ClientException
 import dev.medzik.librepass.types.api.Cipher
 import dev.medzik.librepass.types.api.EncryptedCipher
 import dev.medzik.librepass.types.api.cipher.InsertResponse
+import dev.medzik.librepass.types.api.cipher.SyncResponse
 import dev.medzik.librepass.types.api.serializers.UUIDSerializer
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
@@ -60,13 +61,24 @@ class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
     }
 
     /**
-     * Get all cipher IDs.
-     * @return List of cipher IDs
+     * Get all ciphers.
+     * @return List of ciphers.
      */
     @Throws(ClientException::class, ApiException::class)
-    fun getAll(): List<UUID> {
+    fun getAll(): List<EncryptedCipher> {
         val response = client.get(apiEndpoint)
-        return Json.decodeFromString(ListSerializer(UUIDSerializer), response)
+        return Json.decodeFromString(ListSerializer(EncryptedCipher.serializer()), response)
+    }
+
+    /**
+     * Sync ciphers with the server.
+     * @param ciphers List of ciphers to sync.
+     * @return List of ciphers.
+     */
+    @Throws(ClientException::class, ApiException::class)
+    fun sync(lastSync: Date): SyncResponse {
+        val response = client.get("$apiEndpoint/sync/${lastSync.time / 1000}")
+        return Json.decodeFromString(SyncResponse.serializer(), response)
     }
 
     /**
