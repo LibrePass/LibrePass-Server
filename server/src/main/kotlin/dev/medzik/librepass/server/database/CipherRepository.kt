@@ -11,8 +11,8 @@ interface CipherRepository : CrudRepository<CipherTable, UUID> {
      * @param owner The owner of the ciphers.
      * @return A list of all ciphers owned by the user.
      */
-    @Query("SELECT p.id FROM #{#entityName} p WHERE p.owner = :owner")
-    fun getAllIds(@Param("owner") owner: UUID): List<UUID>
+    @Query("SELECT p FROM #{#entityName} p WHERE p.owner = :owner ORDER BY p.lastModified DESC")
+    fun getAll(@Param("owner") owner: UUID): List<CipherTable>
 
     /**
      * Get the owner of a cipher.
@@ -38,5 +38,5 @@ interface CipherRepository : CrudRepository<CipherTable, UUID> {
      * @return A list of all ciphers that are in a collection owned by the user.
      */
     @Query("SELECT p.id FROM #{#entityName} p WHERE p.collection = :collection AND p.owner = :owner")
-    fun getAllIdsByCollection(@Param("collection") collection: UUID, @Param("owner") owner: UUID): List<UUID>
+    fun getAllIDs(@Param("collection") collection: UUID, @Param("owner") owner: UUID): List<UUID>
 }

@@ -1,7 +1,10 @@
 package dev.medzik.librepass.server.database
 
 import dev.medzik.librepass.types.api.EncryptedCipher
+import dev.medzik.librepass.types.api.serializers.DateSerializer
+import dev.medzik.librepass.types.api.serializers.UUIDSerializer
 import jakarta.persistence.*
+import kotlinx.serialization.Serializable
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
@@ -10,53 +13,52 @@ import java.util.*
 @Entity
 @EntityListeners(AuditingEntityListener::class)
 @Table(name = "ciphers")
-class CipherTable {
+@Serializable
+data class CipherTable(
     @Id
-    var id: UUID = UUID.randomUUID()
+    @Serializable(with = UUIDSerializer::class)
+    val id: UUID = UUID.randomUUID(),
 
-    lateinit var owner: UUID
+    @Serializable(with = UUIDSerializer::class)
+    val owner: UUID,
 
-    lateinit var type: Number
+    val type: Int,
     @Column(columnDefinition = "TEXT")
-    lateinit var data: String
+    val data: String,
 
-    var favorite: Boolean = false
-    var collection: UUID? = null
-    var rePrompt: Boolean = false
+    val favorite: Boolean = false,
+    @Serializable(with = UUIDSerializer::class)
+    val collection: UUID? = null,
+    val rePrompt: Boolean = false,
 
     @CreatedDate
-    lateinit var created: Date
-
+    @Serializable(with = DateSerializer::class)
+    val created: Date,
     @LastModifiedDate
-    lateinit var lastModified: Date
-
-    fun toEncryptedCipher(): EncryptedCipher = EncryptedCipher(
-        id = this.id,
-        owner = this.owner,
-        type = this.type.toInt(),
-        data = this.data,
-        favorite = this.favorite,
-        collection = this.collection,
-        rePrompt = this.rePrompt,
-        created = this.created,
-        lastModified = this.lastModified
+    @Serializable(with = DateSerializer::class)
+    val lastModified: Date
+) {
+    constructor(cipher: EncryptedCipher) : this(
+        id = cipher.id,
+        owner = cipher.owner,
+        type = cipher.type,
+        data = cipher.data,
+        favorite = cipher.favorite,
+        collection = cipher.collection,
+        rePrompt = cipher.rePrompt,
+        created = cipher.created ?: Date(),
+        lastModified = cipher.lastModified ?: Date()
     )
 
-    fun toJson() = toEncryptedCipher().toJson()
-
-    fun from(cipher: EncryptedCipher) {
-        this.id = cipher.id
-
-        this.owner = cipher.owner
-
-        this.type = cipher.type
-        this.data = cipher.data
-
-        this.favorite = cipher.favorite
-        this.collection = cipher.collection
-        this.rePrompt = cipher.rePrompt
-
-        this.created = cipher.created ?: Date()
-        this.lastModified = cipher.lastModified ?: Date()
-    }
+    fun toEncryptedCipher() = EncryptedCipher(
+        id = id,
+        owner = owner,
+        type = type,
+        data = data,
+        favorite = favorite,
+        collection = collection,
+        rePrompt = rePrompt,
+        created = created,
+        lastModified = lastModified
+    )
 }

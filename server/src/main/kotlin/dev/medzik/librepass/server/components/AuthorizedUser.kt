@@ -13,7 +13,7 @@ import org.springframework.web.method.support.ModelAndViewContainer
 
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.VALUE_PARAMETER, AnnotationTarget.ANNOTATION_CLASS)
-annotation class AuthorizedUser {}
+annotation class AuthorizedUser
 
 @Component
 class AuthorizedUserArgumentResolver : HandlerMethodArgumentResolver {
