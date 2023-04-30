@@ -84,6 +84,11 @@ class CipherClientTests {
 
     @Test
     fun syncCiphers() {
+        insertCipher()
+
+        // wait for 1 second to make sure that the last sync time is different
+        Thread.sleep(1000)
+
         val lastSync = Date()
         val response = cipherClient.sync(lastSync)
 
