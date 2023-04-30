@@ -21,7 +21,7 @@ class AuthClientTests {
     }
 
     @Test
-    fun refresh() {
+    fun `refresh token`() {
         register() // register user first
         val credentials = authClient.login(email, password)
         authClient.refresh(credentials.refreshToken)
