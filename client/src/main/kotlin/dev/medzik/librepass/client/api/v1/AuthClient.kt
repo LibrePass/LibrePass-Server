@@ -16,6 +16,7 @@ import org.apache.commons.codec.binary.Hex
 const val EncryptionKeyIterations = 500 // 500 iterations
 const val PasswordIterations = 65000 // 65k iterations
 
+@Suppress("unused")
 class AuthClient(apiUrl: String = Client.DefaultApiUrl) {
     private val apiEndpoint = "/api/v1/auth"
 
