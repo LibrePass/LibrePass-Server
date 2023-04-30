@@ -92,7 +92,7 @@ class CipherClientTests {
         val lastSync = Date()
         val response = cipherClient.sync(lastSync)
 
-        assert(response.ids.size >= 0)
+        assert(response.ids.isNotEmpty())
         assert(response.ciphers.isEmpty())
     }
 

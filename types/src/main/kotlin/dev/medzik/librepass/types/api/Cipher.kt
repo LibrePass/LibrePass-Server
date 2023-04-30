@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package dev.medzik.librepass.types.api
 
 import dev.medzik.libcrypto.AesCbc

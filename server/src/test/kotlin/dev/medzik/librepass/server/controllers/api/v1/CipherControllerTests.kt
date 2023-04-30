@@ -21,6 +21,8 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import java.util.*
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -30,7 +32,7 @@ class CipherControllerTests {
 
     private final val urlPrefix = "/api/v1/cipher"
 
-    var email: String = Faker().internet().safeEmailAddress()
+    var email: String = "_test_" + Faker().internet().safeEmailAddress()
     var password: String = Faker().internet().password(true)
     var passwordSalt: ByteArray = Salt.generate(16)
 
@@ -167,7 +169,8 @@ class CipherControllerTests {
         insertCipher(userCredentials)
 
         val ciphers = listCiphers(userCredentials)
-        assert(ciphers.size == 2)
+
+        assertEquals(2, ciphers.size)
     }
 
     @Test
@@ -176,11 +179,11 @@ class CipherControllerTests {
         val insertResponse = insertCipher(userCredentials)
         val cipher = getCipher(userCredentials, insertResponse.id.toString())
 
-        assert(cipher.id == insertResponse.id)
-        assert(cipher.owner == userCredentials.userId)
+        assertEquals(insertResponse.id, cipher.id)
+        assertEquals(userCredentials.userId, cipher.owner)
 
-        assert(cipher.created != null)
-        assert(cipher.lastModified != null)
+        assertNotNull(cipher.created)
+        assertNotNull(cipher.lastModified)
     }
 
     @Test
@@ -202,7 +205,7 @@ class CipherControllerTests {
         val responseBody = mvcResult.response.contentAsString
         val response = Json.decodeFromString(SyncResponse.serializer(), responseBody)
 
-        assert(response.ids.size == 1)
+        assertEquals(1, response.ids.size)
         assert(response.ciphers.isEmpty())
     }
 

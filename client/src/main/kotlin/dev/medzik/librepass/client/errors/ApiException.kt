@@ -1,5 +1,6 @@
 package dev.medzik.librepass.client.errors
 
+@Suppress("unused")
 class ApiException(
     val status: Number,
     val error: String

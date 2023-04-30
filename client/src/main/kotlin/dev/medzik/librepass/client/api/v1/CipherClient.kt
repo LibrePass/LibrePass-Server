@@ -7,11 +7,11 @@ import dev.medzik.librepass.types.api.Cipher
 import dev.medzik.librepass.types.api.EncryptedCipher
 import dev.medzik.librepass.types.api.cipher.InsertResponse
 import dev.medzik.librepass.types.api.cipher.SyncResponse
-import dev.medzik.librepass.types.api.serializers.UUIDSerializer
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import java.util.*
 
+@Suppress("unused")
 class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
     private val apiEndpoint = "/api/v1/cipher"
 
@@ -72,7 +72,7 @@ class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
 
     /**
      * Sync ciphers with the server.
-     * @param ciphers List of ciphers to sync.
+     * @param lastSync The last sync date.
      * @return List of ciphers.
      */
     @Throws(ClientException::class, ApiException::class)
