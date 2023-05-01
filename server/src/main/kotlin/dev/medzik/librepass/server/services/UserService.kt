@@ -1,6 +1,6 @@
 package dev.medzik.librepass.server.services
 
-import dev.medzik.libcrypto.Pbkdf2
+import dev.medzik.libcrypto.Argon2id
 import dev.medzik.libcrypto.Salt
 import dev.medzik.librepass.server.components.AuthComponent
 import dev.medzik.librepass.server.components.TokenType
@@ -18,7 +18,9 @@ class UserService {
     @Autowired
     private lateinit var authComponent: AuthComponent
 
-    private final val passwordIterations = 100000
+    // lower than recommended due to the fact that it is previously still encrypted locally on the user's device
+    // and the fact that the server is not a high-performance system
+    private final val argon2idHasher = Argon2id(64, 1, 9216, 1)
     private final val saltLength = 32
 
     fun createUser(user: UserTable) {
@@ -45,9 +47,8 @@ class UserService {
         if (email.isEmpty() || password.isEmpty()) return null
 
         val user = userRepository.findByEmail(email) ?: return null
-        val passwordHash = hashPassword(password, user.passwordSalt)
 
-        if (passwordHash != user.password) return null
+        if (!Argon2id.verify(password, user.password)) return null
 
         return UserCredentials(
             userId = user.id,
@@ -96,6 +97,5 @@ class UserService {
     }
 
     fun generateSalt(): ByteArray = Salt.generate(saltLength)
-
-    fun hashPassword(password: String, salt: ByteArray): String = Pbkdf2(passwordIterations).sha256(password, salt)
+    fun hashPassword(password: String, salt: ByteArray): String = argon2idHasher.hash(password, salt)
 }
