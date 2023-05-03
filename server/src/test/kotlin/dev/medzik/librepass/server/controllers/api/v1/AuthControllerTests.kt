@@ -4,6 +4,7 @@ import dev.medzik.libcrypto.Pbkdf2
 import dev.medzik.libcrypto.Salt
 import dev.medzik.librepass.types.api.auth.LoginRequest
 import dev.medzik.librepass.types.api.auth.RegisterRequest
+import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
 import kotlinx.serialization.json.Json
 import net.datafaker.Faker
 import org.junit.jupiter.api.Test
@@ -13,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.ResultMatcher
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
@@ -34,7 +36,12 @@ class AuthControllerTests {
             // NOTE: This is not how you encrypt passwords in real life
             password = Pbkdf2(100).sha256(password, passwordSalt),
             encryptionKey = Pbkdf2(100).sha256(password, Salt.generate(16)),
-            passwordHint = Faker().lorem().characters()
+            passwordHint = Faker().lorem().characters(),
+            // test data
+            parallelism = 3,
+            memory = 65536,
+            iterations = 4,
+            version = 19
         )
 
         val json = Json.encodeToString(RegisterRequest.serializer(), request)
@@ -62,6 +69,19 @@ class AuthControllerTests {
     fun `register and login`() {
         createUser()
         login(status().isOk)
+    }
+
+    @Test
+    fun `register and check argon2id settings`() {
+        createUser()
+
+        val json = mockMvc.perform(get("${urlPrefix}/userArgon2Parameters?=email=${email}"))
+        val response = Json.decodeFromString(UserArgon2idParameters.serializer(), json.andReturn().response.contentAsString)
+
+        assert(response.parallelism == 3)
+        assert(response.memory == 65536)
+        assert(response.iterations == 4)
+        assert(response.version == 19)
     }
 
     @Test
