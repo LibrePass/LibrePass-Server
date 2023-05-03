@@ -42,7 +42,12 @@ class CipherControllerTests {
             // NOTE: This is not how you encrypt passwords in real life
             password = Pbkdf2(100).sha256(password, passwordSalt),
             encryptionKey = Pbkdf2(100).sha256(password, Salt.generate(16)),
-            passwordHint = Faker().lorem().characters()
+            passwordHint = Faker().lorem().characters(),
+            // test data
+            parallelism = 3,
+            memory = 65536,
+            iterations = 4,
+            version = 19
         )
 
         val json = Json.encodeToString(RegisterRequest.serializer(), request)
