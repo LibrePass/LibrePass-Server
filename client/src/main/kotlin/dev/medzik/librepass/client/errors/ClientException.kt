@@ -7,6 +7,8 @@ class ClientException(
     @Suppress("MemberVisibilityCanBePrivate")
     val ioException: IOException
 ) : Exception() {
+    constructor(message: String) : this(IOException(message))
+
     override val message: String
         get() = "Client error occurred while executing request ${ioException.message}"
 }
