@@ -53,7 +53,17 @@ class AuthController {
 
     @PostMapping("/register")
     fun register(@RequestBody request: RegisterRequest): Response {
-        val verificationToken = userService.register(request.email, request.password, request.passwordHint, request.encryptionKey)
+        val verificationToken = userService.register(
+            email = request.email,
+            password = request.password,
+            passwordHint = request.passwordHint,
+            encryptionKey = request.encryptionKey,
+            // argon2id parameters
+            parallelism = request.parallelism,
+            memory = request.memory,
+            iterations = request.iterations,
+            version = request.version
+        )
 
         scope.launch {
             try {
@@ -64,6 +74,22 @@ class AuthController {
         }
 
         return ResponseHandler.generateResponse(HttpStatus.CREATED)
+    }
+
+    @GetMapping("/userArgon2Parameters")
+    fun getUserArgon2Parameters(
+        httpServletRequest: HttpServletRequest,
+        @RequestParam("email") email: String
+    ): Response {
+        val ip = httpServletRequest.remoteAddr
+        if (!rateLimit.resolveBucket(ip).tryConsume(1)) {
+            return ResponseError.TooManyRequests
+        }
+
+        val argon2Parameters = userService.getArgon2Parameters(email)
+            ?: return ResponseError.InvalidCredentials
+
+        return ResponseHandler.generateResponse(argon2Parameters, HttpStatus.OK)
     }
 
     @PostMapping("/login")

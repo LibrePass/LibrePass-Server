@@ -1,13 +1,13 @@
 package dev.medzik.librepass.server.services
 
-import dev.medzik.libcrypto.Argon2id
-import dev.medzik.libcrypto.Salt
 import dev.medzik.librepass.server.components.AuthComponent
 import dev.medzik.librepass.server.components.TokenType
 import dev.medzik.librepass.server.database.UserRepository
 import dev.medzik.librepass.server.database.UserTable
+import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
 import dev.medzik.librepass.types.api.auth.UserCredentials
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -18,29 +18,51 @@ class UserService {
     @Autowired
     private lateinit var authComponent: AuthComponent
 
-    // lower than recommended due to the fact that it is previously still encrypted locally on the user's device
-    // and the fact that the server is not a high-performance system
-    private final val argon2idHasher = Argon2id(64, 1, 9216, 1)
-    private final val saltLength = 32
+    // create argon2 password encoder with default parameters
+    private final val argon2 = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
 
-    fun createUser(user: UserTable) {
-        userRepository.save(user)
-    }
+    fun createUser(user: UserTable): UserTable = userRepository.save(user)
 
-    fun register(email: String, password: String, passwordHint: String?, encryptionKey: String): String {
-        val salt = generateSalt()
-        val passwordHash = hashPassword(password, salt)
+    fun register(
+        email: String,
+        password: String,
+        passwordHint: String?,
+        encryptionKey: String,
+        parallelism: Int,
+        memory: Int,
+        iterations: Int,
+        version: Int
+    ): String {
+        val passwordHash = argon2.encode(password)
 
-        val user = UserTable()
-        user.email = email
-        user.password = passwordHash
-        user.passwordSalt = salt
-        user.passwordHint = passwordHint
-        user.encryptionKey = encryptionKey
+        val user = UserTable(
+            email = email,
+            password = passwordHash,
+            passwordHint = passwordHint,
+            encryptionKey = encryptionKey,
+            // argon2id parameters
+            parallelism = parallelism,
+            memory = memory,
+            iterations = iterations,
+            version = version
+        )
 
         createUser(user)
 
         return authComponent.generateToken(TokenType.VERIFICATION_TOKEN, user.id)
+    }
+
+    fun getArgon2Parameters(email: String): UserArgon2idParameters? {
+        if (email.isEmpty()) return null
+
+        val user = userRepository.findByEmail(email) ?: return null
+
+        return UserArgon2idParameters(
+            parallelism = user.parallelism,
+            memory = user.memory,
+            iterations = user.iterations,
+            version = user.version
+        )
     }
 
     fun login(email: String, password: String): UserCredentials? {
@@ -48,7 +70,7 @@ class UserService {
 
         val user = userRepository.findByEmail(email) ?: return null
 
-        if (!Argon2id.verify(password, user.password)) return null
+        if (!argon2.matches(password, user.password)) return null
 
         return UserCredentials(
             userId = user.id,
@@ -77,9 +99,7 @@ class UserService {
         val userUuid = UUID.fromString(userId)
 
         val user = userRepository.findById(userUuid).orElse(null) ?: return false
-
-        user.emailVerified = true
-        userRepository.save(user)
+        userRepository.save(user.copy(emailVerified = true))
 
         return true
     }
@@ -95,7 +115,4 @@ class UserService {
 
         return userRepository.findById(userUuid).orElse(null)
     }
-
-    fun generateSalt(): ByteArray = Salt.generate(saltLength)
-    fun hashPassword(password: String, salt: ByteArray): String = argon2idHasher.hash(password, salt)
 }

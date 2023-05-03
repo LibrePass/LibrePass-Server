@@ -7,28 +7,33 @@ import java.util.*
 
 @Entity
 @Table(name = "users")
-class UserTable {
+data class UserTable (
     @Id
-    var id: UUID = UUID.randomUUID()
+    val id: UUID = UUID.randomUUID(),
 
     @Column(unique = true, columnDefinition = "TEXT")
-    lateinit var email: String
-    var emailVerified: Boolean = false
+    val email: String,
+    val emailVerified: Boolean = false,
+
+    // argon2id parameters
+    val parallelism: Int,
+    val memory: Int,
+    val iterations: Int,
+    val version: Int,
 
     @Column(columnDefinition = "TEXT")
-    lateinit var password: String
-    lateinit var passwordSalt: ByteArray
-    var passwordHint: String? = null
+    val password: String,
+    val passwordHint: String? = null,
 
     @Column(columnDefinition = "TEXT")
-    lateinit var encryptionKey: String
+    val encryptionKey: String,
 
     @CreatedDate
     @Temporal(TemporalType.TIMESTAMP)
     @Column(insertable = false, updatable = false)
-    var created: Date? = null
+    val created: Date? = null,
     @LastModifiedDate
     @Temporal(TemporalType.TIMESTAMP)
     @Column(insertable = false, updatable = false)
-    var lastModified: Date? = null
-}
+    val lastModified: Date? = null,
+)
