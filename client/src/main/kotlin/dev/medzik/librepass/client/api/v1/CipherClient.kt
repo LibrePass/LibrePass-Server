@@ -1,6 +1,7 @@
 package dev.medzik.librepass.client.api.v1
 
 import dev.medzik.librepass.client.Client
+import dev.medzik.librepass.client.api.v1.CipherClient.Companion.API_ENDPOINT
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
 import dev.medzik.librepass.types.api.Cipher
@@ -11,11 +12,10 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import java.util.*
 
-@Suppress("unused")
-class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
-    private val apiEndpoint = "/api/v1/cipher"
-
-    private val client = Client(accessToken, apiUrl)
+interface CipherClient {
+    companion object {
+        const val API_ENDPOINT = "/api/v1/cipher"
+    }
 
     /**
      * Inserts a new cipher.
@@ -24,9 +24,7 @@ class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
      * @return [InsertResponse]
      */
     @Throws(ClientException::class, ApiException::class)
-    fun insert(cipher: Cipher, encryptionKey: String): InsertResponse {
-        return insert(cipher.toEncryptedCipher(encryptionKey))
-    }
+    fun insert(cipher: Cipher, encryptionKey: String): InsertResponse
 
     /**
      * Inserts a new cipher.
@@ -34,10 +32,7 @@ class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
      * @return [InsertResponse]
      */
     @Throws(ClientException::class, ApiException::class)
-    fun insert(cipher: EncryptedCipher): InsertResponse {
-        val response = client.put(apiEndpoint, cipher.toJson())
-        return Json.decodeFromString(InsertResponse.serializer(), response)
-    }
+    fun insert(cipher: EncryptedCipher): InsertResponse
 
     /**
      * Gets a cipher.
@@ -45,9 +40,7 @@ class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
      * @return [EncryptedCipher]
      */
     @Throws(ClientException::class, ApiException::class)
-    fun get(id: UUID): EncryptedCipher {
-        return get(id.toString())
-    }
+    fun get(id: UUID): EncryptedCipher
 
     /**
      * Gets a cipher by its ID.
@@ -55,20 +48,14 @@ class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
      * @return [EncryptedCipher]
      */
     @Throws(ClientException::class, ApiException::class)
-    fun get(id: String): EncryptedCipher {
-        val response = client.get("$apiEndpoint/$id")
-        return Json.decodeFromString(EncryptedCipher.serializer(), response)
-    }
+    fun get(id: String): EncryptedCipher
 
     /**
      * Get all ciphers.
      * @return List of ciphers.
      */
     @Throws(ClientException::class, ApiException::class)
-    fun getAll(): List<EncryptedCipher> {
-        val response = client.get(apiEndpoint)
-        return Json.decodeFromString(ListSerializer(EncryptedCipher.serializer()), response)
-    }
+    fun getAll(): List<EncryptedCipher>
 
     /**
      * Sync ciphers with the server.
@@ -76,10 +63,7 @@ class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
      * @return List of ciphers.
      */
     @Throws(ClientException::class, ApiException::class)
-    fun sync(lastSync: Date): SyncResponse {
-        val response = client.get("$apiEndpoint/sync/${lastSync.time / 1000}")
-        return Json.decodeFromString(SyncResponse.serializer(), response)
-    }
+    fun sync(lastSync: Date): SyncResponse
 
     /**
      * Updates a cipher.
@@ -88,9 +72,7 @@ class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
      * @return [InsertResponse]
      */
     @Throws(ClientException::class, ApiException::class)
-    fun update(cipher: Cipher, encryptionKey: String): InsertResponse {
-        return update(cipher.toEncryptedCipher(encryptionKey))
-    }
+    fun update(cipher: Cipher, encryptionKey: String): InsertResponse
 
     /**
      * Updates a cipher.
@@ -98,26 +80,78 @@ class CipherClient(accessToken: String, apiUrl: String = Client.DefaultApiUrl) {
      * @return [InsertResponse]
      */
     @Throws(ClientException::class, ApiException::class)
-    fun update(cipher: EncryptedCipher): InsertResponse {
-        val response = client.patch("$apiEndpoint/${cipher.id}", cipher.toJson())
+    fun update(cipher: EncryptedCipher): InsertResponse
+
+    /**
+     * Deletes a cipher.
+     * @param id The UUID of the cipher.
+     */
+    @Throws(ClientException::class, ApiException::class)
+    fun delete(id: UUID)
+
+    /**
+     * Deletes a cipher.
+     * @param id The UUID of the cipher.
+     */
+    @Throws(ClientException::class, ApiException::class)
+    fun delete(id: String)
+}
+
+fun CipherClient(
+    accessToken: String,
+    apiUrl: String = Client.DefaultApiUrl
+): CipherClient {
+    return CipherClientImpl(accessToken, apiUrl)
+}
+
+class CipherClientImpl(
+    accessToken: String,
+    apiUrl: String
+) : CipherClient {
+    private val client = Client(accessToken, apiUrl)
+
+    override fun insert(cipher: Cipher, encryptionKey: String): InsertResponse {
+        return insert(cipher.toEncryptedCipher(encryptionKey))
+    }
+
+    override fun insert(cipher: EncryptedCipher): InsertResponse {
+        val response = client.put(API_ENDPOINT, cipher.toJson())
         return Json.decodeFromString(InsertResponse.serializer(), response)
     }
 
-    /**
-     * Deletes a cipher.
-     * @param id The UUID of the cipher.
-     */
-    @Throws(ClientException::class, ApiException::class)
-    fun delete(id: UUID) {
+    override fun get(id: UUID): EncryptedCipher {
+        return get(id.toString())
+    }
+
+    override fun get(id: String): EncryptedCipher {
+        val response = client.get("$API_ENDPOINT/$id")
+        return Json.decodeFromString(EncryptedCipher.serializer(), response)
+    }
+
+    override fun getAll(): List<EncryptedCipher> {
+        val response = client.get(API_ENDPOINT)
+        return Json.decodeFromString(ListSerializer(EncryptedCipher.serializer()), response)
+    }
+
+    override fun sync(lastSync: Date): SyncResponse {
+        val response = client.get("$API_ENDPOINT/sync/${lastSync.time / 1000}")
+        return Json.decodeFromString(SyncResponse.serializer(), response)
+    }
+
+    override fun update(cipher: Cipher, encryptionKey: String): InsertResponse {
+        return update(cipher.toEncryptedCipher(encryptionKey))
+    }
+
+    override fun update(cipher: EncryptedCipher): InsertResponse {
+        val response = client.patch("$API_ENDPOINT/${cipher.id}", cipher.toJson())
+        return Json.decodeFromString(InsertResponse.serializer(), response)
+    }
+
+    override fun delete(id: UUID) {
         delete(id.toString())
     }
 
-    /**
-     * Deletes a cipher.
-     * @param id The UUID of the cipher.
-     */
-    @Throws(ClientException::class, ApiException::class)
-    fun delete(id: String) {
-        client.delete("$apiEndpoint/$id")
+    override fun delete(id: String) {
+        client.delete("$API_ENDPOINT/$id")
     }
 }
