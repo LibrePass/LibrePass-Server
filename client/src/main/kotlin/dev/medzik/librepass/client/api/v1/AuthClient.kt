@@ -1,9 +1,6 @@
 package dev.medzik.librepass.client.api.v1
 
-import dev.medzik.libcrypto.AesCbc
-import dev.medzik.libcrypto.Argon2Hash
-import dev.medzik.libcrypto.Pbkdf2
-import dev.medzik.libcrypto.Salt
+import dev.medzik.libcrypto.*
 import dev.medzik.librepass.client.Client
 import dev.medzik.librepass.client.api.v1.AuthClient.Companion.computeBasePasswordHash
 import dev.medzik.librepass.client.errors.ApiException
@@ -108,6 +105,16 @@ private class AuthClientImpl(apiUrl: String) : AuthClient {
             .sha256(Hex.encodeHexString(Salt.generate(16)), Salt.generate(16))
         val encryptionKey = AesCbc.encrypt(encryptionKeyBase, basePasswordHex)
 
+        // generate a new rsa keypair for the user
+        val rsaKeypair = RSA.generateKeyPair(2048)
+
+        // get the public and private key as string
+        val rsaPublicKey = RSA.KeyUtils.getPublicKeyString(rsaKeypair.public)
+        val rsaPrivateKey = RSA.KeyUtils.getPrivateKeyString(rsaKeypair.private)
+
+        // encrypt private key with the encryption key
+        val encryptedRsaPrivateKey = AesCbc.encrypt(rsaPrivateKey, encryptionKeyBase)
+
         val request = RegisterRequest(
             email = email,
             password = finalPassword,
@@ -117,7 +124,10 @@ private class AuthClientImpl(apiUrl: String) : AuthClient {
             parallelism = basePassword.parallelism,
             memory = basePassword.memory,
             iterations = basePassword.iterations,
-            version = basePassword.version
+            version = basePassword.version,
+            // rsa keypair
+            publicKey = rsaPublicKey,
+            privateKey = encryptedRsaPrivateKey
         )
 
         client.post("$apiEndpoint/register", Json.encodeToString(RegisterRequest.serializer(), request))
