@@ -47,7 +47,11 @@ class CipherControllerTests {
             parallelism = 3,
             memory = 65536,
             iterations = 4,
-            version = 19
+            version = 19,
+            // rsa keypair
+            // NOTE: These tests do not need this
+            publicKey = "",
+            privateKey = ""
         )
 
         val json = Json.encodeToString(RegisterRequest.serializer(), request)
