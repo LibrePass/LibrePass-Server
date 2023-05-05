@@ -53,17 +53,7 @@ class AuthController {
 
     @PostMapping("/register")
     fun register(@RequestBody request: RegisterRequest): Response {
-        val verificationToken = userService.register(
-            email = request.email,
-            password = request.password,
-            passwordHint = request.passwordHint,
-            encryptionKey = request.encryptionKey,
-            // argon2id parameters
-            parallelism = request.parallelism,
-            memory = request.memory,
-            iterations = request.iterations,
-            version = request.version
-        )
+        val verificationToken = userService.register(request)
 
         scope.launch {
             try {
