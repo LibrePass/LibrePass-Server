@@ -4,6 +4,7 @@ import dev.medzik.librepass.server.components.AuthComponent
 import dev.medzik.librepass.server.components.TokenType
 import dev.medzik.librepass.server.database.UserRepository
 import dev.medzik.librepass.server.database.UserTable
+import dev.medzik.librepass.types.api.auth.RegisterRequest
 import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
 import dev.medzik.librepass.types.api.auth.UserCredentials
 import org.springframework.beans.factory.annotation.Autowired
@@ -23,28 +24,22 @@ class UserService {
 
     fun createUser(user: UserTable): UserTable = userRepository.save(user)
 
-    fun register(
-        email: String,
-        password: String,
-        passwordHint: String?,
-        encryptionKey: String,
-        parallelism: Int,
-        memory: Int,
-        iterations: Int,
-        version: Int
-    ): String {
-        val passwordHash = argon2.encode(password)
+    fun register(request: RegisterRequest): String {
+        val passwordHash = argon2.encode(request.password)
 
         val user = UserTable(
-            email = email,
+            email = request.email,
             password = passwordHash,
-            passwordHint = passwordHint,
-            encryptionKey = encryptionKey,
+            passwordHint = request.passwordHint,
+            encryptionKey = request.encryptionKey,
             // argon2id parameters
-            parallelism = parallelism,
-            memory = memory,
-            iterations = iterations,
-            version = version
+            parallelism = request.parallelism,
+            memory = request.memory,
+            iterations = request.iterations,
+            version = request.version,
+            // RSA keypair
+            publicKey = request.publicKey,
+            privateKey = request.privateKey
         )
 
         createUser(user)

@@ -20,7 +20,11 @@ data class RegisterRequest(
     val parallelism: Int,
     val memory: Int,
     val iterations: Int,
-    val version: Int
+    val version: Int,
+
+    // RSA keypair
+     val publicKey: String,
+     val privateKey: String
 )
 
 /**

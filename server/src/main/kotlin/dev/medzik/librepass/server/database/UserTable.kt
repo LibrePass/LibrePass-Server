@@ -28,6 +28,12 @@ data class UserTable (
     @Column(columnDefinition = "TEXT")
     val encryptionKey: String,
 
+    // RSA key pair
+    @Column(columnDefinition = "TEXT")
+    val publicKey: String,
+    @Column(columnDefinition = "TEXT")
+    val privateKey: String,
+
     @CreatedDate
     @Temporal(TemporalType.TIMESTAMP)
     @Column(insertable = false, updatable = false)
