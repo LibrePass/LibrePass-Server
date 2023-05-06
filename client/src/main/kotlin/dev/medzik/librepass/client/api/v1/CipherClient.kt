@@ -134,7 +134,7 @@ class CipherClientImpl(
     }
 
     override fun sync(lastSync: Date): SyncResponse {
-        val response = client.get("$API_ENDPOINT/sync/${lastSync.time / 1000}")
+        val response = client.get("$API_ENDPOINT/sync?lastSync=${lastSync.time / 1000}")
         return Json.decodeFromString(SyncResponse.serializer(), response)
     }
 
