@@ -16,13 +16,13 @@ import java.util.*
 data class Cipher(
     val id: UUID,
     val owner: UUID,
-    var type: Int,
-    var data: CipherData,
-    var favorite: Boolean = false,
-    var collection: UUID? = null,
-    var rePrompt: Boolean = false,
-    var created: Date? = null,
-    var lastModified: Date? = null
+    val type: Int,
+    val data: CipherData,
+    val favorite: Boolean = false,
+    val collection: UUID? = null,
+    val rePrompt: Boolean = false,
+    val created: Date? = null,
+    val lastModified: Date? = null
 ) {
     companion object {
         /**
@@ -65,16 +65,16 @@ data class EncryptedCipher(
     val id: UUID,
     @Serializable(with = UUIDSerializer::class)
     val owner: UUID,
-    var type: Int = CipherType.Login.type,
-    var data: String,
-    var favorite: Boolean = false,
+    val type: Int = CipherType.Login.type,
+    val data: String,
+    val favorite: Boolean = false,
     @Serializable(with = UUIDSerializer::class)
-    var collection: UUID? = null,
-    var rePrompt: Boolean = false,
+    val collection: UUID? = null,
+    val rePrompt: Boolean = false,
     @Serializable(with = DateSerializer::class)
-    var created: Date? = null,
+    val created: Date? = null,
     @Serializable(with = DateSerializer::class)
-    var lastModified: Date? = null
+    val lastModified: Date? = null
 ) {
     companion object {
         /**
@@ -144,13 +144,13 @@ enum class CipherType(val type: Int) {
  */
 @Serializable
 data class CipherData(
-    var name: String,
-    var username: String? = null,
-    var password: String? = null,
-    var uris: List<String>? = null,
-    var twoFactor: String? = null,
-    var notes: String? = null,
-    var customFields: List<String>? = null
+    val name: String,
+    val username: String? = null,
+    val password: String? = null,
+    val uris: List<String>? = null,
+    val twoFactor: String? = null,
+    val notes: String? = null,
+    val customFields: List<String>? = null
 ) {
     /**
      * Encrypts the cipher data and returns a new JSON string.
