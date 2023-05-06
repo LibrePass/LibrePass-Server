@@ -1,7 +1,6 @@
 package dev.medzik.librepass.server.controllers.api.v1
 
 import dev.medzik.librepass.server.components.AuthorizedUser
-import dev.medzik.librepass.server.database.CipherTable
 import dev.medzik.librepass.server.database.UserTable
 import dev.medzik.librepass.server.services.CipherService
 import dev.medzik.librepass.server.utils.Response
@@ -9,9 +8,6 @@ import dev.medzik.librepass.server.utils.ResponseError
 import dev.medzik.librepass.server.utils.ResponseHandler
 import dev.medzik.librepass.types.api.EncryptedCipher
 import dev.medzik.librepass.types.api.cipher.InsertResponse
-import dev.medzik.librepass.types.api.cipher.SyncResponse
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.json.Json
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -32,7 +28,11 @@ class CipherController {
 
         return try {
             val cipher = cipherService.insertCipher(encryptedCipher)
-            ResponseHandler.generateResponse(InsertResponse(cipher.id), HttpStatus.CREATED)
+
+            ResponseHandler.generateResponse(
+                data = InsertResponse(cipher.id),
+                status = HttpStatus.CREATED
+            )
         } catch (e: Exception) {
             ResponseError.InvalidBody
         }
@@ -42,9 +42,7 @@ class CipherController {
     fun getAllCiphers(@AuthorizedUser user: UserTable?): Response {
         if (user == null) return ResponseError.Unauthorized
         val ciphers = cipherService.getAllCiphers(user.id)
-
-        val json = Json.encodeToString(ListSerializer(CipherTable.serializer()), ciphers)
-        return ResponseHandler.generateResponse(json, HttpStatus.OK)
+        return ResponseHandler.generateResponse(ciphers, HttpStatus.OK)
     }
 
     @GetMapping("/sync")
@@ -54,9 +52,7 @@ class CipherController {
     ): Response {
         if (user == null) return ResponseError.Unauthorized
         val ciphers = cipherService.sync(user.id, Date(lastSyncUnixTimestamp * 1000))
-
-        val json = Json.encodeToString(SyncResponse.serializer(), ciphers)
-        return ResponseHandler.generateResponse(json, HttpStatus.OK)
+        return ResponseHandler.generateResponse(ciphers, HttpStatus.OK)
     }
 
     @GetMapping("/{id}")
@@ -66,7 +62,7 @@ class CipherController {
     ): Response {
         if (user == null) return ResponseError.Unauthorized
         val cipher = cipherService.getCipher(id, user.id) ?: return ResponseError.NotFound
-        return ResponseHandler.generateResponse(Json.encodeToString(CipherTable.serializer(), cipher), HttpStatus.OK)
+        return ResponseHandler.generateResponse(cipher, HttpStatus.OK)
     }
 
     @PatchMapping("/{id}")
@@ -85,7 +81,11 @@ class CipherController {
                 created = cipher.created,
                 lastModified = Date()
             ))
-            ResponseHandler.generateResponse(InsertResponse(cipher.id), HttpStatus.OK)
+
+            ResponseHandler.generateResponse(
+                data = InsertResponse(cipher.id),
+                status = HttpStatus.OK
+            )
         } catch (e: Exception) {
             ResponseError.InvalidBody
         }
