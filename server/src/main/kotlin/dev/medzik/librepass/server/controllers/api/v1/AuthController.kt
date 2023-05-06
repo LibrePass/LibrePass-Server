@@ -83,7 +83,10 @@ class AuthController {
     }
 
     @PostMapping("/login")
-    fun login(httpServletRequest: HttpServletRequest, @RequestBody request: LoginRequest): Response {
+    fun login(
+        httpServletRequest: HttpServletRequest,
+        @RequestBody request: LoginRequest
+    ): Response {
         val ip = httpServletRequest.remoteAddr
         if (!rateLimit.resolveBucket(ip).tryConsume(1)) {
             return ResponseError.TooManyRequests
