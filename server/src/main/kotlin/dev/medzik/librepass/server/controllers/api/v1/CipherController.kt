@@ -1,6 +1,7 @@
 package dev.medzik.librepass.server.controllers.api.v1
 
 import dev.medzik.librepass.server.components.AuthorizedUser
+import dev.medzik.librepass.server.database.CipherTable
 import dev.medzik.librepass.server.database.UserTable
 import dev.medzik.librepass.server.services.CipherService
 import dev.medzik.librepass.server.utils.Response
@@ -8,6 +9,7 @@ import dev.medzik.librepass.server.utils.ResponseError
 import dev.medzik.librepass.server.utils.ResponseHandler
 import dev.medzik.librepass.types.api.EncryptedCipher
 import dev.medzik.librepass.types.api.cipher.InsertResponse
+import kotlinx.serialization.builtins.ListSerializer
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -42,7 +44,11 @@ class CipherController {
     fun getAllCiphers(@AuthorizedUser user: UserTable?): Response {
         if (user == null) return ResponseError.Unauthorized
         val ciphers = cipherService.getAllCiphers(user.id)
-        return ResponseHandler.generateResponse(ciphers, HttpStatus.OK)
+        return ResponseHandler.generateResponse(
+            serializer = ListSerializer(CipherTable.serializer()),
+            data = ciphers,
+            status = HttpStatus.OK
+        )
     }
 
     @GetMapping("/sync")
