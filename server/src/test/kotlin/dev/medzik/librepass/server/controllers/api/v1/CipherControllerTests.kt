@@ -32,9 +32,9 @@ class CipherControllerTests {
 
     private final val urlPrefix = "/api/v1/cipher"
 
-    var email: String = "_test_" + Faker().internet().safeEmailAddress()
-    var password: String = Faker().internet().password(true)
-    var passwordSalt: ByteArray = Salt.generate(16)
+    val email: String = "_test_" + Faker().internet().safeEmailAddress()
+    val password: String = Faker().internet().password(true)
+    val passwordSalt: ByteArray = Salt.generate(16)
 
     fun createUser() {
         val request = RegisterRequest(
@@ -103,12 +103,14 @@ class CipherControllerTests {
     }
 
     fun updateCipher(userCredentials: UserCredentials, cipher: EncryptedCipher): InsertResponse {
-        cipher.type = 2
-        cipher.data = "test2"
-        cipher.favorite = true
-        cipher.rePrompt = true
+        val newCipher = cipher.copy(
+            type = 2,
+            data = "test2",
+            favorite = true,
+            rePrompt = true
+        )
 
-        val json = Json.encodeToString(EncryptedCipher.serializer(), cipher)
+        val json = Json.encodeToString(EncryptedCipher.serializer(), newCipher)
         val mvcResult = mockMvc.perform(
             MockMvcRequestBuilders.put(urlPrefix)
                 .contentType(MediaType.APPLICATION_JSON)
