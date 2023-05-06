@@ -1,6 +1,7 @@
 package dev.medzik.librepass.server.utils
 
 import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 import org.springframework.http.HttpStatus
@@ -22,6 +23,11 @@ object ResponseHandler {
         return ResponseEntity
             .status(status)
             .body(json)
+    }
+
+    fun <T> generateResponse(serializer: SerializationStrategy<T>, data: T, status: HttpStatus): Response {
+        val json = Json.encodeToString(serializer, data)
+        return createResponse(json, status)
     }
 
     fun generateErrorResponse(error: String, status: HttpStatus): Response {
