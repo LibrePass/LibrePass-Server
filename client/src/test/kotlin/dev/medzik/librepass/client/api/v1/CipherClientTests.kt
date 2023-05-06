@@ -99,16 +99,14 @@ class CipherClientTests {
     @Test
     fun updateCipher() {
         insertCipher()
-        val cipher = cipherClient.get(cipherId)
 
+        val cipher = cipherClient.get(cipherId)
         assertEquals(0, cipher.type)
 
-        cipher.type = 1
-
-        cipherClient.update(cipher)
+        val newCipher = cipher.copy(type = 1)
+        cipherClient.update(newCipher)
 
         val updatedCipher = cipherClient.get(cipherId)
-
         assertEquals(1, updatedCipher.type)
     }
 
