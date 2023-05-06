@@ -14,21 +14,14 @@ object ResponseHandler {
         return createResponse(map, status)
     }
 
-    fun generateResponse(data: Any, status: HttpStatus): Response {
-        return createResponse(
-            data = encodeToJson(data),
-            status = status
-        )
-    }
-
-    /**
-     * Encode data to JSON string using Kotlinx Serialization
-     */
     @OptIn(InternalSerializationApi::class)
-    private inline fun <reified T : Any> encodeToJson(data: T) {
+    inline fun <reified T : Any> generateResponse(data: T, status: HttpStatus): Response {
         val serializer = T::class.serializer()
-        val jsonString = Json.encodeToString(serializer, data)
-        println(jsonString)
+        val json = Json.encodeToString(serializer, data)
+
+        return ResponseEntity
+            .status(status)
+            .body(json)
     }
 
     fun generateErrorResponse(error: String, status: HttpStatus): Response {
@@ -44,7 +37,9 @@ object ResponseHandler {
     }
 
     private fun createResponse(data: Any, status: HttpStatus): Response {
-        return ResponseEntity.status(status).body(data)
+        return ResponseEntity
+            .status(status)
+            .body(data)
     }
 }
 
