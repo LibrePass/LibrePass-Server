@@ -206,7 +206,7 @@ class CipherControllerTests {
         val timestamp = Date().time / 1000
 
         val mvcResult = mockMvc.perform(
-            MockMvcRequestBuilders.get("$urlPrefix/sync/$timestamp")
+            MockMvcRequestBuilders.get("$urlPrefix/sync?lastSync=$timestamp")
                 .header("Authorization", "Bearer ${userCredentials.accessToken}")
         ).andExpect(MockMvcResultMatchers.status().isOk)
             .andReturn()
