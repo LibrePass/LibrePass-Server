@@ -24,7 +24,10 @@ class CipherController {
     private lateinit var cipherService: CipherService
 
     @PutMapping
-    fun insertCipher(@AuthorizedUser user: UserTable?, @RequestBody encryptedCipher: EncryptedCipher): Response {
+    fun insertCipher(
+        @AuthorizedUser user: UserTable?,
+        @RequestBody encryptedCipher: EncryptedCipher
+    ): Response {
         if (user == null) return ResponseError.Unauthorized
 
         return try {
@@ -44,8 +47,11 @@ class CipherController {
         return ResponseHandler.generateResponse(json, HttpStatus.OK)
     }
 
-    @GetMapping("/sync/{lastSyncUnixTimestamp}")
-    fun syncCiphers(@AuthorizedUser user: UserTable?, @PathVariable lastSyncUnixTimestamp: Long): Response {
+    @GetMapping("/sync")
+    fun syncCiphers(
+        @AuthorizedUser user: UserTable?,
+        @RequestParam("lastSync") lastSyncUnixTimestamp: Long
+    ): Response {
         if (user == null) return ResponseError.Unauthorized
         val ciphers = cipherService.sync(user.id, Date(lastSyncUnixTimestamp * 1000))
 
@@ -54,14 +60,21 @@ class CipherController {
     }
 
     @GetMapping("/{id}")
-    fun getCipher(@AuthorizedUser user: UserTable?, @PathVariable id: UUID): Response {
+    fun getCipher(
+        @AuthorizedUser user: UserTable?,
+        @PathVariable id: UUID
+    ): Response {
         if (user == null) return ResponseError.Unauthorized
         val cipher = cipherService.getCipher(id, user.id) ?: return ResponseError.NotFound
         return ResponseHandler.generateResponse(Json.encodeToString(CipherTable.serializer(), cipher), HttpStatus.OK)
     }
 
     @PatchMapping("/{id}")
-    fun updateCipher(@AuthorizedUser user: UserTable?, @PathVariable id: UUID, @RequestBody encryptedCipher: EncryptedCipher): Response {
+    fun updateCipher(
+        @AuthorizedUser user: UserTable?,
+        @PathVariable id: UUID,
+        @RequestBody encryptedCipher: EncryptedCipher
+    ): Response {
         if (user == null) return ResponseError.Unauthorized
 
         val cipher = cipherService.getCipher(id, user.id) ?: return ResponseError.NotFound
@@ -79,7 +92,10 @@ class CipherController {
     }
 
     @DeleteMapping("/{id}")
-    fun deleteCipher(@AuthorizedUser user: UserTable?, @PathVariable id: UUID): Response {
+    fun deleteCipher(
+        @AuthorizedUser user: UserTable?,
+        @PathVariable id: UUID
+    ): Response {
         if (user == null) return ResponseError.Unauthorized
 
         if (!cipherService.checkIfCipherExistsAndOwnedBy(id, user.id)) return ResponseError.NotFound
