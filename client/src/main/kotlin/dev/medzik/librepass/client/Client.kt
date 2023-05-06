@@ -17,9 +17,9 @@ class Client(
 ) {
     companion object {
         const val DefaultApiUrl = "https://librepass-api.medzik.dev"
-    }
 
-    private val mediaTypeJson: MediaType = "application/json; charset=utf-8".toMediaType()
+        private val MediaTypeJson: MediaType = "application/json; charset=utf-8".toMediaType()
+    }
 
     private val client = OkHttpClient()
 
@@ -65,7 +65,7 @@ class Client(
      */
     @Throws(ClientException::class, ApiException::class)
     fun post(endpoint: String, json: String): String {
-        val body = json.toRequestBody(mediaTypeJson)
+        val body = json.toRequestBody(MediaTypeJson)
 
         val request = Request.Builder()
             .url(apiURL + endpoint)
@@ -84,7 +84,7 @@ class Client(
      */
     @Throws(ClientException::class, ApiException::class)
     fun patch(endpoint: String, json: String): String {
-        val body = json.toRequestBody(mediaTypeJson)
+        val body = json.toRequestBody(MediaTypeJson)
 
         val request = Request.Builder()
             .url(apiURL + endpoint)
@@ -103,7 +103,7 @@ class Client(
      */
     @Throws(ClientException::class, ApiException::class)
     fun put(endpoint: String, json: String): String {
-        val body = json.toRequestBody(mediaTypeJson)
+        val body = json.toRequestBody(MediaTypeJson)
 
         val request = Request.Builder()
             .url(apiURL + endpoint)

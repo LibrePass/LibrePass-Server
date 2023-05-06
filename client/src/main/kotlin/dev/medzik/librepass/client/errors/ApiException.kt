@@ -11,7 +11,5 @@ class ApiException(
     /**
      * Check if the error is a 401 Unauthorized
      */
-    fun isUnauthorized(): Boolean {
-        return status == 401
-    }
+    fun isUnauthorized(): Boolean = status == 401
 }
