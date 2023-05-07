@@ -16,13 +16,17 @@ class Client(
     private val apiURL: String
 ) {
     companion object {
+        // Default API URL
         const val DefaultApiUrl = "https://librepass-api.medzik.dev"
 
+        // JSON media type
         private val MediaTypeJson: MediaType = "application/json; charset=utf-8".toMediaType()
+
+        // HTTP client instance
+        private val HttpClient = OkHttpClient()
     }
 
-    private val client = OkHttpClient()
-
+    // create authorization header if access token is provided
     private val authorizationHeader = if (accessToken.isNullOrEmpty()) "" else "Bearer $accessToken"
 
     /**
@@ -123,7 +127,7 @@ class Client(
     private fun executeAndExtractBody(request: Request): String {
         try {
             // send request
-            val response = client.newCall(request).execute()
+            val response = HttpClient.newCall(request).execute()
 
             // extract from response
             val statusCode = response.code

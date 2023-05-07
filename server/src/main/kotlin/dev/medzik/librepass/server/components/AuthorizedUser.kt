@@ -11,10 +11,20 @@ import org.springframework.web.context.request.NativeWebRequest
 import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.method.support.ModelAndViewContainer
 
+/**
+ * Annotation for getting authorized user from request.
+ * If user is not authorized, then null will be passed.
+ * If user is authorized, then [UserTable] will be passed.
+ * @see AuthorizedUserArgumentResolver
+ */
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.VALUE_PARAMETER, AnnotationTarget.ANNOTATION_CLASS)
 annotation class AuthorizedUser
 
+/**
+ * Argument resolver for [AuthorizedUser] annotation.
+ * @see AuthorizedUser
+ */
 @Component
 class AuthorizedUserArgumentResolver : HandlerMethodArgumentResolver {
     @Autowired

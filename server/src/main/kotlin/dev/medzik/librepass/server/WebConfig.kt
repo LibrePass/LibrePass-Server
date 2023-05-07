@@ -10,15 +10,17 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 @Configuration
 class WebConfig : WebMvcConfigurer {
-    @Value("\${cors.allowedOrigins}")
-    private lateinit var allowedOrigins: String
-
+    // Add @AuthorizedUser annotation support
     @Autowired
     private lateinit var authorizedUserArgumentResolver: AuthorizedUserArgumentResolver
 
     override fun addArgumentResolvers(resolvers: MutableList<HandlerMethodArgumentResolver>) {
         resolvers.add(authorizedUserArgumentResolver)
     }
+
+    // CORS configuration
+    @Value("\${cors.allowedOrigins}")
+    private lateinit var allowedOrigins: String
 
     override fun addCorsMappings(registry: CorsRegistry) {
         val allowedOrigin = allowedOrigins.split(",").toTypedArray()
