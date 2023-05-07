@@ -21,9 +21,11 @@ class UserService {
     private lateinit var authComponent: AuthComponent
 
     // create argon2 password encoder with default parameters
-    private final val argon2 = Argon2HashingFunction(32, 1, 15 * 1024, 1)
+    private final val argon2 =
+        Argon2HashingFunction(32, 1, 15 * 1024, 1)
 
-    fun createUser(user: UserTable): UserTable = userRepository.save(user)
+    fun createUser(user: UserTable): UserTable =
+        userRepository.save(user)
 
     fun register(request: RegisterRequest): String {
         val passwordSalt = Salt.generate(32)

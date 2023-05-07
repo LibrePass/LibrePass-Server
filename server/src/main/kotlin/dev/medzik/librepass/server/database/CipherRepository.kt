@@ -5,6 +5,10 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 import java.util.*
 
+/**
+ * Repository for the ciphers. It is used to interact with the database.
+ * @see CipherTable
+ */
 interface CipherRepository : CrudRepository<CipherTable, UUID> {
     /**
      * Get a list of all ciphers owned by the user.
@@ -30,13 +34,4 @@ interface CipherRepository : CrudRepository<CipherTable, UUID> {
      */
     @Query("SELECT EXISTS(SELECT 1 FROM #{#entityName} p WHERE p.id = :id AND p.owner = :owner)")
     fun checkIfCipherExistsAndOwnedBy(@Param("id") id: UUID, @Param("owner") owner: UUID): Boolean
-
-    /**
-     * Get a list of all cipher ids that are in a collection owned by the user.
-     * @param collection The collection to get ciphers from.
-     * @param owner The owner of the collection.
-     * @return A list of all ciphers that are in a collection owned by the user.
-     */
-    @Query("SELECT p.id FROM #{#entityName} p WHERE p.collection = :collection AND p.owner = :owner")
-    fun getAllIDs(@Param("collection") collection: UUID, @Param("owner") owner: UUID): List<UUID>
 }
