@@ -16,6 +16,12 @@ class EmailService {
     @Value("\${librepass.api.domain}")
     private lateinit var apiDomain: String
 
+    /**
+     * Email the given address.
+     * @param to The email address to send the email to.
+     * @param subject The subject of the email.
+     * @param body The body of the email.
+     */
     fun send(to: String, subject: String, body: String) {
         val message = SimpleMailMessage()
         message.from = "LibrePass <$senderAddress>"
@@ -26,7 +32,13 @@ class EmailService {
         emailSender.send(message)
     }
 
+    /**
+     * Email the given address with the given code.
+     * @param to The email address to send the email to.
+     * @param code The code to send.
+     */
     suspend fun sendEmailVerification(to: String, code: String) {
+        // TODO: Use a template engine to generate the email body.
         val subject = "Activate your LibrePass account"
         val body = "Click here to activate your account https://$apiDomain/api/v1/auth/verifyEmail?code=$code"
         send(to, subject, body)

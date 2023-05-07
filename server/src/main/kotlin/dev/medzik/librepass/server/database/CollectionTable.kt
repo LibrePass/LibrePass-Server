@@ -10,10 +10,10 @@ import java.util.*
 @Entity
 @EntityListeners(AuditingEntityListener::class)
 @Table(name = "collections")
-class CollectionTable {
+class CollectionTable(
     @Id
-    var id: UUID = UUID.randomUUID()
+    val id: UUID = UUID.randomUUID(),
 
-    lateinit var owner: UUID
-    lateinit var name: String
-}
+    val owner: UUID,
+    val name: String,
+)
