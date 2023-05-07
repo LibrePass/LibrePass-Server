@@ -15,19 +15,15 @@ class CollectionService {
         collectionRepository.save(collection)
     }
 
-    fun getAllCollections(owner: UUID): List<UUID> {
-        return collectionRepository.findAllIdsByOwner(owner)
-    }
+    fun getAllCollections(owner: UUID): List<UUID> =
+        collectionRepository.findAllIdsByOwner(owner)
 
-    fun getCollection(id: UUID, owner: UUID): CollectionTable? {
-        return collectionRepository.findByIdAndOwner(id, owner)
-    }
+    fun getCollection(id: UUID, owner: UUID): CollectionTable? =
+        collectionRepository.findByIdAndOwner(id, owner)
 
-    fun updateCollection(collection: CollectionTable) {
+    fun updateCollection(collection: CollectionTable): CollectionTable =
         collectionRepository.save(collection)
-    }
 
-    fun deleteCollection(collection: CollectionTable) {
+    fun deleteCollection(collection: CollectionTable) =
         collectionRepository.delete(collection)
-    }
 }

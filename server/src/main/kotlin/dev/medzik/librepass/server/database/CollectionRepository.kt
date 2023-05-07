@@ -5,14 +5,11 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 import java.util.*
 
+/**
+ * Repository for collections. It is used to interact with the database.
+ * @see CollectionTable
+ */
 interface CollectionRepository : CrudRepository<CollectionTable, UUID> {
-    /**
-     * Find all collections owned by the given user.
-     * @param owner The owner of the collections.
-     * @return A list of collections owned by the given user.
-     */
-    fun findAllByOwner(owner: UUID): List<CollectionTable>
-
     /**
      * Find a collection by its ID and owner.
      * @param id The ID of the collection.

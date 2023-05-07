@@ -11,29 +11,18 @@ import java.security.PublicKey
 import java.util.*
 
 /**
- * One hour in milliseconds.
+ * One hour in milliseconds. Used for token expiration time.
  */
 private const val HourTime = 1000L * 60 * 60
 
 /**
- * Time in milliseconds for which the access token is valid.
+ * Type of the token.
+ * @param expirationTime Time in milliseconds for which the token is valid.
  */
-const val AccessTokenExpirationTime = 10 * HourTime // 10 hours
-
-/**
- * Time in milliseconds for which the refresh token is valid.
- */
-const val RefreshTokenExpirationTime = 90 * 24 * HourTime // 90 days
-
-/**
- * Time in milliseconds for which the verification token is valid.
- */
-const val VerificationTokenExpirationTime = 24 * HourTime // 24 hours
-
-enum class TokenType(val type: String, val expirationTime: Long) {
-    ACCESS_TOKEN("access_token", AccessTokenExpirationTime),
-    REFRESH_TOKEN("refresh_token", RefreshTokenExpirationTime),
-    VERIFICATION_TOKEN("verification_token", VerificationTokenExpirationTime)
+enum class TokenType(val expirationTime: Long) {
+    ACCESS_TOKEN(10 * HourTime), // 10 hours
+    REFRESH_TOKEN(90 * 24 * HourTime), // 90 days
+    VERIFICATION_TOKEN(24 * HourTime) // 24 hours
 }
 
 @Component
@@ -58,7 +47,7 @@ class AuthComponent
      */
     fun generateToken(tokenType: TokenType, userId: UUID): String {
         val claims: MutableMap<String, Any> = HashMap()
-        claims["typ"] = tokenType.type
+        claims["typ"] = tokenType.name
         claims["sub"] = userId
 
         return Jwts.builder()
@@ -83,7 +72,7 @@ class AuthComponent
                 .body
 
             // check if the token type is correct
-            if (claims["typ"] != tokenType.type) return null
+            if (claims["typ"] != tokenType.name) return null
 
             claims["sub"] as String
         } catch (e: Exception) {
