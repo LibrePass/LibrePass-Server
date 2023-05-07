@@ -1,5 +1,7 @@
 package dev.medzik.librepass.server.services
 
+import dev.medzik.libcrypto.Argon2HashingFunction
+import dev.medzik.libcrypto.Salt
 import dev.medzik.librepass.server.components.AuthComponent
 import dev.medzik.librepass.server.components.TokenType
 import dev.medzik.librepass.server.database.UserRepository
@@ -8,7 +10,6 @@ import dev.medzik.librepass.types.api.auth.RegisterRequest
 import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
 import dev.medzik.librepass.types.api.auth.UserCredentials
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.security.crypto.argon2.Argon2PasswordEncoder
 import org.springframework.stereotype.Service
 import java.util.*
 
@@ -20,12 +21,13 @@ class UserService {
     private lateinit var authComponent: AuthComponent
 
     // create argon2 password encoder with default parameters
-    private final val argon2 = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
+    private final val argon2 = Argon2HashingFunction(32, 1, 15 * 1024, 1)
 
     fun createUser(user: UserTable): UserTable = userRepository.save(user)
 
     fun register(request: RegisterRequest): String {
-        val passwordHash = argon2.encode(request.password)
+        val passwordSalt = Salt.generate(32)
+        val passwordHash = argon2.hash(request.password, passwordSalt).toString()
 
         val user = UserTable(
             email = request.email,
@@ -65,7 +67,7 @@ class UserService {
 
         val user = userRepository.findByEmail(email) ?: return null
 
-        if (!argon2.matches(password, user.password)) return null
+        if (!Argon2HashingFunction.verify(password, user.password)) return null
 
         return UserCredentials(
             userId = user.id,
