@@ -41,9 +41,14 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
-        <kotlin.version>1.8.0</kotlin.version>
+        <kotlin.version>1.8.20</kotlin.version>
         <serialization.version>1.5.0</serialization.version>
         <coroutines.version>1.6.4</coroutines.version>
+
+        <medzik-libcrypto.version>0.3.0</medzik-libcrypto.version>
+
+        <junit.jupiter.version>5.9.2</junit.jupiter.version>
+        <datafaker.version>1.9.0</datafaker.version>
     </properties>
 
     <dependencies>
@@ -64,29 +69,30 @@
             <version>${kotlin.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.jetbrains.kotlinx</groupId>
-            <artifactId>kotlinx-serialization-json</artifactId>
-            <version>${serialization.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-test</artifactId>
             <version>${kotlin.version}</version>
             <scope>test</scope>
+        </dependency>
+        <!-- Kotlinx Serialization -->
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-serialization-json</artifactId>
+            <version>${serialization.version}</version>
         </dependency>
 
         <!-- Cryptography -->
         <dependency>
             <groupId>dev.medzik</groupId>
             <artifactId>libcrypto</artifactId>
-            <version>0.3.0</version>
+            <version>${medzik-libcrypto.version}</version>
         </dependency>
 
         <!-- Tests -->
         <dependency>
             <groupId>net.datafaker</groupId>
             <artifactId>datafaker</artifactId>
-            <version>1.9.0</version>
+            <version>${datafaker.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
