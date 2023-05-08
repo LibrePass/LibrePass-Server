@@ -14,7 +14,7 @@
     <description>LibrePass API Client for Java/Kotlin</description>
 
     <properties>
-        <junit.jupiter.version>5.9.2</junit.jupiter.version>
+        <okhttp.version>5.0.0-alpha.11</okhttp.version>
     </properties>
 
     <dependencies>
@@ -22,7 +22,7 @@
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
-            <version>5.0.0-alpha.11</version>
+            <version>${okhttp.version}</version>
         </dependency>
 
         <!-- Tests -->
