@@ -80,7 +80,8 @@ object ResponseHandler {
 }
 
 object ResponseError {
-    private fun generateErrorResponse(error: String, status: HttpStatus): Response = ResponseHandler.generateErrorResponse(error, status)
+    private fun generateErrorResponse(error: String, status: HttpStatus): Response =
+        ResponseHandler.generateErrorResponse(error, status)
 
     val InvalidBody = generateErrorResponse("invalid_body", HttpStatus.BAD_REQUEST)
     val InvalidCredentials = generateErrorResponse("invalid_credentials", HttpStatus.UNAUTHORIZED)
