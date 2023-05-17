@@ -83,22 +83,7 @@ class UserService {
         return UserCredentials(
             userId = user.id,
             accessToken = authComponent.generateToken(TokenType.ACCESS_TOKEN, user.id),
-            refreshToken = authComponent.generateToken(TokenType.REFRESH_TOKEN, user.id),
             encryptionKey = user.encryptionKey
-        )
-    }
-
-    fun refreshToken(refreshToken: String): UserCredentials? {
-        val userId = authComponent.parseToken(TokenType.REFRESH_TOKEN, refreshToken) ?: return null
-        val userUuid = UUID.fromString(userId)
-
-        val user = userRepository.findById(userUuid).orElse(null) ?: return null
-
-        return UserCredentials(
-            userId = userUuid,
-            accessToken = authComponent.generateToken(TokenType.ACCESS_TOKEN, userUuid),
-            refreshToken = authComponent.generateToken(TokenType.REFRESH_TOKEN, userUuid),
-            encryptionKey = user.encryptionKey,
         )
     }
 
