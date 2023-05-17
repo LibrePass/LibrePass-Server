@@ -6,9 +6,11 @@ import dev.medzik.librepass.server.components.AuthComponent
 import dev.medzik.librepass.server.components.TokenType
 import dev.medzik.librepass.server.database.UserRepository
 import dev.medzik.librepass.server.database.UserTable
+import dev.medzik.librepass.server.utils.Argon2DefaultHasher
 import dev.medzik.librepass.types.api.auth.RegisterRequest
 import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
 import dev.medzik.librepass.types.api.auth.UserCredentials
+import dev.medzik.librepass.types.api.user.ChangePasswordRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.*
@@ -20,16 +22,12 @@ class UserService {
     @Autowired
     private lateinit var authComponent: AuthComponent
 
-    // create argon2 password encoder with default parameters
-    private final val argon2 =
-        Argon2HashingFunction(32, 1, 15 * 1024, 1)
-
     fun createUser(user: UserTable): UserTable =
         userRepository.save(user)
 
     fun register(request: RegisterRequest): UserTable {
         val passwordSalt = Salt.generate(32)
-        val passwordHash = argon2.hash(request.password, passwordSalt).toString()
+        val passwordHash = Argon2DefaultHasher.hash(request.password, passwordSalt).toString()
 
         val verificationToken = UUID.randomUUID().toString()
 
@@ -114,5 +112,34 @@ class UserService {
         val userUuid = UUID.fromString(userId)
 
         return userRepository.findById(userUuid).orElse(null)
+    }
+
+    fun changePassword(user: UserTable, body: ChangePasswordRequest): Boolean {
+        // compare old password with password hash in database
+        // if they match, update password hash with new password hash
+        if (!Argon2HashingFunction.verify(body.oldPassword, user.password)) {
+            return false
+        }
+
+        // update password hash in database
+        val passwordSalt = Salt.generate(32)
+        val newPasswordHash = Argon2DefaultHasher.hash(body.newPassword, passwordSalt)
+
+        val newUser = user.copy(
+            password = newPasswordHash.toString(),
+            encryptionKey = body.newEncryptionKey,
+            privateKey = body.newPrivateKey,
+            // argon2id parameters
+            parallelism = body.parallelism,
+            memory = body.memory,
+            iterations = body.iterations,
+            version = body.version,
+            // set last password change date
+            lastPasswordChange = Date()
+        )
+
+        userRepository.save(newUser)
+
+        return true
     }
 }

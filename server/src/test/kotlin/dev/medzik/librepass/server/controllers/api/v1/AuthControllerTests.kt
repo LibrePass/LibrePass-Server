@@ -5,6 +5,7 @@ import dev.medzik.libcrypto.Salt
 import dev.medzik.librepass.types.api.auth.LoginRequest
 import dev.medzik.librepass.types.api.auth.RegisterRequest
 import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
+import dev.medzik.librepass.types.api.auth.UserCredentials
 import kotlinx.serialization.json.Json
 import net.datafaker.Faker
 import org.junit.jupiter.api.Test
@@ -22,7 +23,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 @AutoConfigureMockMvc
 class AuthControllerTests {
     @Autowired
-    private lateinit var mockMvc: MockMvc
+    lateinit var mockMvc: MockMvc
 
     private final val urlPrefix = "/api/v1/auth"
 
@@ -55,7 +56,7 @@ class AuthControllerTests {
         ).andExpect(status().isCreated)
     }
 
-    fun login(expect: ResultMatcher) {
+    fun login(expect: ResultMatcher): UserCredentials {
         val request = LoginRequest(
             email = email,
             // NOTE: This is not how you encrypt passwords in real life
@@ -63,10 +64,14 @@ class AuthControllerTests {
         )
 
         val json = Json.encodeToString(LoginRequest.serializer(), request)
-        mockMvc.perform(
+        val response = mockMvc.perform(
             post("${urlPrefix}/login")
                 .contentType(MediaType.APPLICATION_JSON).content(json)
-        ).andExpect(expect)
+        )
+            .andExpect(expect)
+            .andReturn()
+
+        return Json.decodeFromString(UserCredentials.serializer(), response.response.contentAsString)
     }
 
     @Test
