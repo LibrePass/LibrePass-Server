@@ -14,6 +14,8 @@ data class UserTable (
     @Column(unique = true, columnDefinition = "TEXT")
     val email: String,
     val emailVerified: Boolean = false,
+    val emailVerificationCode: String? = null,
+    val emailVerificationCodeExpiresAt: Date? = null,
 
     // argon2id parameters
     val parallelism: Int,

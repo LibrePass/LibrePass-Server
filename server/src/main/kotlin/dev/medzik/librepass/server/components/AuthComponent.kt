@@ -22,7 +22,6 @@ private const val HourTime = 1000L * 60 * 60
 enum class TokenType(val expirationTime: Long) {
     ACCESS_TOKEN(10 * HourTime), // 10 hours
     REFRESH_TOKEN(90 * 24 * HourTime), // 90 days
-    VERIFICATION_TOKEN(24 * HourTime) // 24 hours
 }
 
 @Component

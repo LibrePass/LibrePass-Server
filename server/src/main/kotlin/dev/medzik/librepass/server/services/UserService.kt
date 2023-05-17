@@ -27,9 +27,11 @@ class UserService {
     fun createUser(user: UserTable): UserTable =
         userRepository.save(user)
 
-    fun register(request: RegisterRequest): String {
+    fun register(request: RegisterRequest): UserTable {
         val passwordSalt = Salt.generate(32)
         val passwordHash = argon2.hash(request.password, passwordSalt).toString()
+
+        val verificationToken = UUID.randomUUID().toString()
 
         val user = UserTable(
             email = request.email,
@@ -43,12 +45,19 @@ class UserService {
             version = request.version,
             // RSA keypair
             publicKey = request.publicKey,
-            privateKey = request.privateKey
+            privateKey = request.privateKey,
+            // email verification
+            emailVerificationCode = verificationToken,
+            emailVerificationCodeExpiresAt = Date.from(
+                Calendar.getInstance().apply {
+                    add(Calendar.HOUR, 24)
+                }.toInstant()
+            )
         )
 
         createUser(user)
 
-        return authComponent.generateToken(TokenType.VERIFICATION_TOKEN, user.id)
+        return user
     }
 
     fun getArgon2Parameters(email: String): UserArgon2idParameters? {
@@ -93,11 +102,18 @@ class UserService {
         )
     }
 
-    fun verifyEmail(verificationToken: String): Boolean {
-        val userId = authComponent.parseToken(TokenType.VERIFICATION_TOKEN, verificationToken) ?: return false
-        val userUuid = UUID.fromString(userId)
+    fun verifyEmail(userId: String, verificationToken: String): Boolean {
+        // get user from database
+        val user = userRepository.findById(UUID.fromString(userId)).orElse(null)
+            ?: return false
 
-        val user = userRepository.findById(userUuid).orElse(null) ?: return false
+        // check if token is valid
+        if (user.emailVerificationCode != verificationToken) return false
+
+        // check if token is expired
+        if (user.emailVerificationCodeExpiresAt?.before(Date()) == true) return false
+
+        // set email as verified
         userRepository.save(user.copy(emailVerified = true))
 
         return true
