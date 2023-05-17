@@ -6,7 +6,6 @@ import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseError
 import dev.medzik.librepass.server.utils.ResponseHandler
 import dev.medzik.librepass.types.api.auth.LoginRequest
-import dev.medzik.librepass.types.api.auth.RefreshRequest
 import dev.medzik.librepass.types.api.auth.RegisterRequest
 import io.github.bucket4j.Bandwidth
 import io.github.bucket4j.Bucket
@@ -99,12 +98,6 @@ class AuthController {
 
         val credentials = userService.login(request.email, request.password) ?: return ResponseError.InvalidCredentials
 
-        return ResponseHandler.generateResponse(credentials, HttpStatus.OK)
-    }
-
-    @PostMapping("/refresh")
-    fun refresh(@RequestBody request: RefreshRequest): Response {
-        val credentials = userService.refreshToken(request.refreshToken) ?: return ResponseError.InvalidCredentials
         return ResponseHandler.generateResponse(credentials, HttpStatus.OK)
     }
 
