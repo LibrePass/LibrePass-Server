@@ -56,7 +56,7 @@ class AuthControllerTests {
         ).andExpect(status().isCreated)
     }
 
-    fun login(expect: ResultMatcher): UserCredentials {
+    fun login(expect: ResultMatcher): UserCredentials? {
         val request = LoginRequest(
             email = email,
             // NOTE: This is not how you encrypt passwords in real life
@@ -73,7 +73,7 @@ class AuthControllerTests {
 
         // check if response is successful
         if (response.response.status != 200) {
-            throw Exception("Failed to insert cipher")
+            return null
         }
 
         return Json.decodeFromString(UserCredentials.serializer(), response.response.contentAsString)
