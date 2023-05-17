@@ -5,7 +5,10 @@ import dev.medzik.librepass.client.Client
 import dev.medzik.librepass.client.api.v1.AuthClient.Companion.computeBasePasswordHash
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
-import dev.medzik.librepass.types.api.auth.*
+import dev.medzik.librepass.types.api.auth.LoginRequest
+import dev.medzik.librepass.types.api.auth.RegisterRequest
+import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
+import dev.medzik.librepass.types.api.auth.UserCredentials
 import kotlinx.serialization.json.Json
 import org.apache.commons.codec.binary.Hex
 
@@ -53,14 +56,6 @@ interface AuthClient {
      */
     @Throws(ClientException::class, ApiException::class)
     fun login(email: String, basePassword: Argon2Hash): UserCredentials
-
-    /**
-     * Refresh the access token
-     * @param refreshToken refresh token of the user
-     * @return [UserCredentials]
-     */
-    @Throws(ClientException::class, ApiException::class)
-    fun refresh(refreshToken: String): UserCredentials
 
     companion object {
         /**
@@ -169,12 +164,6 @@ private class AuthClientImpl(apiUrl: String) : AuthClient {
 
         val body = client.post("$apiEndpoint/login", Json.encodeToString(LoginRequest.serializer(), request))
 
-        return Json.decodeFromString(UserCredentials.serializer(), body)
-    }
-
-    override fun refresh(refreshToken: String): UserCredentials {
-        val request = RefreshRequest(refreshToken = refreshToken)
-        val body = client.post("$apiEndpoint/refresh", Json.encodeToString(RefreshRequest.serializer(), request))
         return Json.decodeFromString(UserCredentials.serializer(), body)
     }
 

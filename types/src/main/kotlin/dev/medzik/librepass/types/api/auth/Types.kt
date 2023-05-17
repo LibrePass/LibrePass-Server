@@ -73,6 +73,5 @@ data class UserCredentials(
     @Serializable(with = UUIDSerializer::class)
     val userId: UUID,
     val accessToken: String,
-    val refreshToken: String,
     val encryptionKey: String
 )
