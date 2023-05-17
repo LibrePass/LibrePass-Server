@@ -49,7 +49,7 @@ class UserControllerTests {
             MockMvcRequestBuilders.patch("${userControllerPrefix}/password")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(changePasswordJson)
-                .header("Authorization", "Bearer ${credentials.accessToken}")
+                .header("Authorization", "Bearer ${credentials!!.accessToken}")
         ).andExpect(MockMvcResultMatchers.status().isOk)
 
         // login
