@@ -42,7 +42,7 @@ class EmailService {
      * @param code The code to send.
      */
     fun sendEmailVerification(to: String, user: String, code: String) {
-        val url = "https://$apiDomain/api/v1/auth/verifyEmail?user=$user?code=$code"
+        val url = "https://$apiDomain/api/v1/auth/verifyEmail?user=$user&code=$code"
 
         val subject = "Activate your LibrePass account"
         val body = emailTemplate
