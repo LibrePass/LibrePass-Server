@@ -79,6 +79,13 @@ object ResponseHandler {
         .body(data)
 }
 
+object ResponseSuccess {
+    private fun generateResponse(status: HttpStatus): Response =
+        ResponseHandler.generateResponse(status)
+
+    val OK = generateResponse(HttpStatus.OK)
+}
+
 object ResponseError {
     private fun generateErrorResponse(error: String, status: HttpStatus): Response =
         ResponseHandler.generateErrorResponse(error, status)

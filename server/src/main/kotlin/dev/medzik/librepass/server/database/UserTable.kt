@@ -3,9 +3,11 @@ package dev.medzik.librepass.server.database
 import jakarta.persistence.*
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.util.*
 
 @Entity
+@EntityListeners(AuditingEntityListener::class)
 @Table(name = "users")
 data class UserTable (
     @Id
@@ -26,6 +28,8 @@ data class UserTable (
     @Column(columnDefinition = "TEXT")
     val password: String,
     val passwordHint: String? = null,
+    @Temporal(TemporalType.TIMESTAMP)
+    val lastPasswordChange: Date? = null,
 
     @Column(columnDefinition = "TEXT")
     val encryptionKey: String,
