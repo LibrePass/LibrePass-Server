@@ -71,6 +71,11 @@ class AuthControllerTests {
             .andExpect(expect)
             .andReturn()
 
+        // check if response is successful
+        if (response.response.status != 200) {
+            throw Exception("Failed to insert cipher")
+        }
+
         return Json.decodeFromString(UserCredentials.serializer(), response.response.contentAsString)
     }
 
