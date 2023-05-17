@@ -53,11 +53,16 @@ class AuthController {
 
     @PostMapping("/register")
     fun register(@RequestBody request: RegisterRequest): Response {
-        val verificationToken = userService.register(request)
+        val dbUser = userService.register(request)
 
+        // send email verification
         scope.launch {
             try {
-                emailService.sendEmailVerification(request.email, verificationToken)
+                emailService.sendEmailVerification(
+                    to = request.email,
+                    user = dbUser.id.toString(),
+                    code = dbUser.emailVerificationCode.toString()
+                )
             } catch (e: Exception) {
                 logger.error("Failed to send email verification", e)
             }
@@ -104,8 +109,11 @@ class AuthController {
     }
 
     @GetMapping("/verifyEmail")
-    fun verifyEmail(@RequestParam("code") code: String): Response {
-        return if (userService.verifyEmail(code)) {
+    fun verifyEmail(
+        @RequestParam("user") user: String,
+        @RequestParam("code") code: String
+    ): Response {
+        return if (userService.verifyEmail(userId = user, verificationToken = code)) {
             ResponseHandler.generateResponse(HttpStatus.OK)
         } else {
             ResponseError.InvalidCredentials
