@@ -59,12 +59,6 @@ data class LoginRequest(
 )
 
 /**
- * RefreshRequest is a representation of a request to refresh endpoint.
- */
-@Serializable
-data class RefreshRequest(val refreshToken: String)
-
-/**
  * UserCredentials is a representation of a user credentials.
  * Server returns this object after successful login or refresh.
  */
