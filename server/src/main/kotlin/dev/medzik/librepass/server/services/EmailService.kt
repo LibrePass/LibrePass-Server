@@ -1,8 +1,8 @@
 package dev.medzik.librepass.server.services
 
+import jakarta.mail.Message
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Service
 
@@ -16,6 +16,10 @@ class EmailService {
     @Value("\${librepass.api.domain}")
     private lateinit var apiDomain: String
 
+    // get email template
+    private val emailTemplate = this::class.java.getResource("/templates/email.html")?.readText()
+        ?: throw Exception("Could not read email template")
+
     /**
      * Email the given address.
      * @param to The email address to send the email to.
@@ -23,11 +27,11 @@ class EmailService {
      * @param body The body of the email.
      */
     fun send(to: String, subject: String, body: String) {
-        val message = SimpleMailMessage()
-        message.from = "LibrePass <$senderAddress>"
-        message.setTo(to)
+        val message = emailSender.createMimeMessage()
+        message.setFrom(senderAddress)
+        message.setRecipients(Message.RecipientType.TO, to)
         message.subject = subject
-        message.text = body
+        message.setText(body, "utf-8", "html")
 
         emailSender.send(message)
     }
@@ -37,10 +41,13 @@ class EmailService {
      * @param to The email address to send the email to.
      * @param code The code to send.
      */
-    suspend fun sendEmailVerification(to: String, code: String) {
-        // TODO: Use a template engine to generate the email body.
+    fun sendEmailVerification(to: String, user: String, code: String) {
+        val url = "https://$apiDomain/api/v1/auth/verifyEmail?user=$user?code=$code"
+
         val subject = "Activate your LibrePass account"
-        val body = "Click here to activate your account https://$apiDomain/api/v1/auth/verifyEmail?code=$code"
+        val body = emailTemplate
+            .replace("{{url}}", url)
+
         send(to, subject, body)
     }
 }
