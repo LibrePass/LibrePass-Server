@@ -2,10 +2,11 @@ package dev.medzik.librepass.client.api.v1
 
 import dev.medzik.libcrypto.*
 import dev.medzik.librepass.client.Client
-import dev.medzik.librepass.client.api.v1.AuthClient.Companion.computeBasePasswordHash
-import dev.medzik.librepass.client.api.v1.AuthClient.Companion.computeFinalPasswordHash
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
+import dev.medzik.librepass.client.utils.EncryptionKeyIterations
+import dev.medzik.librepass.client.utils.computeBasePasswordHash
+import dev.medzik.librepass.client.utils.computeFinalPasswordHash
 import dev.medzik.librepass.types.api.auth.LoginRequest
 import dev.medzik.librepass.types.api.auth.RegisterRequest
 import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
@@ -13,16 +14,13 @@ import dev.medzik.librepass.types.api.auth.UserCredentials
 import kotlinx.serialization.json.Json
 import org.apache.commons.codec.binary.Hex
 
-const val EncryptionKeyIterations = 500
+class AuthClient(apiUrl: String = Client.DefaultApiUrl) {
+    companion object {
+        const val API_ENDPOINT = "/api/v1/auth"
+    }
 
-val DefaultArgon2idParameters = UserArgon2idParameters(
-    parallelism = 3,
-    memory = 65536, // 64MB
-    iterations = 4,
-    version = 19
-)
+    private val client = Client(null, apiUrl)
 
-interface AuthClient {
     /**
      * Register a new user
      * @param email email of the user
@@ -30,76 +28,7 @@ interface AuthClient {
      * @param passwordHint password hint of the user (optional)
      */
     @Throws(ClientException::class, ApiException::class)
-    fun register(email: String, password: String, passwordHint: String? = null)
-
-    /**
-     * Get the argon2id parameters of a user (for login)
-     * @param email email of the user
-     * @return [UserArgon2idParameters]
-     */
-    @Throws(ClientException::class, ApiException::class)
-    fun getUserArgon2idParameters(email: String): UserArgon2idParameters
-
-    /**
-     * Login a user
-     * @param email email of the user
-     * @param password password of the user
-     * @return [UserCredentials]
-     */
-    @Throws(ClientException::class, ApiException::class)
-    fun login(email: String, password: String): UserCredentials
-
-    /**
-     * Login a user
-     * @param email email of the user
-     * @param basePassword base password of the user
-     * @return [UserCredentials]
-     */
-    @Throws(ClientException::class, ApiException::class)
-    fun login(email: String, basePassword: Argon2Hash): UserCredentials
-
-    companion object {
-        /**
-         * Compute base password hash
-         * @param password password of the user
-         * @param email email of the user
-         * @param parameters argon2id parameters
-         */
-        fun computeBasePasswordHash(
-            password: String,
-            email: String,
-            parameters: UserArgon2idParameters = DefaultArgon2idParameters
-        ): Argon2Hash {
-            return parameters
-                .toHashingFunction()
-                .hash(password, email.toByteArray())
-        }
-
-        /**
-         * Compute final password hash
-         * @param basePassword base password hash of the user
-         * @param email email of the user
-         */
-        fun computeFinalPasswordHash(
-            basePassword: String,
-            email: String
-        ): String = Pbkdf2(EncryptionKeyIterations)
-            .sha256(basePassword, email.encodeToByteArray())
-    }
-}
-
-fun AuthClient(apiUrl: String = Client.DefaultApiUrl): AuthClient = AuthClientImpl(apiUrl)
-
-private class AuthClientImpl(apiUrl: String) : AuthClient {
-    private val apiEndpoint = "/api/v1/auth"
-
-    private val client = Client(null, apiUrl)
-
-    override fun register(
-        email: String,
-        password: String,
-        passwordHint: String?
-    ) {
+    fun register(email: String, password: String, passwordHint: String? = null) {
         // compute the base password hash
         val basePassword = computeBasePasswordHash(password, email)
         val basePasswordHex = basePassword.toHexHash()
@@ -137,18 +66,28 @@ private class AuthClientImpl(apiUrl: String) : AuthClient {
             privateKey = encryptedRsaPrivateKey
         )
 
-        client.post("$apiEndpoint/register", Json.encodeToString(RegisterRequest.serializer(), request))
+        client.post("$API_ENDPOINT/register", Json.encodeToString(RegisterRequest.serializer(), request))
     }
 
-    override fun getUserArgon2idParameters(email: String): UserArgon2idParameters {
-        val body = client.get("$apiEndpoint/userArgon2Parameters?email=$email")
+    /**
+     * Get the argon2id parameters of a user (for login)
+     * @param email email of the user
+     * @return [UserArgon2idParameters]
+     */
+    @Throws(ClientException::class, ApiException::class)
+    fun getUserArgon2idParameters(email: String): UserArgon2idParameters {
+        val body = client.get("$API_ENDPOINT/userArgon2Parameters?email=$email")
         return Json.decodeFromString(UserArgon2idParameters.serializer(), body)
     }
 
-    override fun login(
-        email: String,
-        password: String
-    ): UserCredentials {
+    /**
+     * Login a user
+     * @param email email of the user
+     * @param password password of the user
+     * @return [UserCredentials]
+     */
+    @Throws(ClientException::class, ApiException::class)
+    fun login(email: String, password: String): UserCredentials {
         // compute the base password hash
         val basePassword = computeBasePasswordHash(
             password = password,
@@ -159,10 +98,14 @@ private class AuthClientImpl(apiUrl: String) : AuthClient {
         return login(email, basePassword)
     }
 
-    override fun login(
-        email: String,
-        basePassword: Argon2Hash
-    ): UserCredentials {
+    /**
+     * Login a user
+     * @param email email of the user
+     * @param basePassword base password of the user
+     * @return [UserCredentials]
+     */
+    @Throws(ClientException::class, ApiException::class)
+    fun login(email: String, basePassword: Argon2Hash): UserCredentials {
         // compute the final password, it is required since the earlier hash is used to encrypt the encryption key
         val finalPassword = computeFinalPasswordHash(
             basePassword = basePassword.toHexHash(),
@@ -174,7 +117,7 @@ private class AuthClientImpl(apiUrl: String) : AuthClient {
             password = finalPassword
         )
 
-        val body = client.post("$apiEndpoint/login", Json.encodeToString(LoginRequest.serializer(), request))
+        val body = client.post("$API_ENDPOINT/login", Json.encodeToString(LoginRequest.serializer(), request))
 
         return Json.decodeFromString(UserCredentials.serializer(), body)
     }
