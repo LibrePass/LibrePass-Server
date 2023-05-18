@@ -1,6 +1,6 @@
 package dev.medzik.librepass.client.api.v1
 
-import dev.medzik.libcrypto.Pbkdf2
+import dev.medzik.librepass.client.utils.Cryptography.DefaultArgon2idParameters
 import net.datafaker.Faker
 import org.junit.jupiter.api.Test
 
@@ -9,12 +9,10 @@ class AuthClientTests {
 
     private val email = "_test_" + Faker().internet().emailAddress()
     private val password = Faker().internet().password()
-    // TODO: use the real password hash (argon2)
-    private val passwordHash = Pbkdf2(100).sha256(password, "salt".toByteArray())
 
     @Test
     fun register() {
-        authClient.register(email, passwordHash)
+        authClient.register(email, password)
     }
 
     @Test
@@ -31,6 +29,6 @@ class AuthClientTests {
     @Test
     fun login() {
         register() // register user first
-        authClient.login(email, passwordHash)
+        authClient.login(email, password)
     }
 }
