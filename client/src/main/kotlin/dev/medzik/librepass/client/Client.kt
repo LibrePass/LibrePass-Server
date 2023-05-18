@@ -1,5 +1,6 @@
 package dev.medzik.librepass.client
 
+import dev.medzik.librepass.client.Client.Companion.DefaultApiUrl
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
 import dev.medzik.librepass.types.api.ResponseError
@@ -11,13 +12,18 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
 
+/**
+ * HTTP Client for sending requests to the API
+ * @param accessToken access token to use for authorization
+ * @param apiURL The API URL to use. Defaults to [DefaultApiUrl].
+ */
 class Client(
     accessToken: String? = null,
     private val apiURL: String = DefaultApiUrl
 ) {
     companion object {
         /**
-         * Default API Instance URL
+         * Default API Instance URL [https://librepass-api.medzik.dev](https://librepass-api.medzik.dev)
          */
         const val DefaultApiUrl = "https://librepass-api.medzik.dev"
 

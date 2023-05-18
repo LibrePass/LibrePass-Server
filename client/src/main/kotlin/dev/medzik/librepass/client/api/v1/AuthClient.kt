@@ -15,6 +15,10 @@ import dev.medzik.librepass.types.api.auth.UserCredentials
 import kotlinx.serialization.json.Json
 import org.apache.commons.codec.binary.Hex
 
+/**
+ * Auth Client for the LibrePass API. This client is used to register and login users.
+ * @param apiUrl The API URL to use. Defaults to [Client.DefaultApiUrl].
+ */
 class AuthClient(apiUrl: String = Client.DefaultApiUrl) {
     companion object {
         const val API_ENDPOINT = "/api/v1/auth"
