@@ -14,7 +14,7 @@ class UserClientTests {
         }
     }
 
-    lateinit var userClient: UserClient
+    private lateinit var userClient: UserClient
 
     @BeforeEach
     fun beforeEach() {
