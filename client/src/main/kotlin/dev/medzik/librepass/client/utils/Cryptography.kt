@@ -4,6 +4,9 @@ import dev.medzik.libcrypto.Argon2Hash
 import dev.medzik.libcrypto.Pbkdf2
 import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
 
+/**
+ * Cryptography utilities. Used for password hashing.
+ */
 object Cryptography {
     /**
      * Number of iterations for the encryption key and final password hash.

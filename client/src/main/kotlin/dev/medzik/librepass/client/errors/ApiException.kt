@@ -1,5 +1,8 @@
 package dev.medzik.librepass.client.errors
 
+/**
+ * HTTP error codes returned by the API.
+ */
 enum class HttpError {
     BAD_REQUEST,
     UNAUTHORIZED,
@@ -10,6 +13,9 @@ enum class HttpError {
     UNKNOWN
 }
 
+/**
+ * Exception thrown when the API returns an error.
+ */
 @Suppress("unused")
 class ApiException(
     val status: Number,
@@ -17,6 +23,7 @@ class ApiException(
 ) : Exception() {
     override val message: String
         get() = "HTTP $status: $error"
+
 
     val httpError: HttpError = when (status.toInt()) {
         400 -> HttpError.BAD_REQUEST
