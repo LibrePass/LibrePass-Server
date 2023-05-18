@@ -11,6 +11,11 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import java.util.*
 
+/**
+ * Cipher API client.
+ * @param accessToken The access token to use for authentication.
+ * @param apiUrl The API URL to use. Defaults to [Client.DefaultApiUrl].
+ */
 @Suppress("unused")
 class CipherClient(
     accessToken: String,
