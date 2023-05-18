@@ -4,9 +4,9 @@ import dev.medzik.libcrypto.*
 import dev.medzik.librepass.client.Client
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
-import dev.medzik.librepass.client.utils.EncryptionKeyIterations
-import dev.medzik.librepass.client.utils.computeBasePasswordHash
-import dev.medzik.librepass.client.utils.computeFinalPasswordHash
+import dev.medzik.librepass.client.utils.Cryptography.EncryptionKeyIterations
+import dev.medzik.librepass.client.utils.Cryptography.computeBasePasswordHash
+import dev.medzik.librepass.client.utils.Cryptography.computeFinalPasswordHash
 import dev.medzik.librepass.types.api.auth.LoginRequest
 import dev.medzik.librepass.types.api.auth.RegisterRequest
 import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
