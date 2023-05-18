@@ -15,6 +15,10 @@ class ApiException(
     val status: Number,
     val error: String
 ) : Exception() {
+    // print error message
+    override val message: String
+        get() = "HTTP $status: $error"
+
     val httpError: HttpError = when (status.toInt()) {
         400 -> HttpError.BAD_REQUEST
         401 -> HttpError.UNAUTHORIZED
