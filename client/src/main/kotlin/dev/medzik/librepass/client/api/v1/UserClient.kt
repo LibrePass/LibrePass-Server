@@ -11,6 +11,12 @@ import dev.medzik.librepass.types.api.user.ChangePasswordRequest
 import dev.medzik.librepass.types.api.user.UserSecretsResponse
 import kotlinx.serialization.json.Json
 
+/**
+ * User API client.
+ * @param email The email of the user.
+ * @param accessToken The access token to use for authentication.
+ * @param apiUrl The API URL to use. Defaults to [Client.DefaultApiUrl].
+ */
 class UserClient(
     private val email: String,
     accessToken: String,
