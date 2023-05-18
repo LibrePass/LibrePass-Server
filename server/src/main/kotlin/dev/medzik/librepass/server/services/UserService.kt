@@ -11,6 +11,7 @@ import dev.medzik.librepass.types.api.auth.RegisterRequest
 import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
 import dev.medzik.librepass.types.api.auth.UserCredentials
 import dev.medzik.librepass.types.api.user.ChangePasswordRequest
+import dev.medzik.librepass.types.api.user.UserSecretsResponse
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.util.*
@@ -128,7 +129,6 @@ class UserService {
         val newUser = user.copy(
             password = newPasswordHash.toString(),
             encryptionKey = body.newEncryptionKey,
-            privateKey = body.newPrivateKey,
             // argon2id parameters
             parallelism = body.parallelism,
             memory = body.memory,
@@ -141,5 +141,13 @@ class UserService {
         userRepository.save(newUser)
 
         return true
+    }
+
+    fun getSecrets(user: UserTable): UserSecretsResponse {
+        return UserSecretsResponse(
+            encryptionKey = user.encryptionKey,
+            privateKey = user.privateKey,
+            publicKey = user.publicKey
+        )
     }
 }
