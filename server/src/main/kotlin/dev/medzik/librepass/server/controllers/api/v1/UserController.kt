@@ -5,13 +5,12 @@ import dev.medzik.librepass.server.database.UserTable
 import dev.medzik.librepass.server.services.UserService
 import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseError
+import dev.medzik.librepass.server.utils.ResponseHandler
 import dev.medzik.librepass.server.utils.ResponseSuccess
 import dev.medzik.librepass.types.api.user.ChangePasswordRequest
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.bind.annotation.PatchMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.http.HttpStatus
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/v1/user")
@@ -31,5 +30,14 @@ class UserController {
         } else {
             ResponseError.InvalidBody
         }
+    }
+
+    @GetMapping("/secrets")
+    fun getSecrets(@AuthorizedUser user: UserTable?): Response {
+        if (user == null) return ResponseError.Unauthorized
+
+        val secrets = userService.getSecrets(user)
+
+        return ResponseHandler.generateResponse(secrets, HttpStatus.OK)
     }
 }

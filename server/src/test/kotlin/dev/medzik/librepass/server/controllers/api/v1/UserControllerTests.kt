@@ -36,7 +36,6 @@ class UserControllerTests {
             oldPassword = Pbkdf2(100).sha256(authController.password, authController.passwordSalt),
             newPassword = Pbkdf2(300).sha256(authController.password, authController.passwordSalt),
             newEncryptionKey = Pbkdf2(200).sha256(authController.password, authController.passwordSalt),
-            newPrivateKey = "",
             parallelism = 3,
             memory = 65536,
             iterations = 4,
