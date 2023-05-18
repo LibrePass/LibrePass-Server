@@ -60,6 +60,7 @@ jobs:
           MAIL_SMTP_AUTH: false
           MAIL_SMTP_TLS_ENABLED: false
           SMTP_EMAIL_ADDRESS: librepass@localhost
+          RATE_LIMIT_ENABLED: false
 
       - name: Run tests
         run: ./mvnw clean test
@@ -80,3 +81,4 @@ jobs:
           MAIL_SMTP_AUTH: false
           MAIL_SMTP_TLS_ENABLED: false
           SMTP_EMAIL_ADDRESS: librepass@localhost
+          RATE_LIMIT_ENABLED: false
