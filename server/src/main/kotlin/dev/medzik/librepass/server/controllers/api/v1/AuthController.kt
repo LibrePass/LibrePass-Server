@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import java.time.Duration
@@ -44,6 +45,9 @@ class AuthController {
     @Autowired
     private lateinit var emailService: EmailService
 
+    @Value("\${librepass.api.rateLimit.enabled}")
+    private val rateLimitEnabled = true
+
     private val rateLimit = AuthRateLimitConfig()
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -51,7 +55,17 @@ class AuthController {
     val scope = CoroutineScope(Dispatchers.IO)
 
     @PostMapping("/register")
-    fun register(@RequestBody request: RegisterRequest): Response {
+    fun register(
+        httpServletRequest: HttpServletRequest,
+        @RequestBody request: RegisterRequest
+    ): Response {
+        if (rateLimitEnabled) {
+            val ip = httpServletRequest.remoteAddr
+            if (!rateLimit.resolveBucket(ip).tryConsume(1)) {
+                return ResponseError.TooManyRequests
+            }
+        }
+
         val dbUser = userService.register(request)
 
         // send email verification
@@ -75,9 +89,11 @@ class AuthController {
         httpServletRequest: HttpServletRequest,
         @RequestParam("email") email: String
     ): Response {
-        val ip = httpServletRequest.remoteAddr
-        if (!rateLimit.resolveBucket(ip).tryConsume(1)) {
-            return ResponseError.TooManyRequests
+        if (rateLimitEnabled) {
+            val ip = httpServletRequest.remoteAddr
+            if (!rateLimit.resolveBucket(ip).tryConsume(1)) {
+                return ResponseError.TooManyRequests
+            }
         }
 
         val argon2Parameters = userService.getArgon2Parameters(email)
@@ -91,9 +107,11 @@ class AuthController {
         httpServletRequest: HttpServletRequest,
         @RequestBody request: LoginRequest
     ): Response {
-        val ip = httpServletRequest.remoteAddr
-        if (!rateLimit.resolveBucket(ip).tryConsume(1)) {
-            return ResponseError.TooManyRequests
+        if (rateLimitEnabled) {
+            val ip = httpServletRequest.remoteAddr
+            if (!rateLimit.resolveBucket(ip).tryConsume(1)) {
+                return ResponseError.TooManyRequests
+            }
         }
 
         val credentials = userService.login(request.email, request.password) ?: return ResponseError.InvalidCredentials
