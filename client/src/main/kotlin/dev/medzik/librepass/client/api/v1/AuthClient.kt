@@ -3,6 +3,7 @@ package dev.medzik.librepass.client.api.v1
 import dev.medzik.libcrypto.*
 import dev.medzik.librepass.client.Client
 import dev.medzik.librepass.client.api.v1.AuthClient.Companion.computeBasePasswordHash
+import dev.medzik.librepass.client.api.v1.AuthClient.Companion.computeFinalPasswordHash
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
 import dev.medzik.librepass.types.api.auth.LoginRequest
@@ -73,6 +74,17 @@ interface AuthClient {
                 .toHashingFunction()
                 .hash(password, email.toByteArray())
         }
+
+        /**
+         * Compute final password hash
+         * @param basePassword base password hash of the user
+         * @param email email of the user
+         */
+        fun computeFinalPasswordHash(
+            basePassword: String,
+            email: String
+        ): String = Pbkdf2(EncryptionKeyIterations)
+            .sha256(basePassword, email.encodeToByteArray())
     }
 }
 
@@ -166,15 +178,4 @@ private class AuthClientImpl(apiUrl: String) : AuthClient {
 
         return Json.decodeFromString(UserCredentials.serializer(), body)
     }
-
-    /**
-     * Compute final password hash
-     * @param basePassword base password hash of the user
-     * @param email email of the user
-     */
-    private fun computeFinalPasswordHash(
-        basePassword: String,
-        email: String
-    ): String = Pbkdf2(EncryptionKeyIterations)
-        .sha256(basePassword, email.encodeToByteArray())
 }
