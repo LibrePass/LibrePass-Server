@@ -7,6 +7,7 @@ import dev.medzik.librepass.client.errors.ClientException
 import dev.medzik.librepass.client.utils.Cryptography.EncryptionKeyIterations
 import dev.medzik.librepass.client.utils.Cryptography.computeBasePasswordHash
 import dev.medzik.librepass.client.utils.Cryptography.computeFinalPasswordHash
+import dev.medzik.librepass.client.utils.Cryptography.computeHashes
 import dev.medzik.librepass.types.api.auth.LoginRequest
 import dev.medzik.librepass.types.api.auth.RegisterRequest
 import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
@@ -29,17 +30,13 @@ class AuthClient(apiUrl: String = Client.DefaultApiUrl) {
      */
     @Throws(ClientException::class, ApiException::class)
     fun register(email: String, password: String, passwordHint: String? = null) {
-        // compute the base password hash
-        val basePassword = computeBasePasswordHash(password, email)
-        val basePasswordHex = basePassword.toHexHash()
-
-        // compute the final password, it is required since the earlier hash is used to encrypt the encryption key
-        val finalPassword = computeFinalPasswordHash(basePasswordHex, email)
+        // compute password hashes
+        val passwordHashes = computeHashes(password, email)
 
         // create a random byte array with 16 bytes and encode it to hex string,
-        val encryptionKeyBase = Pbkdf2(EncryptionKeyIterations)
+        val encryptionKey = Pbkdf2(EncryptionKeyIterations)
             .sha256(Hex.encodeHexString(Salt.generate(16)), Salt.generate(16))
-        val encryptionKey = AesCbc.encrypt(encryptionKeyBase, basePasswordHex)
+        val encryptedEncryptionKey = AesCbc.encrypt(encryptionKey, passwordHashes.basePasswordHashString)
 
         // generate a new rsa keypair for the user
         val rsaKeypair = RSA.generateKeyPair(2048)
@@ -49,18 +46,18 @@ class AuthClient(apiUrl: String = Client.DefaultApiUrl) {
         val rsaPrivateKey = RSA.KeyUtils.getPrivateKeyString(rsaKeypair.private)
 
         // encrypt private key with the encryption key
-        val encryptedRsaPrivateKey = AesCbc.encrypt(rsaPrivateKey, encryptionKeyBase)
+        val encryptedRsaPrivateKey = AesCbc.encrypt(rsaPrivateKey, encryptionKey)
 
         val request = RegisterRequest(
             email = email,
-            password = finalPassword,
+            password = passwordHashes.finalPasswordHash,
             passwordHint = passwordHint,
-            encryptionKey = encryptionKey,
+            encryptionKey = encryptedEncryptionKey,
             // argon2id parameters
-            parallelism = basePassword.parallelism,
-            memory = basePassword.memory,
-            iterations = basePassword.iterations,
-            version = basePassword.version,
+            parallelism = passwordHashes.basePasswordHash.parallelism,
+            memory = passwordHashes.basePasswordHash.memory,
+            iterations = passwordHashes.basePasswordHash.iterations,
+            version = passwordHashes.basePasswordHash.version,
             // rsa keypair
             publicKey = rsaPublicKey,
             privateKey = encryptedRsaPrivateKey

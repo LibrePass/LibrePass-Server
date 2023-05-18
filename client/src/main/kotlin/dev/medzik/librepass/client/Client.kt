@@ -12,11 +12,13 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
 
 class Client(
-    accessToken: String?,
-    private val apiURL: String
+    accessToken: String? = null,
+    private val apiURL: String = DefaultApiUrl
 ) {
     companion object {
-        // Default API URL
+        /**
+         * Default API Instance URL
+         */
         const val DefaultApiUrl = "https://librepass-api.medzik.dev"
 
         // JSON media type

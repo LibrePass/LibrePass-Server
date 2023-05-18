@@ -5,7 +5,7 @@ import dev.medzik.librepass.client.Client
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
 import dev.medzik.librepass.client.utils.Cryptography.computeBasePasswordHash
-import dev.medzik.librepass.client.utils.Cryptography.computeFinalPasswordHash
+import dev.medzik.librepass.client.utils.Cryptography.computeHashes
 import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
 import dev.medzik.librepass.types.api.user.ChangePasswordRequest
 import dev.medzik.librepass.types.api.user.UserSecretsResponse
@@ -40,33 +40,23 @@ class UserClient(
         val argon2idParameters = parameters ?: AuthClient(apiUrl = apiUrl).getUserArgon2idParameters(email)
 
         // compute old password hashes
-        val oldBasePassword = computeBasePasswordHash(
+        val oldPasswordHashes = computeHashes(
             password = oldPassword,
             email = email,
-            parameters = argon2idParameters
-        )
-        val oldFinalPassword = computeFinalPasswordHash(
-            basePassword = oldBasePassword.toHexHash(),
-            email = email
         )
 
         // compute new password hashes
-        val newBasePassword = computeBasePasswordHash(
+        val newPasswordHashes = computeHashes(
             password = newPassword,
             email = email,
-            parameters = argon2idParameters
-        )
-        val newFinalPassword = computeFinalPasswordHash(
-            basePassword = newBasePassword.toHexHash(),
-            email = email
         )
 
         // encrypt the new secrets
-        val newSecrets = userSecrets.encrypt(newBasePassword)
+        val newSecrets = userSecrets.encrypt(newPasswordHashes.basePasswordHash)
 
         val request = ChangePasswordRequest(
-            oldPassword = oldFinalPassword,
-            newPassword = newFinalPassword,
+            oldPassword = oldPasswordHashes.finalPasswordHash,
+            newPassword = newPasswordHashes.finalPasswordHash,
             newEncryptionKey = newSecrets.encryptionKey,
             parallelism = argon2idParameters.parallelism,
             memory = argon2idParameters.memory,

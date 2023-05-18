@@ -46,4 +46,42 @@ object Cryptography {
         email: String
     ): String = Pbkdf2(EncryptionKeyIterations)
         .sha256(basePassword, email.encodeToByteArray())
+
+    /**
+     * Compute password hashes of the user.
+     * @param password password of the user
+     * @param email email of the user
+     * @return password hashes
+     */
+    fun computeHashes(
+        password: String,
+        email: String,
+    ): PasswordHashes {
+        val basePasswordHash = computeBasePasswordHash(password, email)
+        val finalPasswordHash = computeFinalPasswordHash(basePasswordHash.toHexHash(), email)
+
+        return PasswordHashes(
+            basePasswordHash = basePasswordHash,
+            basePasswordHashString = basePasswordHash.toHexHash(),
+            finalPasswordHash = finalPasswordHash
+        )
+    }
+
+    /**
+     * Password hashes of the user.
+     */
+    class PasswordHashes(
+        /**
+         * Base password hash. Used for encrypting/decryption encryption key.
+         */
+        val basePasswordHash: Argon2Hash,
+        /**
+         * The string representation of [basePasswordHash].
+         */
+        val basePasswordHashString: String,
+        /**
+         * Final password hash. Used for authentication. Stored in the database.
+         */
+        val finalPasswordHash: String
+    )
 }

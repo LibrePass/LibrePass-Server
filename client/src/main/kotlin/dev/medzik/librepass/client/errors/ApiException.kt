@@ -15,7 +15,6 @@ class ApiException(
     val status: Number,
     val error: String
 ) : Exception() {
-    // print error message
     override val message: String
         get() = "HTTP $status: $error"
 
