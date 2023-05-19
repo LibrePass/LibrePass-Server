@@ -10,6 +10,11 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import java.util.*
 
+/**
+ * Collection Client for the LibrePass API. This client is used to manage collections.
+ * @param accessToken The access token to use.
+ * @param apiUrl The API URL to use. Defaults to [Client.DefaultApiUrl].
+ */
 class CollectionClient(
     accessToken: String,
     apiUrl: String = Client.DefaultApiUrl
@@ -28,7 +33,7 @@ class CollectionClient(
     @Throws(ClientException::class, ApiException::class)
     fun createCollection(name: String): InsertResponse {
         val request = CreateCollectionRequest(name = name)
-        val response = client.post(API_ENDPOINT, Json.encodeToString(CreateCollectionRequest.serializer(), request))
+        val response = client.put(API_ENDPOINT, Json.encodeToString(CreateCollectionRequest.serializer(), request))
         return Json.decodeFromString(InsertResponse.serializer(), response)
     }
 
@@ -83,7 +88,7 @@ class CollectionClient(
     @Throws(ClientException::class, ApiException::class)
     fun updateCollection(id: String, name: String): InsertResponse {
         val request = CreateCollectionRequest(name = name)
-        val response = client.put("$API_ENDPOINT/$id", Json.encodeToString(CreateCollectionRequest.serializer(), request))
+        val response = client.patch("$API_ENDPOINT/$id", Json.encodeToString(CreateCollectionRequest.serializer(), request))
         return Json.decodeFromString(InsertResponse.serializer(), response)
     }
 

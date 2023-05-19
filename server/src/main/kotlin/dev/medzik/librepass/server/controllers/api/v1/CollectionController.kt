@@ -8,7 +8,9 @@ import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseError
 import dev.medzik.librepass.server.utils.ResponseHandler
 import dev.medzik.librepass.types.api.cipher.InsertResponse
+import dev.medzik.librepass.types.api.collection.CipherCollection
 import dev.medzik.librepass.types.api.collection.CreateCollectionRequest
+import kotlinx.serialization.builtins.ListSerializer
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -42,7 +44,20 @@ class CollectionController {
     fun getAllCollections(@AuthorizedUser user: UserTable?): Response {
         if (user == null) return ResponseError.Unauthorized
         val collections = collectionService.getAllCollections(user.id)
-        return ResponseHandler.generateResponse(collections, HttpStatus.OK)
+
+        val cipherCollections = collections.map {
+            CipherCollection(
+                id = it.id,
+                owner = it.owner,
+                name = it.name
+            )
+        }
+
+        return ResponseHandler.generateResponse(
+            serializer = ListSerializer(CipherCollection.serializer()),
+            data = cipherCollections,
+            status = HttpStatus.OK
+        )
     }
 
     @GetMapping("/{id}")
@@ -52,7 +67,14 @@ class CollectionController {
     ): Response {
         if (user == null) return ResponseError.Unauthorized
         val collection = collectionService.getCollection(id, user.id) ?: return ResponseError.NotFound
-        return ResponseHandler.generateResponse(collection, HttpStatus.OK)
+
+        val cipherCollection = CipherCollection(
+            id = collection.id,
+            owner = collection.owner,
+            name = collection.name
+        )
+
+        return ResponseHandler.generateResponse(cipherCollection, HttpStatus.OK)
     }
 
     @PatchMapping("/{id}")
