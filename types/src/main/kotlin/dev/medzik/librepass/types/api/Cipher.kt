@@ -132,10 +132,10 @@ data class EncryptedCipher(
  * - Identity: An identity cipher.
  */
 enum class CipherType(val type: Int) {
-    Login(1),
-    SecureNote(2),
-    Card(3),
-    Identity(4)
+    Login(0),
+    SecureNote(1),
+    Card(2),
+    Identity(3)
 }
 
 /**
