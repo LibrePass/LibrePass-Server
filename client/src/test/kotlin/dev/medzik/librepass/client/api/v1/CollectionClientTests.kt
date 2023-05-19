@@ -35,12 +35,14 @@ class CollectionClientTests {
 
     @Test
     fun `get collections`() {
-        collectionClient.createCollection("test")
+        val insertedCollection = collectionClient.createCollection("test")
         val collections = collectionClient.getCollections()
 
-        assertNotNull(collections)
-        assertEquals(collections[0].id, collections[0].id)
-        assertEquals("test", collections[0].name)
+        val collection = collections.firstOrNull { it.id == insertedCollection.id }
+
+        assertNotNull(collection)
+        assertEquals(insertedCollection.id, collection.id)
+        assertEquals("test", collection.name)
     }
 
     @Test
