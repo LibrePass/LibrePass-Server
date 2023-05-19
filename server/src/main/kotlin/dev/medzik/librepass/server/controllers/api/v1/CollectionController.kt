@@ -8,6 +8,7 @@ import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseError
 import dev.medzik.librepass.server.utils.ResponseHandler
 import dev.medzik.librepass.types.api.cipher.InsertResponse
+import dev.medzik.librepass.types.api.collection.CreateCollectionRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -20,39 +21,64 @@ class CollectionController {
     private lateinit var collectionService: CollectionService
 
     @PutMapping
-    fun insertCollection(@AuthorizedUser user: UserTable?, @RequestBody collection: CollectionTable): Response {
+    fun insertCollection(
+        @AuthorizedUser user: UserTable?,
+        @RequestBody collection: CreateCollectionRequest
+    ): Response {
         if (user == null) return ResponseError.Unauthorized
-        if (collection.owner != user.id) return ResponseError.InvalidBody
-        collectionService.insertCollection(collection)
+
+        collectionService.insertCollection(
+            CollectionTable(
+                id = collection.id,
+                name = collection.name,
+                owner = user.id
+            )
+        )
+
         return ResponseHandler.generateResponse(InsertResponse(collection.id), HttpStatus.CREATED)
     }
 
     @GetMapping
-    fun getAllCollectionIDs(@AuthorizedUser user: UserTable?): Response {
+    fun getAllCollections(@AuthorizedUser user: UserTable?): Response {
         if (user == null) return ResponseError.Unauthorized
         val collections = collectionService.getAllCollections(user.id)
         return ResponseHandler.generateResponse(collections, HttpStatus.OK)
     }
 
     @GetMapping("/{id}")
-    fun getCollection(@AuthorizedUser user: UserTable?, @PathVariable id: UUID): Response {
+    fun getCollection(
+        @AuthorizedUser user: UserTable?,
+        @PathVariable id: UUID
+    ): Response {
         if (user == null) return ResponseError.Unauthorized
         val collection = collectionService.getCollection(id, user.id) ?: return ResponseError.NotFound
         return ResponseHandler.generateResponse(collection, HttpStatus.OK)
     }
 
     @PatchMapping("/{id}")
-    fun updateCollection(@AuthorizedUser user: UserTable?, @PathVariable id: UUID, @RequestBody collection: CollectionTable): Response {
+    fun updateCollection(
+        @AuthorizedUser user: UserTable?,
+        @PathVariable id: UUID,
+        @RequestBody collection: CreateCollectionRequest
+    ): Response {
         if (user == null) return ResponseError.Unauthorized
-        if (collection.owner != user.id) return ResponseError.InvalidBody
-        val oldCollection = collectionService.getCollection(id, user.id) ?: return ResponseError.NotFound
-        if (oldCollection.id != collection.id || oldCollection.owner != collection.owner) return ResponseError.InvalidBody
-        collectionService.updateCollection(collection)
+
+        collectionService.updateCollection(
+            CollectionTable(
+                id = id,
+                name = collection.name,
+                owner = user.id
+            )
+        )
+
         return ResponseHandler.generateResponse(InsertResponse(collection.id), HttpStatus.OK)
     }
 
     @DeleteMapping("/{id}")
-    fun deleteCollection(@AuthorizedUser user: UserTable?, @PathVariable id: UUID): Response {
+    fun deleteCollection(
+        @AuthorizedUser user: UserTable?,
+        @PathVariable id: UUID
+    ): Response {
         if (user == null) return ResponseError.Unauthorized
         val collection = collectionService.getCollection(id, user.id) ?: return ResponseError.NotFound
         collectionService.deleteCollection(collection)
