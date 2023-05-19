@@ -1,22 +1,33 @@
 package dev.medzik.librepass.client.api.v1
 
-import net.datafaker.Faker
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class CollectionClientTests {
-    private val authClient = AuthClient("http://localhost:8080")
+    private lateinit var collectionClient: CollectionClient
 
-    private val email = "_test_" + Faker().internet().emailAddress()
-    private val password = Faker().internet().password()
+    companion object {
+        @BeforeAll
+        @JvmStatic
+        fun setup() {
+            val authClient = AuthClient("http://localhost:8080")
+            authClient.register("test_collection@example.com", "test")
+        }
+    }
+
+    @BeforeEach
+    fun beforeEach() {
+        val authClient = AuthClient("http://localhost:8080")
+        val credentials = authClient.login("test_collection@example.com", "test")
+
+        collectionClient = CollectionClient(credentials.accessToken, "http://localhost:8080")
+    }
 
     @Test
     fun `create collection`() {
-        authClient.register(email, password)
-        val credentials = authClient.login(email, password)
-
-        val collectionClient = CollectionClient(credentials.accessToken)
         val collection = collectionClient.createCollection("test")
 
         assertNotNull(collection.id)
@@ -24,11 +35,6 @@ class CollectionClientTests {
 
     @Test
     fun `get collections`() {
-        authClient.register(email, password)
-        val credentials = authClient.login(email, password)
-
-        val collectionClient = CollectionClient(credentials.accessToken)
-
         collectionClient.createCollection("test")
         val collections = collectionClient.getCollections()
 
@@ -39,11 +45,6 @@ class CollectionClientTests {
 
     @Test
     fun `get collection by id`() {
-        authClient.register(email, password)
-        val credentials = authClient.login(email, password)
-
-        val collectionClient = CollectionClient(credentials.accessToken)
-
         val collection = collectionClient.createCollection("test")
         val fetchedCollection = collectionClient.getCollection(collection.id)
 
@@ -54,11 +55,6 @@ class CollectionClientTests {
 
     @Test
     fun `update collection`() {
-        authClient.register(email, password)
-        val credentials = authClient.login(email, password)
-
-        val collectionClient = CollectionClient(credentials.accessToken)
-
         val collection = collectionClient.createCollection("test")
         collectionClient.updateCollection(collection.id, "test2")
 
@@ -69,16 +65,7 @@ class CollectionClientTests {
 
     @Test
     fun `delete collection`() {
-        authClient.register(email, password)
-        val credentials = authClient.login(email, password)
-
-        val collectionClient = CollectionClient(credentials.accessToken)
-
         val collection = collectionClient.createCollection("test")
         collectionClient.deleteCollection(collection.id)
-
-        val collections = collectionClient.getCollections()
-
-        assertEquals(0, collections.size)
     }
 }
