@@ -15,8 +15,8 @@ class CollectionService {
         collectionRepository.save(collection)
     }
 
-    fun getAllCollections(owner: UUID): List<UUID> =
-        collectionRepository.findAllIdsByOwner(owner)
+    fun getAllCollections(owner: UUID): List<CollectionTable> =
+        collectionRepository.findAllByOwner(owner)
 
     fun getCollection(id: UUID, owner: UUID): CollectionTable? =
         collectionRepository.findByIdAndOwner(id, owner)
