@@ -169,11 +169,11 @@ class AuthController @Autowired constructor(
 
         // get user from database
         val user = userRepository.findByEmail(request.email)
-            ?: return ResponseError.InvalidBody
+            ?: return ResponseError.InvalidCredentials
 
         // check if password is correct
         if (!Argon2HashingFunction.verify(request.password, user.password))
-            return ResponseError.InvalidBody
+            return ResponseError.InvalidCredentials
 
         // prepare response
         val credentials = UserCredentials(
