@@ -11,21 +11,15 @@ import java.security.PublicKey
 import java.util.*
 
 /**
- * One hour in milliseconds. Used for token expiration time.
- */
-private const val HourTime = 1000L * 60 * 60
-
-/**
  * Type of the token.
  * @param expirationTime Time in milliseconds for which the token is valid.
  */
 enum class TokenType(val expirationTime: Long) {
-    ACCESS_TOKEN(90 * 24 * HourTime), // 90 days
+    ACCESS_TOKEN(90 * 24 * 60 * 60 * 1000L), // 90 days
 }
 
 @Component
-class AuthComponent
-@Autowired constructor(
+class AuthComponent @Autowired constructor(
     @Value("\${jwt.publicKeyFile}") publicKeyFile: String,
     @Value("\${jwt.privateKeyFile}") privateKeyFile: String
 ) {
