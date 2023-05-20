@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 
 @ControllerAdvice
-class GlobalInvalidRequestBodyAdvice {
+class InvalidBodyHandler {
     @ExceptionHandler(HttpMessageNotReadableException::class)
     fun handleInvalidRequestBody(): Response {
         return ResponseError.InvalidBody

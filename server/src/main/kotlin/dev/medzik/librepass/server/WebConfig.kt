@@ -13,7 +13,6 @@ class WebConfig : WebMvcConfigurer {
     // Add @AuthorizedUser annotation support
     @Autowired
     private lateinit var authorizedUserArgumentResolver: AuthorizedUserArgumentResolver
-
     override fun addArgumentResolvers(resolvers: MutableList<HandlerMethodArgumentResolver>) {
         resolvers.add(authorizedUserArgumentResolver)
     }
@@ -21,7 +20,6 @@ class WebConfig : WebMvcConfigurer {
     // CORS configuration
     @Value("\${cors.allowedOrigins}")
     private lateinit var allowedOrigins: String
-
     override fun addCorsMappings(registry: CorsRegistry) {
         val allowedOrigin = allowedOrigins.split(",").toTypedArray()
 
