@@ -1,14 +1,15 @@
 package dev.medzik.librepass.server.controllers.api.v1
 
 import dev.medzik.librepass.server.components.AuthorizedUser
+import dev.medzik.librepass.server.database.CipherRepository
 import dev.medzik.librepass.server.database.CipherTable
 import dev.medzik.librepass.server.database.UserTable
-import dev.medzik.librepass.server.services.CipherService
 import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseError
 import dev.medzik.librepass.server.utils.ResponseHandler
 import dev.medzik.librepass.types.api.EncryptedCipher
 import dev.medzik.librepass.types.api.cipher.InsertResponse
+import dev.medzik.librepass.types.api.cipher.SyncResponse
 import kotlinx.serialization.builtins.ListSerializer
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -17,10 +18,9 @@ import java.util.*
 
 @RestController
 @RequestMapping("/api/v1/cipher")
-class CipherController {
-    @Autowired
-    private lateinit var cipherService: CipherService
-
+class CipherController @Autowired constructor(
+    private val cipherRepository: CipherRepository
+) {
     @PutMapping
     fun insertCipher(
         @AuthorizedUser user: UserTable?,
@@ -29,7 +29,7 @@ class CipherController {
         if (user == null) return ResponseError.Unauthorized
 
         return try {
-            val cipher = cipherService.insertCipher(encryptedCipher)
+            val cipher = cipherRepository.save(CipherTable(encryptedCipher))
 
             ResponseHandler.generateResponse(
                 data = InsertResponse(cipher.id),
@@ -43,7 +43,10 @@ class CipherController {
     @GetMapping
     fun getAllCiphers(@AuthorizedUser user: UserTable?): Response {
         if (user == null) return ResponseError.Unauthorized
-        val ciphers = cipherService.getAllCiphers(user.id)
+
+        // get all ciphers owned by user
+        val ciphers = cipherRepository.getAll(owner = user.id)
+
         return ResponseHandler.generateResponse(
             serializer = ListSerializer(CipherTable.serializer()),
             data = ciphers,
@@ -57,8 +60,26 @@ class CipherController {
         @RequestParam("lastSync") lastSyncUnixTimestamp: Long
     ): Response {
         if (user == null) return ResponseError.Unauthorized
-        val ciphers = cipherService.sync(user.id, Date(lastSyncUnixTimestamp * 1000))
-        return ResponseHandler.generateResponse(ciphers, HttpStatus.OK)
+
+        // convert timestamp to date
+        val lastSyncDate = Date(lastSyncUnixTimestamp * 1000)
+
+        // get all ciphers owned by user
+        val ciphers = cipherRepository.getAll(owner = user.id)
+
+        // prepare response
+        val syncResponse = SyncResponse(
+            // get ids of all ciphers
+            ids = ciphers.map { it.id },
+            // get all ciphers that were updated after timestamp
+            ciphers = ciphers
+                // get all ciphers that were updated after timestamp
+                .filter { it.lastModified.after(lastSyncDate) }
+                // convert to encrypted ciphers
+                .map { it.toEncryptedCipher() }
+        )
+
+        return ResponseHandler.generateResponse(syncResponse, HttpStatus.OK)
     }
 
     @GetMapping("/{id}")
@@ -67,8 +88,19 @@ class CipherController {
         @PathVariable id: UUID
     ): Response {
         if (user == null) return ResponseError.Unauthorized
-        val cipher = cipherService.getCipher(id, user.id) ?: return ResponseError.NotFound
-        return ResponseHandler.generateResponse(cipher, HttpStatus.OK)
+
+        // get cipher by id
+        val cipher = cipherRepository.findById(id).orElse(null)
+            ?: return ResponseError.NotFound
+
+        // check if cipher is owned by user (if not, return 404)
+        if (cipher.owner != user.id)
+            return ResponseError.NotFound
+
+        // convert to encrypted cipher
+        val encryptedCipher = cipher.toEncryptedCipher()
+
+        return ResponseHandler.generateResponse(encryptedCipher, HttpStatus.OK)
     }
 
     @PatchMapping("/{id}")
@@ -79,22 +111,20 @@ class CipherController {
     ): Response {
         if (user == null) return ResponseError.Unauthorized
 
-        val cipher = cipherService.getCipher(id, user.id) ?: return ResponseError.NotFound
-        if (cipher.id != encryptedCipher.id || cipher.owner != encryptedCipher.owner) return ResponseError.InvalidBody
+        // get cipher table from encrypted cipher
+        val cipher = CipherTable(encryptedCipher)
 
-        return try {
-            cipherService.updateCipher(encryptedCipher.copy(
-                created = cipher.created,
-                lastModified = Date()
-            ))
+        // check if cipher exists and is owned by user (if not, return 404)
+        if (!checkIfCipherExistsAndOwnedBy(id, user.id))
+            return ResponseError.NotFound
 
-            ResponseHandler.generateResponse(
-                data = InsertResponse(cipher.id),
-                status = HttpStatus.OK
-            )
-        } catch (e: Exception) {
-            ResponseError.InvalidBody
-        }
+        // update cipher
+        cipherRepository.save(cipher)
+
+        // prepare response
+        val response = InsertResponse(cipher.id)
+
+        return ResponseHandler.generateResponse(response, HttpStatus.OK)
     }
 
     @DeleteMapping("/{id}")
@@ -104,9 +134,26 @@ class CipherController {
     ): Response {
         if (user == null) return ResponseError.Unauthorized
 
-        if (!cipherService.checkIfCipherExistsAndOwnedBy(id, user.id)) return ResponseError.NotFound
+        // check if cipher exists and is owned by user (if not, return 404)
+        if (!checkIfCipherExistsAndOwnedBy(id, user.id))
+            return ResponseError.NotFound
 
-        cipherService.deleteCipher(id)
-        return ResponseHandler.generateResponse(InsertResponse(id), HttpStatus.OK)
+        // delete cipher
+        cipherRepository.deleteById(id)
+
+        // prepare response
+        val response = InsertResponse(id)
+
+        return ResponseHandler.generateResponse(response, HttpStatus.OK)
+    }
+
+    /**
+     * Checks if cipher exists and is owned by user.
+     * @param id UUID of cipher
+     * @param owner UUID of user
+     * @return true if cipher exists and is owned by user, false otherwise
+     */
+    private fun checkIfCipherExistsAndOwnedBy(id: UUID, owner: UUID): Boolean {
+        return cipherRepository.checkIfCipherExistsAndOwnedBy(id, owner)
     }
 }

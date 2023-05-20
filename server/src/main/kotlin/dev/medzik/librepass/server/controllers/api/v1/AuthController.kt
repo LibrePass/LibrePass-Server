@@ -1,12 +1,17 @@
 package dev.medzik.librepass.server.controllers.api.v1
 
+import dev.medzik.libcrypto.Argon2HashingFunction
+import dev.medzik.libcrypto.Salt
+import dev.medzik.librepass.server.components.AuthComponent
+import dev.medzik.librepass.server.components.TokenType
+import dev.medzik.librepass.server.database.UserRepository
+import dev.medzik.librepass.server.database.UserTable
 import dev.medzik.librepass.server.services.EmailService
-import dev.medzik.librepass.server.services.UserService
-import dev.medzik.librepass.server.utils.Response
-import dev.medzik.librepass.server.utils.ResponseError
-import dev.medzik.librepass.server.utils.ResponseHandler
+import dev.medzik.librepass.server.utils.*
 import dev.medzik.librepass.types.api.auth.LoginRequest
 import dev.medzik.librepass.types.api.auth.RegisterRequest
+import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
+import dev.medzik.librepass.types.api.auth.UserCredentials
 import io.github.bucket4j.Bandwidth
 import io.github.bucket4j.Bucket
 import io.github.bucket4j.Refill
@@ -18,11 +23,16 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import java.time.Duration
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 @RestController
 @RequestMapping("/api/v1/auth")
-class AuthController {
+class AuthController @Autowired constructor(
+    private val userRepository: UserRepository,
+    private val authComponent: AuthComponent,
+    private val emailService: EmailService
+) {
     /**
      * Rate limit for login endpoint per IP address.
      */
@@ -39,11 +49,6 @@ class AuthController {
                 .build()
         }
     }
-
-    @Autowired
-    private lateinit var userService: UserService
-    @Autowired
-    private lateinit var emailService: EmailService
 
     @Value("\${librepass.api.rateLimit.enabled}")
     private val rateLimitEnabled = true
@@ -66,15 +71,43 @@ class AuthController {
             }
         }
 
-        val dbUser = userService.register(request)
+        val passwordSalt = Salt.generate(32)
+        val passwordHash = Argon2DefaultHasher.hash(request.password, passwordSalt).toString()
+
+        val verificationToken = UUID.randomUUID().toString()
+
+        val user = UserTable(
+            email = request.email,
+            password = passwordHash,
+            passwordHint = request.passwordHint,
+            encryptionKey = request.encryptionKey,
+            // argon2id parameters
+            parallelism = request.parallelism,
+            memory = request.memory,
+            iterations = request.iterations,
+            version = request.version,
+            // RSA keypair
+            publicKey = request.publicKey,
+            privateKey = request.privateKey,
+            // email verification
+            emailVerificationCode = verificationToken,
+            emailVerificationCodeExpiresAt = Date.from(
+                Calendar.getInstance().apply {
+                    add(Calendar.HOUR, 24)
+                }.toInstant()
+            )
+        )
+
+        // save user to database
+        userRepository.save(user)
 
         // send email verification
         scope.launch {
             try {
                 emailService.sendEmailVerification(
                     to = request.email,
-                    user = dbUser.id.toString(),
-                    code = dbUser.emailVerificationCode.toString()
+                    user = user.id.toString(),
+                    code = user.emailVerificationCode!!
                 )
             } catch (e: Exception) {
                 logger.error("Failed to send email verification", e)
@@ -84,6 +117,10 @@ class AuthController {
         return ResponseHandler.generateResponse(HttpStatus.CREATED)
     }
 
+    /**
+     * Get argon2id parameters for user. Used for client-side password hashing.
+     * @return [UserArgon2idParameters]
+     */
     @GetMapping("/userArgon2Parameters")
     fun getUserArgon2Parameters(
         httpServletRequest: HttpServletRequest,
@@ -96,8 +133,20 @@ class AuthController {
             }
         }
 
-        val argon2Parameters = userService.getArgon2Parameters(email)
+        // check if email is empty
+        if (email.isEmpty())
+            return ResponseError.InvalidCredentials
+
+        // get user from database
+        val user = userRepository.findByEmail(email)
             ?: return ResponseError.InvalidCredentials
+
+        val argon2Parameters = UserArgon2idParameters(
+            parallelism = user.parallelism,
+            memory = user.memory,
+            iterations = user.iterations,
+            version = user.version
+        )
 
         return ResponseHandler.generateResponse(argon2Parameters, HttpStatus.OK)
     }
@@ -114,20 +163,51 @@ class AuthController {
             }
         }
 
-        val credentials = userService.login(request.email, request.password) ?: return ResponseError.InvalidCredentials
+        // check if email or password is empty
+        if (request.email.isEmpty() || request.password.isEmpty())
+            return ResponseError.InvalidBody
+
+        // get user from database
+        val user = userRepository.findByEmail(request.email)
+            ?: return ResponseError.InvalidBody
+
+        // check if password is correct
+        if (!Argon2HashingFunction.verify(request.password, user.password))
+            return ResponseError.InvalidBody
+
+        // prepare response
+        val credentials = UserCredentials(
+            userId = user.id,
+            accessToken = authComponent.generateToken(TokenType.ACCESS_TOKEN, user.id),
+            encryptionKey = user.encryptionKey
+        )
 
         return ResponseHandler.generateResponse(credentials, HttpStatus.OK)
     }
 
+    /**
+     * Verify email address. This endpoint is called when user clicks on the link in the email.
+     */
     @GetMapping("/verifyEmail")
     fun verifyEmail(
-        @RequestParam("user") user: String,
-        @RequestParam("code") code: String
+        @RequestParam("user") userID: String,
+        @RequestParam("code") verificationCode: String
     ): Response {
-        return if (userService.verifyEmail(userId = user, verificationToken = code)) {
-            ResponseHandler.generateResponse(HttpStatus.OK)
-        } else {
-            ResponseError.InvalidCredentials
-        }
+        // get user from database
+        val user = userRepository.findById(UUID.fromString(userID)).orElse(null)
+            ?: return ResponseError.InvalidBody
+
+        // check if code is valid
+        if (user.emailVerificationCode != verificationCode)
+            return ResponseError.InvalidBody
+
+        // check if code is expired
+        if (user.emailVerificationCodeExpiresAt?.before(Date()) == true)
+            return ResponseError.InvalidBody
+
+        // set email as verified
+        userRepository.save(user.copy(emailVerified = true))
+
+        return ResponseSuccess.OK
     }
 }
