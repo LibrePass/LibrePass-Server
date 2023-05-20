@@ -1,9 +1,9 @@
 package dev.medzik.librepass.server.controllers.api.v1
 
 import dev.medzik.librepass.server.components.AuthorizedUser
+import dev.medzik.librepass.server.database.CollectionRepository
 import dev.medzik.librepass.server.database.CollectionTable
 import dev.medzik.librepass.server.database.UserTable
-import dev.medzik.librepass.server.services.CollectionService
 import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseError
 import dev.medzik.librepass.server.utils.ResponseHandler
@@ -18,10 +18,9 @@ import java.util.*
 
 @RestController
 @RequestMapping("/api/v1/collection")
-class CollectionController {
-    @Autowired
-    private lateinit var collectionService: CollectionService
-
+class CollectionController @Autowired constructor(
+    private val collectionRepository: CollectionRepository
+) {
     @PutMapping
     fun insertCollection(
         @AuthorizedUser user: UserTable?,
@@ -29,7 +28,7 @@ class CollectionController {
     ): Response {
         if (user == null) return ResponseError.Unauthorized
 
-        collectionService.insertCollection(
+        collectionRepository.save(
             CollectionTable(
                 id = collection.id,
                 name = collection.name,
@@ -37,13 +36,17 @@ class CollectionController {
             )
         )
 
-        return ResponseHandler.generateResponse(InsertResponse(collection.id), HttpStatus.CREATED)
+        // prepare response
+        val response = InsertResponse(collection.id)
+
+        return ResponseHandler.generateResponse(response, HttpStatus.CREATED)
     }
 
     @GetMapping
     fun getAllCollections(@AuthorizedUser user: UserTable?): Response {
         if (user == null) return ResponseError.Unauthorized
-        val collections = collectionService.getAllCollections(user.id)
+
+        val collections = collectionRepository.findAllByOwner(user.id)
 
         val cipherCollections = collections.map {
             CipherCollection(
@@ -66,7 +69,9 @@ class CollectionController {
         @PathVariable id: UUID
     ): Response {
         if (user == null) return ResponseError.Unauthorized
-        val collection = collectionService.getCollection(id, user.id) ?: return ResponseError.NotFound
+
+        val collection = collectionRepository.findByIdAndOwner(id, user.id)
+            ?: return ResponseError.NotFound
 
         val cipherCollection = CipherCollection(
             id = collection.id,
@@ -85,7 +90,7 @@ class CollectionController {
     ): Response {
         if (user == null) return ResponseError.Unauthorized
 
-        collectionService.updateCollection(
+        collectionRepository.save(
             CollectionTable(
                 id = id,
                 name = collection.name,
@@ -93,7 +98,10 @@ class CollectionController {
             )
         )
 
-        return ResponseHandler.generateResponse(InsertResponse(collection.id), HttpStatus.OK)
+        // prepare response
+        val response = InsertResponse(collection.id)
+
+        return ResponseHandler.generateResponse(response, HttpStatus.OK)
     }
 
     @DeleteMapping("/{id}")
@@ -102,8 +110,15 @@ class CollectionController {
         @PathVariable id: UUID
     ): Response {
         if (user == null) return ResponseError.Unauthorized
-        val collection = collectionService.getCollection(id, user.id) ?: return ResponseError.NotFound
-        collectionService.deleteCollection(collection)
-        return ResponseHandler.generateResponse(InsertResponse(collection.id), HttpStatus.OK)
+
+        val collection = collectionRepository.findByIdAndOwner(id, user.id)
+            ?: return ResponseError.NotFound
+
+        collectionRepository.delete(collection)
+
+        // prepare response
+        val response = InsertResponse(collection.id)
+
+        return ResponseHandler.generateResponse(response, HttpStatus.OK)
     }
 }

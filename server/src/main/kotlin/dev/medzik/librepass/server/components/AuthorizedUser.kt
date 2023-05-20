@@ -1,7 +1,7 @@
 package dev.medzik.librepass.server.components
 
+import dev.medzik.librepass.server.database.UserRepository
 import dev.medzik.librepass.server.database.UserTable
-import dev.medzik.librepass.server.services.UserService
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.MethodParameter
@@ -10,6 +10,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory
 import org.springframework.web.context.request.NativeWebRequest
 import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.method.support.ModelAndViewContainer
+import java.util.*
 
 /**
  * Annotation for getting authorized user from request.
@@ -26,10 +27,11 @@ annotation class AuthorizedUser
  * @see AuthorizedUser
  */
 @Component
-class AuthorizedUserArgumentResolver : HandlerMethodArgumentResolver {
-    @Autowired
-    private lateinit var userService: UserService
+class AuthorizedUserArgumentResolver @Autowired constructor(
+    private val authComponent: AuthComponent,
+    private val userRepository: UserRepository
 
+) : HandlerMethodArgumentResolver {
     override fun supportsParameter(parameter: MethodParameter): Boolean {
         return parameter.hasParameterAnnotation(AuthorizedUser::class.java)
     }
@@ -43,6 +45,13 @@ class AuthorizedUserArgumentResolver : HandlerMethodArgumentResolver {
         val request = webRequest.getNativeRequest(HttpServletRequest::class.java) ?: return null
         val authorizationHeader = request.getHeader("Authorization") ?: return null
         val token = authorizationHeader.removePrefix("Bearer ")
-        return userService.getUserByToken(token)
+
+        val userID = authComponent.parseToken(TokenType.ACCESS_TOKEN, token) ?: return null
+
+        // TODO: Checks that the token was created after the last password change to prevent cipher corruption.
+
+        return userRepository
+            .findById(UUID.fromString(userID))
+            .orElse(null)
     }
 }
