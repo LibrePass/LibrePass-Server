@@ -29,7 +29,7 @@ data class UserTable (
     val password: String,
     val passwordHint: String? = null,
     @Temporal(TemporalType.TIMESTAMP)
-    val lastPasswordChange: Date? = null,
+    val lastPasswordChange: Date = Date(),
 
     @Column(columnDefinition = "TEXT")
     val encryptionKey: String,
@@ -43,9 +43,9 @@ data class UserTable (
     @CreatedDate
     @Temporal(TemporalType.TIMESTAMP)
     @Column(insertable = false, updatable = false)
-    val created: Date? = null,
+    val created: Date = Date(),
     @LastModifiedDate
     @Temporal(TemporalType.TIMESTAMP)
     @Column(insertable = false, updatable = false)
-    val lastModified: Date? = null,
+    val lastModified: Date = Date(),
 )

@@ -57,6 +57,7 @@ class AuthComponent @Autowired constructor(
 
         return Jwts.builder()
             .setClaims(claims)
+            .setIssuedAt(Date())
             .setExpiration(Date(System.currentTimeMillis() + tokenType.expirationTime))
             .signWith(privateKey, SignatureAlgorithm.RS256)
             .compact()
