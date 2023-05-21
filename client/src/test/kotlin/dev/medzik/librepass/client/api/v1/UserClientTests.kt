@@ -30,12 +30,22 @@ class UserClientTests {
     fun changePassword() {
         userClient.changePassword("test", "test2")
 
+        // wait for 1 second to prevent unauthorized error
+        Thread.sleep(1000)
+
         // login with new password
         val authClient = AuthClient("http://localhost:8080")
-        authClient.login("test_user@example.com", "test2")
+        val credentials = authClient.login("test_user@example.com", "test2")
+        userClient = UserClient("test_user@example.com", credentials.accessToken, "http://localhost:8080")
+
+        // wait for 1 second to prevent unauthorized error
+        Thread.sleep(1000)
 
         // change password back
         userClient.changePassword("test2", "test")
+
+        // wait for 1 second to prevent unauthorized error
+        Thread.sleep(1000)
     }
 
     @Test
