@@ -37,7 +37,8 @@ build/
 
 /privateKey.pem
 /publicKey.pem
-
-*.p12
+/*.p12
 
 pom.xml.versionsBackup
+
+*.log
