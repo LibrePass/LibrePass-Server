@@ -2,6 +2,7 @@ package dev.medzik.librepass.client.api.v1
 
 import dev.medzik.libcrypto.Argon2Hash
 import dev.medzik.librepass.client.Client
+import dev.medzik.librepass.client.DEFAULT_API_URL
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
 import dev.medzik.librepass.client.utils.Cryptography.computeBasePasswordHash
@@ -15,12 +16,12 @@ import kotlinx.serialization.json.Json
  * User API client.
  * @param email The email of the user.
  * @param accessToken The access token to use for authentication.
- * @param apiUrl The API URL to use. Defaults to [Client.DefaultApiUrl].
+ * @param apiUrl The API URL to use. Defaults to [DEFAULT_API_URL].
  */
 class UserClient(
     private val email: String,
     accessToken: String,
-    private val apiUrl: String = Client.DefaultApiUrl
+    private val apiUrl: String = DEFAULT_API_URL
 ) {
     companion object {
         const val API_ENDPOINT = "/api/v1/user"

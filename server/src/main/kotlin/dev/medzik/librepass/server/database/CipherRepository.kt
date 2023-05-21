@@ -19,14 +19,6 @@ interface CipherRepository : CrudRepository<CipherTable, UUID> {
     fun getAll(@Param("owner") owner: UUID): List<CipherTable>
 
     /**
-     * Get the owner of a cipher.
-     * @param id The id of the cipher.
-     * @return The owner of the cipher.
-     */
-    @Query("SELECT p.owner FROM #{#entityName} p WHERE p.id = :id")
-    fun getOwnerOfCipher(@Param("id") id: UUID): UUID?
-
-    /**
      * Check if a cipher exists and is owned by the user.
      * @param id The id of the cipher.
      * @param owner The owner of the cipher.

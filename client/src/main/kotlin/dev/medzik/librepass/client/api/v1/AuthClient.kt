@@ -1,25 +1,27 @@
 package dev.medzik.librepass.client.api.v1
 
-import dev.medzik.libcrypto.*
+import dev.medzik.libcrypto.AesCbc
+import dev.medzik.libcrypto.Argon2Hash
+import dev.medzik.libcrypto.RSA
 import dev.medzik.librepass.client.Client
+import dev.medzik.librepass.client.DEFAULT_API_URL
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
-import dev.medzik.librepass.client.utils.Cryptography.EncryptionKeyIterations
 import dev.medzik.librepass.client.utils.Cryptography.computeBasePasswordHash
 import dev.medzik.librepass.client.utils.Cryptography.computeFinalPasswordHash
 import dev.medzik.librepass.client.utils.Cryptography.computeHashes
+import dev.medzik.librepass.client.utils.Cryptography.createEncryptionKey
 import dev.medzik.librepass.types.api.auth.LoginRequest
 import dev.medzik.librepass.types.api.auth.RegisterRequest
 import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
 import dev.medzik.librepass.types.api.auth.UserCredentials
 import kotlinx.serialization.json.Json
-import org.apache.commons.codec.binary.Hex
 
 /**
  * Auth Client for the LibrePass API. This client is used to register and login users.
- * @param apiUrl The API URL to use. Defaults to [Client.DefaultApiUrl].
+ * @param apiUrl The API URL to use. Defaults to [DEFAULT_API_URL].
  */
-class AuthClient(apiUrl: String = Client.DefaultApiUrl) {
+class AuthClient(apiUrl: String = DEFAULT_API_URL) {
     companion object {
         const val API_ENDPOINT = "/api/v1/auth"
     }
@@ -37,9 +39,9 @@ class AuthClient(apiUrl: String = Client.DefaultApiUrl) {
         // compute password hashes
         val passwordHashes = computeHashes(password, email)
 
-        // create a random byte array with 16 bytes and encode it to hex string,
-        val encryptionKey = Pbkdf2(EncryptionKeyIterations)
-            .sha256(Hex.encodeHexString(Salt.generate(16)), Salt.generate(16))
+        // create a random encryption key
+        val encryptionKey = createEncryptionKey()
+        // encrypt the encryption key with the base password hash
         val encryptedEncryptionKey = AesCbc.encrypt(encryptionKey, passwordHashes.basePasswordHashString)
 
         // generate a new rsa keypair for the user

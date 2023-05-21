@@ -23,8 +23,8 @@ data class RegisterRequest(
     val version: Int,
 
     // RSA keypair
-     val publicKey: String,
-     val privateKey: String
+    val publicKey: String,
+    val privateKey: String
 )
 
 /**
@@ -69,3 +69,4 @@ data class UserCredentials(
     val accessToken: String,
     val encryptionKey: String
 )
+
