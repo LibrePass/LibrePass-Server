@@ -11,6 +11,8 @@ class UserClientTests {
         fun setup() {
             val authClient = AuthClient("http://localhost:8080")
             authClient.register("test_user@example.com", "test")
+            // wait for 1 second to prevent unauthorized error
+            Thread.sleep(1000)
         }
     }
 

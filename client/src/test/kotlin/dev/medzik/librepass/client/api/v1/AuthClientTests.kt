@@ -13,6 +13,8 @@ class AuthClientTests {
     @Test
     fun register() {
         authClient.register(email, password)
+        // wait for 1 second to prevent unauthorized error
+        Thread.sleep(1000)
     }
 
     @Test

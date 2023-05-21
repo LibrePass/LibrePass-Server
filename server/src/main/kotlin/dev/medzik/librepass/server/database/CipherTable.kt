@@ -33,10 +33,10 @@ data class CipherTable(
 
     @CreatedDate
     @Serializable(with = DateSerializer::class)
-    val created: Date,
+    val created: Date = Date(),
     @LastModifiedDate
     @Serializable(with = DateSerializer::class)
-    val lastModified: Date
+    val lastModified: Date = Date()
 ) {
     constructor(cipher: EncryptedCipher) : this(
         id = cipher.id,

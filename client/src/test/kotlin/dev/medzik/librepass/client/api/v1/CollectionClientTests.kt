@@ -15,6 +15,8 @@ class CollectionClientTests {
         fun setup() {
             val authClient = AuthClient("http://localhost:8080")
             authClient.register("test_collection@example.com", "test")
+            // wait for 1 second to prevent unauthorized error
+            Thread.sleep(1000)
         }
     }
 
