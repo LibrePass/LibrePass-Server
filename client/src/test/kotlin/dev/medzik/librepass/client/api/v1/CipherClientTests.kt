@@ -2,8 +2,8 @@ package dev.medzik.librepass.client.api.v1
 
 import dev.medzik.libcrypto.Pbkdf2
 import dev.medzik.libcrypto.Salt
-import dev.medzik.librepass.types.api.Cipher
-import dev.medzik.librepass.types.api.CipherData
+import dev.medzik.librepass.types.Cipher
+import dev.medzik.librepass.types.CipherData
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach

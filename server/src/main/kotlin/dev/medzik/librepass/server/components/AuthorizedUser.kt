@@ -42,16 +42,30 @@ class AuthorizedUserArgumentResolver @Autowired constructor(
         webRequest: NativeWebRequest,
         binderFactory: WebDataBinderFactory?
     ): UserTable? {
-        val request = webRequest.getNativeRequest(HttpServletRequest::class.java) ?: return null
-        val authorizationHeader = request.getHeader("Authorization") ?: return null
+        val request = webRequest.getNativeRequest(HttpServletRequest::class.java)
+            ?: return null
+        val authorizationHeader = request.getHeader("Authorization")
+            ?: return null
         val token = authorizationHeader.removePrefix("Bearer ")
 
-        val userID = authComponent.parseToken(TokenType.ACCESS_TOKEN, token) ?: return null
+        // parse token
+        val tokenClaims = authComponent.parseToken(TokenType.ACCESS_TOKEN, token)
+            ?: return null
+        // get user id from token
+        val userID = tokenClaims["sub"] as String
 
-        // TODO: Checks that the token was created after the last password change to prevent cipher corruption.
-
-        return userRepository
+        // get user from database
+        val user = userRepository
             .findById(UUID.fromString(userID))
             .orElse(null)
+            ?: return null
+
+        // check that the token was created after the last password change to prevent cipher corruption
+        if (tokenClaims.expiration > user.lastPasswordChange) {
+            return null
+        }
+
+        // return user table from database
+        return user
     }
 }

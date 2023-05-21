@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package dev.medzik.librepass.types.api
+package dev.medzik.librepass.types
 
 import dev.medzik.libcrypto.AesCbc
 import dev.medzik.librepass.types.api.serializers.DateSerializer

@@ -22,6 +22,4 @@ interface CollectionRepository : CrudRepository<CollectionTable, UUID> {
      * @return A list of all collections owned by the given user.
      */
     fun findAllByOwner(owner: UUID): List<CollectionTable>
-
-    fun deleteByIdAndOwner(id: UUID, owner: UUID)
 }
