@@ -1,6 +1,6 @@
 package dev.medzik.librepass.types.api.cipher
 
-import dev.medzik.librepass.types.api.EncryptedCipher
+import dev.medzik.librepass.types.EncryptedCipher
 import dev.medzik.librepass.types.api.serializers.UUIDSerializer
 import kotlinx.serialization.Serializable
 import java.util.*

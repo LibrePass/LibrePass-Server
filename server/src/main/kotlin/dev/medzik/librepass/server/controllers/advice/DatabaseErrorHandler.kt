@@ -16,12 +16,13 @@ class DatabaseErrorHandler {
     fun handleDatabaseError(e: DataIntegrityViolationException): Response {
         if (e.cause is ConstraintViolationException) {
             val cve = e.cause as ConstraintViolationException?
-            // duplicated key
+            // duplicate key
             if (cve!!.sqlState == "23505") {
                 return ResponseError.DatabaseDuplicatedKey
             }
         }
 
+        // unknown database error
         return ResponseError.DatabaseError
     }
 

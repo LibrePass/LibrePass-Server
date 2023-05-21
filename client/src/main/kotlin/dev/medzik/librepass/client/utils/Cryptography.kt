@@ -2,16 +2,18 @@ package dev.medzik.librepass.client.utils
 
 import dev.medzik.libcrypto.Argon2Hash
 import dev.medzik.libcrypto.Pbkdf2
+import dev.medzik.libcrypto.Salt
 import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
+import org.apache.commons.codec.binary.Hex
 
 /**
  * Cryptography utilities. Used for password hashing.
  */
 object Cryptography {
     /**
-     * Number of iterations for the encryption key and final password hash.
+     * Number of iterations for the final password hash.
      */
-    const val EncryptionKeyIterations = 500
+    private const val FinalHashIterations = 500
 
     /**
      * Default argon2id settings.
@@ -22,6 +24,17 @@ object Cryptography {
         iterations = 4,
         version = 19
     )
+
+    /**
+     * Create random encryption key.
+     * @return encryption key
+     */
+    fun createEncryptionKey(): String {
+        val key = Hex.encodeHexString(Salt.generate(16))
+        val salt = Salt.generate(16)
+
+        return Pbkdf2(1).sha256(key, salt)
+    }
 
     /**
      * Compute base password hash
@@ -47,8 +60,7 @@ object Cryptography {
     fun computeFinalPasswordHash(
         basePassword: String,
         email: String
-    ): String = Pbkdf2(EncryptionKeyIterations)
-        .sha256(basePassword, email.encodeToByteArray())
+    ): String = Pbkdf2(FinalHashIterations).sha256(basePassword, email.encodeToByteArray())
 
     /**
      * Compute password hashes of the user.

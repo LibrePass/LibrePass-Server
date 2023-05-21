@@ -1,10 +1,11 @@
 package dev.medzik.librepass.client.api.v1
 
 import dev.medzik.librepass.client.Client
+import dev.medzik.librepass.client.DEFAULT_API_URL
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
-import dev.medzik.librepass.types.api.Cipher
-import dev.medzik.librepass.types.api.EncryptedCipher
+import dev.medzik.librepass.types.Cipher
+import dev.medzik.librepass.types.EncryptedCipher
 import dev.medzik.librepass.types.api.cipher.InsertResponse
 import dev.medzik.librepass.types.api.cipher.SyncResponse
 import kotlinx.serialization.builtins.ListSerializer
@@ -14,12 +15,12 @@ import java.util.*
 /**
  * Cipher API client.
  * @param accessToken The access token to use for authentication.
- * @param apiUrl The API URL to use. Defaults to [Client.DefaultApiUrl].
+ * @param apiUrl The API URL to use. Defaults to [DEFAULT_API_URL].
  */
 @Suppress("unused")
 class CipherClient(
     accessToken: String,
-    apiUrl: String  = Client.DefaultApiUrl
+    apiUrl: String  = DEFAULT_API_URL
 ) {
     companion object {
         const val API_ENDPOINT = "/api/v1/cipher"
