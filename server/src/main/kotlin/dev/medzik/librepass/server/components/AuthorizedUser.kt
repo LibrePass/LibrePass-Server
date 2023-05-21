@@ -60,7 +60,7 @@ class AuthorizedUserArgumentResolver @Autowired constructor(
             .orElse(null)
             ?: return null
 
-        // check that the token was created after the last password change to prevent cipher corruption
+        // check if user changed password after token was issued
         if (user.lastPasswordChange > tokenClaims.issuedAt) {
             return null
         }
