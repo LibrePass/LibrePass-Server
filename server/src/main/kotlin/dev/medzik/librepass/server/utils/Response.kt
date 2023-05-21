@@ -80,12 +80,12 @@ object ResponseHandler {
 }
 
 object ResponseSuccess {
-    private fun generateResponse(status: HttpStatus): Response =
-        ResponseHandler.generateResponse(status)
-
-    val OK = generateResponse(HttpStatus.OK)
+    val OK = ResponseHandler.generateResponse(HttpStatus.OK)
 }
 
+/**
+ * Utility function to create a error response with the given error and status.
+ */
 object ResponseError {
     private fun generateErrorResponse(error: String, status: HttpStatus): Response =
         ResponseHandler.generateErrorResponse(error, status)

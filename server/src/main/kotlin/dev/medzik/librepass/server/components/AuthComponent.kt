@@ -1,11 +1,13 @@
 package dev.medzik.librepass.server.components
 
-import dev.medzik.librepass.server.utils.KeyParser
+import dev.medzik.libcrypto.RSA
+import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import java.io.FileInputStream
 import java.security.PrivateKey
 import java.security.PublicKey
 import java.util.*
@@ -27,8 +29,19 @@ class AuthComponent @Autowired constructor(
     private lateinit var privateKey: PrivateKey
 
     init {
-        this.publicKey = KeyParser.parsePublicKey(publicKeyFile)
-        this.privateKey = KeyParser.parsePrivateKey(privateKeyFile)
+        // read public key from file
+        val publicKeyFileStream = FileInputStream(publicKeyFile)
+        val publicKeyString = publicKeyFileStream.readAllBytes().toString(Charsets.UTF_8)
+        publicKeyFileStream.close()
+
+        // read private key from file
+        val privateKeyFileStream = FileInputStream(privateKeyFile)
+        val privateKeyString = privateKeyFileStream.readAllBytes().toString(Charsets.UTF_8)
+        privateKeyFileStream.close()
+
+        // parse keys from strings
+        this.publicKey = RSA.KeyUtils.getPublicKey(publicKeyString)
+        this.privateKey = RSA.KeyUtils.getPrivateKey(privateKeyString)
     }
 
     /**
@@ -51,11 +64,11 @@ class AuthComponent @Autowired constructor(
 
     /**
      * Parses a token and returns the user id. Returns null if the token is invalid.
-     * @param tokenType Type of the token.
+     * @param type Type of the token.
      * @param token Token to be parsed.
-     * @return User ID or null.
+     * @return Token claims.
      */
-    fun parseToken(tokenType: TokenType, token: String): String? {
+    fun parseToken(type: TokenType, token: String): Claims? {
         return try {
             val claims = Jwts.parserBuilder()
                 .setSigningKey(publicKey)
@@ -64,9 +77,10 @@ class AuthComponent @Autowired constructor(
                 .body
 
             // check if the token type is correct
-            if (claims["typ"] != tokenType.name) return null
+            if (claims["typ"] != type.name)
+                return null
 
-            claims["sub"] as String
+            claims
         } catch (e: Exception) {
             null
         }

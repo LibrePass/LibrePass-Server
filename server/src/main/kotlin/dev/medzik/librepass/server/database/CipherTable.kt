@@ -1,6 +1,6 @@
 package dev.medzik.librepass.server.database
 
-import dev.medzik.librepass.types.api.EncryptedCipher
+import dev.medzik.librepass.types.EncryptedCipher
 import dev.medzik.librepass.types.api.serializers.DateSerializer
 import dev.medzik.librepass.types.api.serializers.UUIDSerializer
 import jakarta.persistence.*

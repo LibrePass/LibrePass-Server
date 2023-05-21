@@ -7,7 +7,7 @@ import dev.medzik.librepass.server.database.UserTable
 import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseError
 import dev.medzik.librepass.server.utils.ResponseHandler
-import dev.medzik.librepass.types.api.EncryptedCipher
+import dev.medzik.librepass.types.EncryptedCipher
 import dev.medzik.librepass.types.api.cipher.InsertResponse
 import dev.medzik.librepass.types.api.cipher.SyncResponse
 import kotlinx.serialization.builtins.ListSerializer

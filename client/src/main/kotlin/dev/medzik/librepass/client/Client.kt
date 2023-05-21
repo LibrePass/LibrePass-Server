@@ -1,11 +1,9 @@
 package dev.medzik.librepass.client
 
-import dev.medzik.librepass.client.Client.Companion.DefaultApiUrl
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
 import dev.medzik.librepass.types.api.ResponseError
 import kotlinx.serialization.json.Json
-import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -13,27 +11,29 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
 
 /**
+ * Default API Instance URL [https://librepass-api.medzik.dev](https://librepass-api.medzik.dev)
+ */
+const val DEFAULT_API_URL = "https://librepass-api.medzik.dev"
+
+/**
+ * Default HTTP Client instance. Used for all requests.
+ */
+private val HTTP_CLIENT = OkHttpClient()
+
+/**
+ * HTTP Media Type for JSON requests.
+ */
+private val HTTP_MEDIA_TYPE_JSON = "application/json; charset=utf-8".toMediaType()
+
+/**
  * HTTP Client for sending requests to the API
  * @param accessToken access token to use for authorization
- * @param apiURL The API URL to use. Defaults to [DefaultApiUrl].
+ * @param apiURL The API URL to use.
  */
 class Client(
     accessToken: String? = null,
-    private val apiURL: String = DefaultApiUrl
+    private val apiURL: String
 ) {
-    companion object {
-        /**
-         * Default API Instance URL [https://librepass-api.medzik.dev](https://librepass-api.medzik.dev)
-         */
-        const val DefaultApiUrl = "https://librepass-api.medzik.dev"
-
-        // JSON media type
-        private val MediaTypeJson: MediaType = "application/json; charset=utf-8".toMediaType()
-
-        // HTTP client instance
-        private val HttpClient = OkHttpClient()
-    }
-
     // create authorization header if access token is provided
     private val authorizationHeader = if (accessToken.isNullOrEmpty()) "" else "Bearer $accessToken"
 
@@ -77,7 +77,7 @@ class Client(
      */
     @Throws(ClientException::class, ApiException::class)
     fun post(endpoint: String, json: String): String {
-        val body = json.toRequestBody(MediaTypeJson)
+        val body = json.toRequestBody(HTTP_MEDIA_TYPE_JSON)
 
         val request = Request.Builder()
             .url(apiURL + endpoint)
@@ -96,7 +96,7 @@ class Client(
      */
     @Throws(ClientException::class, ApiException::class)
     fun patch(endpoint: String, json: String): String {
-        val body = json.toRequestBody(MediaTypeJson)
+        val body = json.toRequestBody(HTTP_MEDIA_TYPE_JSON)
 
         val request = Request.Builder()
             .url(apiURL + endpoint)
@@ -115,7 +115,7 @@ class Client(
      */
     @Throws(ClientException::class, ApiException::class)
     fun put(endpoint: String, json: String): String {
-        val body = json.toRequestBody(MediaTypeJson)
+        val body = json.toRequestBody(HTTP_MEDIA_TYPE_JSON)
 
         val request = Request.Builder()
             .url(apiURL + endpoint)
@@ -135,7 +135,7 @@ class Client(
     private fun executeAndExtractBody(request: Request): String {
         try {
             // send request
-            val response = HttpClient.newCall(request).execute()
+            val response = HTTP_CLIENT.newCall(request).execute()
 
             // extract from response
             val statusCode = response.code
