@@ -42,10 +42,8 @@ data class UserTable (
 
     @CreatedDate
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(insertable = false, updatable = false)
     val created: Date = Date(),
     @LastModifiedDate
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(insertable = false, updatable = false)
     val lastModified: Date = Date(),
 )
