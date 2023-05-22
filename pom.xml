@@ -43,7 +43,7 @@
 
         <kotlin.version>1.8.21</kotlin.version>
         <serialization.version>1.5.1</serialization.version>
-        <coroutines.version>1.6.4</coroutines.version>
+        <coroutines.version>1.7.1</coroutines.version>
 
         <medzik-libcrypto.version>0.3.0</medzik-libcrypto.version>
 
