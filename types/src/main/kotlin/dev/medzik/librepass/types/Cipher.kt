@@ -35,29 +35,23 @@ data class Cipher(
     val lastModified: Date? = null
 ) {
     init {
-        if (type == CipherType.Login && loginData == null) {
+        if (type == CipherType.Login && loginData == null)
             throw IllegalArgumentException("Login cipher must have login data")
-        }
 
-        if (type != CipherType.Login && loginData != null) {
+        if (type != CipherType.Login && loginData != null)
             throw IllegalArgumentException("Only login cipher can have login data")
-        }
 
-        if (type == CipherType.SecureNote && secureNoteData == null) {
+        if (type == CipherType.SecureNote && secureNoteData == null)
             throw IllegalArgumentException("Secure note cipher must have secure note data")
-        }
 
-        if (type != CipherType.SecureNote && secureNoteData != null) {
+        if (type != CipherType.SecureNote && secureNoteData != null)
             throw IllegalArgumentException("Only secure note cipher can have secure note data")
-        }
 
-        if (type == CipherType.Card && cardData == null) {
+        if (type == CipherType.Card && cardData == null)
             throw IllegalArgumentException("Card cipher must have card data")
-        }
 
-        if (type != CipherType.Card && cardData != null) {
+        if (type != CipherType.Card && cardData != null)
             throw IllegalArgumentException("Only card cipher can have card data")
-        }
     }
 
     companion object {
