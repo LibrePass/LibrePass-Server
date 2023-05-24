@@ -26,6 +26,8 @@ data class Cipher(
     val owner: UUID,
     val type: CipherType,
     val loginData: LoginCipherData? = null,
+    val secureNoteData: SecureNoteCipherData? = null,
+    val cardData: CardCipherData? = null,
     val collection: UUID? = null,
     val favorite: Boolean = false,
     val rePrompt: Boolean = false,
@@ -40,6 +42,22 @@ data class Cipher(
         if (type != CipherType.Login && loginData != null) {
             throw IllegalArgumentException("Only login cipher can have login data")
         }
+
+        if (type == CipherType.SecureNote && secureNoteData == null) {
+            throw IllegalArgumentException("Secure note cipher must have secure note data")
+        }
+
+        if (type != CipherType.SecureNote && secureNoteData != null) {
+            throw IllegalArgumentException("Only secure note cipher can have secure note data")
+        }
+
+        if (type == CipherType.Card && cardData == null) {
+            throw IllegalArgumentException("Card cipher must have card data")
+        }
+
+        if (type != CipherType.Card && cardData != null) {
+            throw IllegalArgumentException("Only card cipher can have card data")
+        }
     }
 
     companion object {
@@ -53,13 +71,30 @@ data class Cipher(
             val type = CipherType.from(encryptedCipher.type)
 
             var loginData: LoginCipherData? = null
+            var secureNoteData: SecureNoteCipherData? = null
+            var cardData: CardCipherData? = null
 
             // check if type is login
-            if (type == CipherType.Login) {
-                loginData = Json.decodeFromString(
-                    LoginCipherData.serializer(),
-                    encryptedCipher.decrypt(encryptionKey)
-                )
+            when (type) {
+                CipherType.Login -> {
+                    loginData = Json.decodeFromString(
+                        LoginCipherData.serializer(),
+                        encryptedCipher.decrypt(encryptionKey)
+                    )
+                }
+                CipherType.SecureNote -> {
+                    secureNoteData = Json.decodeFromString(
+                        SecureNoteCipherData.serializer(),
+                        encryptedCipher.decrypt(encryptionKey)
+                    )
+                }
+                CipherType.Card -> {
+                    cardData = Json.decodeFromString(
+                        CardCipherData.serializer(),
+                        encryptedCipher.decrypt(encryptionKey)
+                    )
+                }
+                CipherType.Identity -> throw IllegalArgumentException("Identity cipher is not supported yet")
             }
 
             return Cipher(
@@ -67,6 +102,8 @@ data class Cipher(
                 owner = encryptedCipher.owner,
                 type = type,
                 loginData = loginData,
+                secureNoteData = secureNoteData,
+                cardData = cardData,
                 collection = encryptedCipher.collection,
                 favorite = encryptedCipher.favorite,
                 rePrompt = encryptedCipher.rePrompt,
@@ -136,9 +173,18 @@ data class EncryptedCipher(
 
             var data = ""
 
-            // check if type is login
-            if (type == CipherType.Login.ordinal) {
-                data = Json.encodeToString(LoginCipherData.serializer(), cipher.loginData!!)
+            when (type) {
+                CipherType.Login.ordinal -> {
+                    data = Json.encodeToString(LoginCipherData.serializer(), cipher.loginData!!)
+                }
+                CipherType.SecureNote.ordinal -> {
+                    data = Json.encodeToString(SecureNoteCipherData.serializer(), cipher.secureNoteData!!)
+                }
+                CipherType.Card.ordinal -> {
+                    data = Json.encodeToString(CardCipherData.serializer(), cipher.cardData!!)
+                }
+                CipherType.Identity.ordinal ->
+                    throw IllegalArgumentException("Identity cipher is not supported yet")
             }
 
             return EncryptedCipher(
@@ -209,3 +255,39 @@ data class LoginCipherData(
     val notes: String? = null,
     val customFields: List<Map<String, String>>? = null
 )
+
+/**
+ * SecureNoteCipherData is a representation of the note data of a secure note cipher.
+ * @param title The title of the secure note cipher.
+ * @param note The note of the secure note cipher.
+ */
+@Serializable
+data class SecureNoteCipherData(
+    val title: String,
+    val note: String
+)
+
+/**
+ * CardCipherData is a representation of the card data of a card cipher.
+ * @param cardholderName The cardholder name of the card cipher.
+ * @param brand The brand of the card cipher.
+ * @param number The number of the card cipher.
+ * @param expMonth The expiration month of the card cipher.
+ * @param expYear The expiration year of the card cipher.
+ * @param code The code of the card cipher.
+ * @param notes The notes of the card cipher.
+ * @param customFields The list of custom fields of the card cipher.
+ */
+@Serializable
+data class CardCipherData(
+    val cardholderName: String,
+    val brand: String? = null,
+    val number: String? = null,
+    val expMonth: Int? = null,
+    val expYear: Int? = null,
+    val code: String? = null,
+    val notes: String? = null,
+    val customFields: List<Map<String, String>>? = null
+)
+
+// TODO: Implement IdentityCipherData
