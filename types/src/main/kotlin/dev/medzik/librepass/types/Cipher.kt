@@ -1,5 +1,3 @@
-@file:Suppress("unused")
-
 package dev.medzik.librepass.types
 
 import dev.medzik.libcrypto.AesCbc
@@ -12,52 +10,94 @@ import java.util.*
 /**
  * Cipher is a representation of a single cipher entry.
  * It contains all the information about the cipher.
+ * @param id The unique identifier of the cipher.
+ * @param owner The unique identifier of the owner of the cipher.
+ * @param type The type of the cipher.
+ * @param loginData The login data of the cipher. (Only if the cipher is a login cipher)
+ * @param collection The unique identifier of the collection the cipher belongs to.
+ * @param favorite Whether the cipher is marked as favorite.
+ * @param rePrompt Whether the password should be re-prompted. (Only UI-related)
+ * @param created The date the cipher was created.
+ * @param lastModified The date the cipher was last modified.
+ * @see LoginCipherData
  */
 data class Cipher(
     val id: UUID,
     val owner: UUID,
-    val type: Int,
-    val data: CipherData,
-    val favorite: Boolean = false,
+    val type: CipherType,
+    val loginData: LoginCipherData? = null,
     val collection: UUID? = null,
+    val favorite: Boolean = false,
     val rePrompt: Boolean = false,
     val created: Date? = null,
     val lastModified: Date? = null
 ) {
+    init {
+        if (type == CipherType.Login && loginData == null) {
+            throw IllegalArgumentException("Login cipher must have login data")
+        }
+
+        if (type != CipherType.Login && loginData != null) {
+            throw IllegalArgumentException("Only login cipher can have login data")
+        }
+    }
+
     companion object {
         /**
-         * Decrypts the [EncryptedCipher] and returns a new [Cipher] object.
-         * @param cipher The [EncryptedCipher] to decrypt.
-         * @param key The key to decrypt the cipher with.
+         * Creates a new [Cipher] object from the [EncryptedCipher].
+         * @param encryptedCipher The [EncryptedCipher] to decrypt.
+         * @param encryptionKey The key to decrypt the cipher with.
          * @return The decrypted cipher.
          */
-        fun from(cipher: EncryptedCipher, key: String): Cipher {
+        fun from(encryptedCipher: EncryptedCipher, encryptionKey: String): Cipher {
+            val type = CipherType.from(encryptedCipher.type)
+
+            var loginData: LoginCipherData? = null
+
+            // check if type is login
+            if (type == CipherType.Login) {
+                loginData = Json.decodeFromString(
+                    LoginCipherData.serializer(),
+                    encryptedCipher.decrypt(encryptionKey)
+                )
+            }
+
             return Cipher(
-                id = cipher.id,
-                owner = cipher.owner,
-                type = cipher.type,
-                data = cipher.decrypt(key),
-                favorite = cipher.favorite,
-                collection = cipher.collection,
-                rePrompt = cipher.rePrompt,
-                created = cipher.created,
-                lastModified = cipher.lastModified
+                id = encryptedCipher.id,
+                owner = encryptedCipher.owner,
+                type = type,
+                loginData = loginData,
+                collection = encryptedCipher.collection,
+                favorite = encryptedCipher.favorite,
+                rePrompt = encryptedCipher.rePrompt,
+                created = encryptedCipher.created,
+                lastModified = encryptedCipher.lastModified
             )
         }
     }
 
     /**
-     * Encrypts the cipher data and returns a new [EncryptedCipher] object.
-     * @param key The key to encrypt the cipher with.
+     * Converts the cipher to an [EncryptedCipher].
+     * @param encryptionKey The key to encrypt the cipher with.
      * @return The encrypted cipher.
      */
-    fun toEncryptedCipher(key: String) = EncryptedCipher.from(this, key)
+    fun toEncryptedCipher(encryptionKey: String) =
+        EncryptedCipher.from(this, encryptionKey)
 }
 
 /**
- * EncryptedCipher is a representation of a single cipher entry.
- * All sensitive data is encrypted.
- * This is the representation of the cipher that is stored in the server database.
+ * EncryptedCipher is a representation of cipher stored in the database.
+ * The data is encrypted and can only be decrypted with the encryption key.
+ * @param id The unique identifier of the cipher.
+ * @param owner The unique identifier of the owner of the cipher.
+ * @param type The type of the cipher.
+ * @param data The encrypted data of the cipher.
+ * @param collection The unique identifier of the collection the cipher belongs to.
+ * @param favorite Whether the cipher is marked as favorite.
+ * @param rePrompt Whether the password should be re-prompted. (Only UI-related)
+ * @param created The date the cipher was created.
+ * @param lastModified The date the cipher was last modified.
+ * @see Cipher
  */
 @Serializable
 data class EncryptedCipher(
@@ -65,11 +105,11 @@ data class EncryptedCipher(
     val id: UUID,
     @Serializable(with = UUIDSerializer::class)
     val owner: UUID,
-    val type: Int = CipherType.Login.type,
+    val type: Int = CipherType.Login.ordinal,
     val data: String,
-    val favorite: Boolean = false,
     @Serializable(with = UUIDSerializer::class)
     val collection: UUID? = null,
+    val favorite: Boolean = false,
     val rePrompt: Boolean = false,
     @Serializable(with = DateSerializer::class)
     val created: Date? = null,
@@ -78,19 +118,36 @@ data class EncryptedCipher(
 ) {
     companion object {
         /**
-         * Encrypts the [Cipher] and returns a new [EncryptedCipher] object.
-         * @param cipher The [Cipher] to encrypt.
-         * @param key The key to encrypt the cipher with.
+         * Creates a new [EncryptedCipher] object from the JSON string.
+         * @param cipher The JSON string to decode.
          * @return The encrypted cipher.
          */
-        fun from(cipher: Cipher, key: String): EncryptedCipher {
+        fun from(cipher: String): EncryptedCipher =
+            Json.decodeFromString(serializer(), cipher)
+
+        /**
+         * Creates a new [EncryptedCipher] object from the [Cipher].
+         * @param cipher The [Cipher] to encrypt.
+         * @param encryptionKey The key to encrypt the cipher with.
+         * @return The encrypted cipher.
+         */
+        fun from(cipher: Cipher, encryptionKey: String): EncryptedCipher {
+            val type = cipher.type.ordinal
+
+            var data = ""
+
+            // check if type is login
+            if (type == CipherType.Login.ordinal) {
+                data = Json.encodeToString(LoginCipherData.serializer(), cipher.loginData!!)
+            }
+
             return EncryptedCipher(
                 id = cipher.id,
                 owner = cipher.owner,
-                type = cipher.type,
-                data = cipher.data.encrypt(key),
-                favorite = cipher.favorite,
+                type = type,
+                data = AesCbc.encrypt(data, encryptionKey),
                 collection = cipher.collection,
+                favorite = cipher.favorite,
                 rePrompt = cipher.rePrompt,
                 created = cipher.created,
                 lastModified = cipher.lastModified
@@ -99,66 +156,56 @@ data class EncryptedCipher(
     }
 
     /**
-     * Decrypts the cipher data and returns a new [CipherData] object.
-     * @param key The key to decrypt the cipher with.
-     * @return The decrypted cipher data.
+     * Decrypts the cipher data.
+     * @param encryptionKey The key to decrypt the cipher with.
+     * @return JSON string of the decrypted cipher data.
      */
-    fun decrypt(key: String): CipherData {
-        val data = AesCbc.decrypt(this.data, key)
-        return Json.decodeFromString(CipherData.serializer(), data)
-    }
-
-    /**
-     * Decrypts the cipher data and returns a new [Cipher] object.
-     * @param key The key to decrypt the cipher with.
-     * @return The decrypted cipher.
-     */
-    fun toCipher(key: String) = Cipher.from(this, key)
+    fun decrypt(encryptionKey: String): String =
+        AesCbc.decrypt(this.data, encryptionKey)
 
     /**
      * Converts the cipher to a JSON string.
-     * @return The JSON string.
+     * @return JSON string of the cipher.
      */
-    fun toJson(): String = Json.encodeToString(serializer(), this)
+    fun toJson(): String =
+        Json.encodeToString(serializer(), this)
 }
 
 /**
- * CipherType is an enum that represents the type of the cipher.
- * It is used to indicate the type of the cipher.
- * It can be one of the following:
- * - Login: A login cipher.
- * - SecureNote: A secure note cipher.
- * - Card: A card cipher.
- * - Identity: An identity cipher.
+ * CipherType is an enum class that represents the type of cipher.
  */
-enum class CipherType(val type: Int) {
-    Login(0),
-    SecureNote(1),
-    Card(2),
-    Identity(3)
+enum class CipherType {
+    Login,
+    SecureNote,
+    Card,
+    Identity;
+
+    companion object {
+        /**
+         * Returns the [CipherType] from the given type integer.
+         * @param type The type of the cipher.
+         */
+        fun from(type: Int) = values()[type]
+    }
 }
 
 /**
- * CipherData is a representation of the data of a cipher.
- * In [EncryptedCipher] the data is encrypted.
+ * LoginCipherData is a representation of the login data of a login cipher.
+ * @param name The name of the login cipher.
+ * @param username The username of the login cipher.
+ * @param password The password of the login cipher.
+ * @param uris The list of URIs of the login cipher.
+ * @param twoFactor The two-factor authentication code of the login cipher.
+ * @param notes The notes of the login cipher.
+ * @param customFields The list of custom fields of the login cipher.
  */
 @Serializable
-data class CipherData(
+data class LoginCipherData(
     val name: String,
     val username: String? = null,
     val password: String? = null,
     val uris: List<String>? = null,
     val twoFactor: String? = null,
     val notes: String? = null,
-    val customFields: List<String>? = null
-) {
-    /**
-     * Encrypts the cipher data and returns a new JSON string.
-     * @param key The key to encrypt the cipher with.
-     * @return The encrypted cipher data.
-     */
-    fun encrypt(key: String): String {
-        val data = Json.encodeToString(serializer(), this)
-        return AesCbc.encrypt(data, key)
-    }
-}
+    val customFields: List<Map<String, String>>? = null
+)

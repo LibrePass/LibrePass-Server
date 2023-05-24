@@ -3,7 +3,8 @@ package dev.medzik.librepass.client.api.v1
 import dev.medzik.libcrypto.Pbkdf2
 import dev.medzik.libcrypto.Salt
 import dev.medzik.librepass.types.Cipher
-import dev.medzik.librepass.types.CipherData
+import dev.medzik.librepass.types.CipherType
+import dev.medzik.librepass.types.LoginCipherData
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -56,15 +57,15 @@ class CipherClientTests {
 
     @Test
     fun insertCipher() {
-        val cipherData = CipherData(
+        val cipherData = LoginCipherData(
             name = "test_cipher"
         )
 
         val cipher = Cipher(
             id = UUID.randomUUID(),
             owner = userId,
-            type = 0,
-            data = cipherData
+            type = CipherType.Login,
+            loginData = cipherData
         )
 
         val response = cipherClient.insert(cipher, encryptionKey)
