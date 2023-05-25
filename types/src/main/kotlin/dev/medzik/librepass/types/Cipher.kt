@@ -68,7 +68,7 @@ data class Cipher(
             var secureNoteData: SecureNoteCipherData? = null
             var cardData: CardCipherData? = null
 
-            // check if type is login
+            // decrypt the cipher data
             when (type) {
                 CipherType.Login -> {
                     loginData = Json.decodeFromString(
@@ -88,7 +88,6 @@ data class Cipher(
                         encryptedCipher.decrypt(encryptionKey)
                     )
                 }
-                CipherType.Identity -> throw IllegalArgumentException("Identity cipher is not supported yet")
             }
 
             return Cipher(
@@ -153,7 +152,7 @@ data class EncryptedCipher(
          * @param cipher The JSON string to decode.
          * @return The encrypted cipher.
          */
-        fun from(cipher: String): EncryptedCipher =
+        fun from(cipher: String) =
             Json.decodeFromString(serializer(), cipher)
 
         /**
@@ -177,9 +176,10 @@ data class EncryptedCipher(
                 CipherType.Card.ordinal -> {
                     data = Json.encodeToString(CardCipherData.serializer(), cipher.cardData!!)
                 }
-                CipherType.Identity.ordinal ->
-                    throw IllegalArgumentException("Identity cipher is not supported yet")
             }
+
+            if (data.isEmpty())
+                throw IllegalArgumentException("Cipher data is empty")
 
             return EncryptedCipher(
                 id = cipher.id,
@@ -200,14 +200,14 @@ data class EncryptedCipher(
      * @param encryptionKey The key to decrypt the cipher with.
      * @return JSON string of the decrypted cipher data.
      */
-    fun decrypt(encryptionKey: String): String =
-        AesCbc.decrypt(this.data, encryptionKey)
+    fun decrypt(encryptionKey: String) =
+        AesCbc.decrypt(this.data, encryptionKey)!!
 
     /**
      * Converts the cipher to a JSON string.
      * @return JSON string of the cipher.
      */
-    fun toJson(): String =
+    fun toJson() =
         Json.encodeToString(serializer(), this)
 }
 
@@ -217,8 +217,7 @@ data class EncryptedCipher(
 enum class CipherType {
     Login,
     SecureNote,
-    Card,
-    Identity;
+    Card;
 
     companion object {
         /**
@@ -283,5 +282,3 @@ data class CardCipherData(
     val notes: String? = null,
     val customFields: List<Map<String, String>>? = null
 )
-
-// TODO: Implement IdentityCipherData
