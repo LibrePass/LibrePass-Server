@@ -7,6 +7,11 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import java.util.*
 
+/**
+ * Serializer for [Date] objects. It serializes [Date] to unix timestamp (seconds since epoch).
+ *
+ * @see Date
+ */
 object DateSerializer : KSerializer<Date> {
     override val descriptor = PrimitiveSerialDescriptor("Date", PrimitiveKind.LONG)
     override fun serialize(encoder: Encoder, value: Date) = encoder.encodeLong(value.time / 1000)
