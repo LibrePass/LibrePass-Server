@@ -10,16 +10,18 @@ import java.util.*
 /**
  * Cipher is a representation of a single cipher entry.
  * It contains all the information about the cipher.
- * @param id The unique identifier of the cipher.
- * @param owner The unique identifier of the owner of the cipher.
- * @param type The type of the cipher.
- * @param loginData The login data of the cipher. (Only if the cipher is a login cipher)
- * @param collection The unique identifier of the collection the cipher belongs to.
- * @param favorite Whether the cipher is marked as favorite.
- * @param rePrompt Whether the password should be re-prompted. (Only UI-related)
- * @param created The date the cipher was created.
- * @param lastModified The date the cipher was last modified.
+ * @property id The unique identifier of the cipher.
+ * @property owner The unique identifier of the owner of the cipher.
+ * @property type The type of the cipher.
+ * @property loginData The login data of the cipher. (Only if the cipher is a login cipher)
+ * @property collection The unique identifier of the collection the cipher belongs to.
+ * @property favorite Whether the cipher is marked as favorite.
+ * @property rePrompt Whether the password should be re-prompted. (Only UI-related)
+ * @property created The date the cipher was created.
+ * @property lastModified The date the cipher was last modified.
  * @see LoginCipherData
+ * @see SecureNoteCipherData
+ * @see CardCipherData
  */
 data class Cipher(
     val id: UUID,
@@ -118,15 +120,15 @@ data class Cipher(
 /**
  * EncryptedCipher is a representation of cipher stored in the database.
  * The data is encrypted and can only be decrypted with the encryption key.
- * @param id The unique identifier of the cipher.
- * @param owner The unique identifier of the owner of the cipher.
- * @param type The type of the cipher.
- * @param data The encrypted data of the cipher.
- * @param collection The unique identifier of the collection the cipher belongs to.
- * @param favorite Whether the cipher is marked as favorite.
- * @param rePrompt Whether the password should be re-prompted. (Only UI-related)
- * @param created The date the cipher was created.
- * @param lastModified The date the cipher was last modified.
+ * @property id The unique identifier of the cipher.
+ * @property owner The unique identifier of the owner of the cipher.
+ * @property type The type of the cipher.
+ * @property data The encrypted data of the cipher.
+ * @property collection The unique identifier of the collection the cipher belongs to.
+ * @property favorite Whether the cipher is marked as favorite.
+ * @property rePrompt Whether the password should be re-prompted. (Only UI-related)
+ * @property created The date the cipher was created.
+ * @property lastModified The date the cipher was last modified.
  * @see Cipher
  */
 @Serializable
@@ -230,13 +232,13 @@ enum class CipherType {
 
 /**
  * LoginCipherData is a representation of the login data of a login cipher.
- * @param name The name of the login cipher.
- * @param username The username of the login cipher.
- * @param password The password of the login cipher.
- * @param uris The list of URIs of the login cipher.
- * @param twoFactor The two-factor authentication code of the login cipher.
- * @param notes The notes of the login cipher.
- * @param customFields The list of custom fields of the login cipher.
+ * @property name The name of the login cipher.
+ * @property username The username of the login cipher.
+ * @property password The password of the login cipher.
+ * @property uris The list of URIs of the login cipher.
+ * @property twoFactor The two-factor authentication code of the login cipher.
+ * @property notes The notes of the login cipher.
+ * @property customFields The list of custom fields of the login cipher.
  */
 @Serializable
 data class LoginCipherData(
