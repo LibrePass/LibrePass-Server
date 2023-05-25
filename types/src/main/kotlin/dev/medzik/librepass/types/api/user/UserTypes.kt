@@ -6,13 +6,13 @@ import kotlinx.serialization.Serializable
 
 /**
  * Request for changing user password.
- * @param oldPassword Old user password. (hashed)
- * @param newPassword New user password. (hashed)
- * @param newEncryptionKey New user encryption key. (encrypted using new password)
- * @param parallelism Argon2id parallelism.
- * @param memory Argon2id memory.
- * @param iterations Argon2id iterations.
- * @param version Argon2id version.
+ * @property oldPassword Old user password. (hashed)
+ * @property newPassword New user password. (hashed)
+ * @property newEncryptionKey New user encryption key. (encrypted using new password)
+ * @property parallelism Argon2id parallelism.
+ * @property memory Argon2id memory.
+ * @property iterations Argon2id iterations.
+ * @property version Argon2id version.
  */
 @Serializable
 data class ChangePasswordRequest(
@@ -28,9 +28,9 @@ data class ChangePasswordRequest(
 
 /**
  * Response of user secrets.
- * @param encryptionKey User encryption key. (encrypted using user password)
- * @param publicKey User public key.
- * @param privateKey User private key. (encrypted using encryption key)
+ * @property encryptionKey User encryption key. (encrypted using user password)
+ * @property publicKey User public key.
+ * @property privateKey User private key. (encrypted using encryption key)
  */
 @Serializable
 data class UserSecretsResponse(
