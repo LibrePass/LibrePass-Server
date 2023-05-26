@@ -11,6 +11,11 @@ import org.apache.commons.codec.binary.Hex
  */
 object Cryptography {
     /**
+     * RSA key size.
+     */
+    const val RSAKeySize = 4096
+
+    /**
      * Number of iterations for the final password hash.
      */
     private const val FinalHashIterations = 500
