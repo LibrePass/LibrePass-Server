@@ -9,12 +9,11 @@ import java.util.*
 @Entity
 @EntityListeners(AuditingEntityListener::class)
 @Table(name = "users")
-data class UserTable(
+data class UserTable (
     @Id
     val id: UUID = UUID.randomUUID(),
 
-    @Lob
-    @Column(unique = true)
+    @Column(unique = true, columnDefinition = "TEXT")
     val email: String,
     val emailVerified: Boolean = false,
     val emailVerificationCode: String? = null,
@@ -26,20 +25,20 @@ data class UserTable(
     val iterations: Int,
     val version: Int,
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     val password: String,
-    @Lob
+    @Column(columnDefinition = "TEXT")
     val passwordHint: String? = null,
     @Temporal(TemporalType.TIMESTAMP)
     val lastPasswordChange: Date = Date(),
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     val encryptionKey: String,
 
     // RSA key pair
-    @Lob
+    @Column(columnDefinition = "TEXT")
     val publicKey: String,
-    @Lob
+    @Column(columnDefinition = "TEXT")
     val privateKey: String,
 
     @CreatedDate
