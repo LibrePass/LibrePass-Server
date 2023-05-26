@@ -23,7 +23,7 @@ data class CipherTable(
     val owner: UUID,
 
     val type: Int,
-    @Lob
+    @Column(columnDefinition = "TEXT")
     val data: String,
 
     val favorite: Boolean = false,
