@@ -7,6 +7,7 @@ import dev.medzik.librepass.client.Client
 import dev.medzik.librepass.client.DEFAULT_API_URL
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
+import dev.medzik.librepass.client.utils.Cryptography.RSAKeySize
 import dev.medzik.librepass.client.utils.Cryptography.computeBasePasswordHash
 import dev.medzik.librepass.client.utils.Cryptography.computeFinalPasswordHash
 import dev.medzik.librepass.client.utils.Cryptography.computeHashes
@@ -45,7 +46,7 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
         val encryptedEncryptionKey = AesCbc.encrypt(encryptionKey, passwordHashes.basePasswordHashString)
 
         // generate a new rsa keypair for the user
-        val rsaKeypair = RSA.generateKeyPair(2048)
+        val rsaKeypair = RSA.generateKeyPair(RSAKeySize)
 
         // get the public and private key as string
         val rsaPublicKey = RSA.KeyUtils.getPublicKeyString(rsaKeypair.public)
