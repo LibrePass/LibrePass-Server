@@ -1,10 +1,10 @@
 package dev.medzik.librepass.client.api.v1
 
-import dev.medzik.libcrypto.Pbkdf2
 import dev.medzik.libcrypto.Salt
-import dev.medzik.librepass.types.Cipher
-import dev.medzik.librepass.types.CipherType
-import dev.medzik.librepass.types.LoginCipherData
+import dev.medzik.librepass.types.cipher.Cipher
+import dev.medzik.librepass.types.cipher.CipherType
+import dev.medzik.librepass.types.cipher.data.CipherLoginData
+import org.apache.commons.codec.binary.Hex
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -15,7 +15,7 @@ import kotlin.test.assertNotEquals
 
 class CipherClientTests {
     // NOTE: This is a test key, do not use it in production
-    private val encryptionKey = Pbkdf2(100).sha256("encryptionKey", Salt.generate(16))
+    private val encryptionKey = Hex.encodeHexString(Salt.generate(32))
 
     private lateinit var cipherClient: CipherClient
     private lateinit var userId: UUID
@@ -57,15 +57,13 @@ class CipherClientTests {
 
     @Test
     fun insertCipher() {
-        val cipherData = LoginCipherData(
-            name = "test_cipher"
-        )
-
         val cipher = Cipher(
             id = UUID.randomUUID(),
             owner = userId,
             type = CipherType.Login,
-            loginData = cipherData
+            loginData = CipherLoginData(
+                name = "test_cipher"
+            )
         )
 
         val response = cipherClient.insert(cipher, encryptionKey)
