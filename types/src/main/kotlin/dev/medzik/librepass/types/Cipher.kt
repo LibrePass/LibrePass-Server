@@ -224,10 +224,23 @@ data class LoginCipherData(
     val name: String,
     val username: String? = null,
     val password: String? = null,
+    val passwordHistory: List<PasswordHistory>? = null,
     val uris: List<String>? = null,
     val twoFactor: String? = null,
     val notes: String? = null,
     val fields: List<CipherField>? = null
+)
+
+/**
+ * PasswordHistory is a representation of the password history of a login cipher.
+ * @param password The password of the login cipher.
+ * @param lastUsed The date the password was last used.
+ */
+@Serializable
+data class PasswordHistory(
+    val password: String,
+    @Serializable(with = DateSerializer::class)
+    val lastUsed: Date
 )
 
 /**
