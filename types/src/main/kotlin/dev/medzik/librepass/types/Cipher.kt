@@ -3,7 +3,13 @@ package dev.medzik.librepass.types
 import dev.medzik.libcrypto.AesCbc
 import dev.medzik.librepass.types.api.serializers.DateSerializer
 import dev.medzik.librepass.types.api.serializers.UUIDSerializer
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
 import java.util.*
 
@@ -56,65 +62,43 @@ data class Cipher(
             throw IllegalArgumentException("Only card cipher can have card data")
     }
 
-    companion object {
-        /**
-         * Creates a new [Cipher] object from the [EncryptedCipher].
-         * @param encryptedCipher The [EncryptedCipher] to decrypt.
-         * @param encryptionKey The key to decrypt the cipher with.
-         * @return The decrypted cipher.
-         */
-        fun from(encryptedCipher: EncryptedCipher, encryptionKey: String): Cipher {
-            val type = CipherType.from(encryptedCipher.type)
-
-            var loginData: LoginCipherData? = null
-            var secureNoteData: SecureNoteCipherData? = null
-            var cardData: CardCipherData? = null
-
-            // decrypt the cipher data
-            when (type) {
-                CipherType.Login -> {
-                    loginData = Json.decodeFromString(
-                        LoginCipherData.serializer(),
-                        encryptedCipher.decrypt(encryptionKey)
-                    )
-                }
-                CipherType.SecureNote -> {
-                    secureNoteData = Json.decodeFromString(
-                        SecureNoteCipherData.serializer(),
-                        encryptedCipher.decrypt(encryptionKey)
-                    )
-                }
-                CipherType.Card -> {
-                    cardData = Json.decodeFromString(
-                        CardCipherData.serializer(),
-                        encryptedCipher.decrypt(encryptionKey)
-                    )
-                }
-            }
-
-            return Cipher(
-                id = encryptedCipher.id,
-                owner = encryptedCipher.owner,
-                type = type,
-                loginData = loginData,
-                secureNoteData = secureNoteData,
-                cardData = cardData,
-                collection = encryptedCipher.collection,
-                favorite = encryptedCipher.favorite,
-                rePrompt = encryptedCipher.rePrompt,
-                created = encryptedCipher.created,
-                lastModified = encryptedCipher.lastModified
-            )
-        }
-    }
-
     /**
-     * Converts the cipher to an [EncryptedCipher].
-     * @param encryptionKey The key to encrypt the cipher with.
-     * @return The encrypted cipher.
+     * Creates a new [Cipher] object from the [EncryptedCipher].
+     * @param encryptedCipher The [EncryptedCipher] to decrypt.
+     * @param encryptionKey The key to decrypt the cipher with.
+     * @return The decrypted cipher.
      */
-    fun toEncryptedCipher(encryptionKey: String) =
-        EncryptedCipher.from(this, encryptionKey)
+    constructor(
+        encryptedCipher: EncryptedCipher,
+        encryptionKey: String
+    ) : this(
+        id = encryptedCipher.id,
+        owner = encryptedCipher.owner,
+        type = CipherType.from(encryptedCipher.type),
+        loginData = if (encryptedCipher.type == CipherType.Login.ordinal) {
+            Json.decodeFromString(
+                LoginCipherData.serializer(),
+                encryptedCipher.decrypt(encryptionKey)
+            )
+        } else null,
+        secureNoteData = if (encryptedCipher.type == CipherType.SecureNote.ordinal) {
+            Json.decodeFromString(
+                SecureNoteCipherData.serializer(),
+                encryptedCipher.decrypt(encryptionKey)
+            )
+        } else null,
+        cardData = if (encryptedCipher.type == CipherType.Card.ordinal) {
+            Json.decodeFromString(
+                CardCipherData.serializer(),
+                encryptedCipher.decrypt(encryptionKey)
+            )
+        } else null,
+        collection = encryptedCipher.collection,
+        favorite = encryptedCipher.favorite,
+        rePrompt = encryptedCipher.rePrompt,
+        created = encryptedCipher.created,
+        lastModified = encryptedCipher.lastModified
+    )
 }
 
 /**
@@ -148,6 +132,34 @@ data class EncryptedCipher(
     @Serializable(with = DateSerializer::class)
     val lastModified: Date? = null
 ) {
+    /**
+     * Creates a new [EncryptedCipher] object from the [Cipher].
+     * @param cipher The [Cipher] to encrypt.
+     * @param encryptionKey The key to encrypt the cipher with.
+     * @return The encrypted cipher.
+     */
+    constructor(
+        cipher: Cipher,
+        encryptionKey: String
+    ) : this(
+        id = cipher.id,
+        owner = cipher.owner,
+        type = cipher.type.ordinal,
+        data = AesCbc.encrypt(
+            when (cipher.type) {
+                CipherType.Login -> Json.encodeToString(LoginCipherData.serializer(), cipher.loginData!!)
+                CipherType.SecureNote -> Json.encodeToString(SecureNoteCipherData.serializer(), cipher.secureNoteData!!)
+                CipherType.Card -> Json.encodeToString(CardCipherData.serializer(), cipher.cardData!!)
+            },
+            encryptionKey
+        ),
+        collection = cipher.collection,
+        favorite = cipher.favorite,
+        rePrompt = cipher.rePrompt,
+        created = cipher.created,
+        lastModified = cipher.lastModified
+    )
+
     companion object {
         /**
          * Creates a new [EncryptedCipher] object from the JSON string.
@@ -156,45 +168,6 @@ data class EncryptedCipher(
          */
         fun from(cipher: String) =
             Json.decodeFromString(serializer(), cipher)
-
-        /**
-         * Creates a new [EncryptedCipher] object from the [Cipher].
-         * @param cipher The [Cipher] to encrypt.
-         * @param encryptionKey The key to encrypt the cipher with.
-         * @return The encrypted cipher.
-         */
-        fun from(cipher: Cipher, encryptionKey: String): EncryptedCipher {
-            val type = cipher.type.ordinal
-
-            var data = ""
-
-            when (type) {
-                CipherType.Login.ordinal -> {
-                    data = Json.encodeToString(LoginCipherData.serializer(), cipher.loginData!!)
-                }
-                CipherType.SecureNote.ordinal -> {
-                    data = Json.encodeToString(SecureNoteCipherData.serializer(), cipher.secureNoteData!!)
-                }
-                CipherType.Card.ordinal -> {
-                    data = Json.encodeToString(CardCipherData.serializer(), cipher.cardData!!)
-                }
-            }
-
-            if (data.isEmpty())
-                throw IllegalArgumentException("Cipher data is empty")
-
-            return EncryptedCipher(
-                id = cipher.id,
-                owner = cipher.owner,
-                type = type,
-                data = AesCbc.encrypt(data, encryptionKey),
-                collection = cipher.collection,
-                favorite = cipher.favorite,
-                rePrompt = cipher.rePrompt,
-                created = cipher.created,
-                lastModified = cipher.lastModified
-            )
-        }
     }
 
     /**
@@ -238,7 +211,7 @@ enum class CipherType {
  * @property uris The list of URIs of the login cipher.
  * @property twoFactor The two-factor authentication code of the login cipher.
  * @property notes The notes of the login cipher.
- * @property customFields The list of custom fields of the login cipher.
+ * @property fields The list of custom fields.
  */
 @Serializable
 data class LoginCipherData(
@@ -248,18 +221,20 @@ data class LoginCipherData(
     val uris: List<String>? = null,
     val twoFactor: String? = null,
     val notes: String? = null,
-    val customFields: List<Map<String, String>>? = null
+    val fields: List<CipherField>? = null
 )
 
 /**
  * SecureNoteCipherData is a representation of the note data of a secure note cipher.
  * @param title The title of the secure note cipher.
  * @param note The note of the secure note cipher.
+ * @param fields The list of custom fields.
  */
 @Serializable
 data class SecureNoteCipherData(
     val title: String,
-    val note: String
+    val note: String,
+    val fields: List<CipherField>? = null
 )
 
 /**
@@ -271,7 +246,7 @@ data class SecureNoteCipherData(
  * @param expYear The expiration year of the card cipher.
  * @param code The code of the card cipher.
  * @param notes The notes of the card cipher.
- * @param customFields The list of custom fields of the card cipher.
+ * @param fields The list of custom fields.
  */
 @Serializable
 data class CardCipherData(
@@ -282,5 +257,42 @@ data class CardCipherData(
     val expYear: Int? = null,
     val code: String? = null,
     val notes: String? = null,
-    val customFields: List<Map<String, String>>? = null
+    val fields: List<CipherField>? = null
 )
+
+/**
+ * CipherField is a representation of a custom field of a cipher.
+ * @property name The name of the custom field.
+ * @property type The type of the custom field.
+ * @property value The value of the custom field.
+ * @see CipherFieldType
+ */
+@Serializable
+data class CipherField(
+    val name: String,
+    val type: CipherFieldType,
+    val value: String
+)
+
+/**
+ * CipherFieldType is an enum class that represents the type of cipher field.
+ */
+@Serializable(with = CipherFieldTypeSerializer::class)
+enum class CipherFieldType {
+    Text,
+    Hidden
+}
+
+/**
+ * Serializer for [CipherFieldType] enum class. Serializes to and from [Int].
+ */
+private object CipherFieldTypeSerializer : KSerializer<CipherFieldType> {
+    override val descriptor: SerialDescriptor =
+        PrimitiveSerialDescriptor("CipherFieldType", PrimitiveKind.INT)
+
+    override fun serialize(encoder: Encoder, value: CipherFieldType) =
+        encoder.encodeInt(value.ordinal)
+
+    override fun deserialize(decoder: Decoder): CipherFieldType =
+        CipherFieldType.values()[decoder.decodeInt()]
+}
