@@ -1,12 +1,21 @@
 package dev.medzik.librepass.types
 
 import dev.medzik.libcrypto.Salt
+import dev.medzik.librepass.types.cipher.Cipher
+import dev.medzik.librepass.types.cipher.CipherType
+import dev.medzik.librepass.types.cipher.EncryptedCipher
+import dev.medzik.librepass.types.cipher.data.CipherField
+import dev.medzik.librepass.types.cipher.data.CipherFieldType
+import dev.medzik.librepass.types.cipher.data.CipherLoginData
+import net.datafaker.Faker
 import org.apache.commons.codec.binary.Hex
 import org.junit.jupiter.api.Test
 import java.util.*
 import kotlin.test.assertEquals
 
 class CipherTests {
+    private val faker = Faker()
+
     // generate encryption key
     private val encryptionKey = Hex.encodeHexString(Salt.generate(32))
 
@@ -15,9 +24,10 @@ class CipherTests {
         id = UUID.randomUUID(),
         owner = UUID.randomUUID(),
         type = CipherType.Login,
-        loginData = LoginCipherData(
-            name = "Test Cipher",
-            username = "test",
+        loginData = CipherLoginData(
+            name = faker.app().name(),
+            username = faker.internet().emailAddress(),
+            password = faker.internet().password(),
             fields = listOf(
                 CipherField(
                     name = "test",
