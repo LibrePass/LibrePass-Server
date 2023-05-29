@@ -13,7 +13,11 @@ import java.util.*
  * @see Date
  */
 object DateSerializer : KSerializer<Date> {
-    override val descriptor = PrimitiveSerialDescriptor("Date", PrimitiveKind.LONG)
-    override fun serialize(encoder: Encoder, value: Date) = encoder.encodeLong(value.time / 1000)
-    override fun deserialize(decoder: Decoder): Date = Date(decoder.decodeLong() * 1000)
+    override val descriptor =
+        PrimitiveSerialDescriptor("Date", PrimitiveKind.LONG)
+
+    override fun serialize(encoder: Encoder, value: Date) =
+        encoder.encodeLong(value.time / 1000)
+
+    override fun deserialize(decoder: Decoder) = Date(decoder.decodeLong() * 1000)
 }
