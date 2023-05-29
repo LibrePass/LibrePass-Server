@@ -9,8 +9,8 @@
     </parent>
 
     <artifactId>server</artifactId>
-    <name>LibrePass Server infrastructure</name>
-    <description>LibrePass Server infrastructure with Spring Boot framework</description>
+    <name>LibrePass Server</name>
+    <description>LibrePass Server infrastructure</description>
 
     <properties>
         <java.version>17</java.version>
@@ -138,6 +138,7 @@
                 <executions>
                     <execution>
                         <goals>
+                            <!-- Re-package the application to produce a single executable JAR file -->
                             <goal>repackage</goal>
                         </goals>
                     </execution>
