@@ -1,8 +1,8 @@
 package dev.medzik.librepass.server.database
 
-import dev.medzik.librepass.types.EncryptedCipher
 import dev.medzik.librepass.types.api.serializers.DateSerializer
 import dev.medzik.librepass.types.api.serializers.UUIDSerializer
+import dev.medzik.librepass.types.cipher.EncryptedCipher
 import jakarta.persistence.*
 import kotlinx.serialization.Serializable
 import org.springframework.data.annotation.CreatedDate
