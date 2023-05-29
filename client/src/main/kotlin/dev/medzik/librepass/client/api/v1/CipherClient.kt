@@ -73,7 +73,12 @@ class CipherClient(
      */
     @Throws(ClientException::class, ApiException::class)
     fun insert(cipher: Cipher, encryptionKey: String): InsertResponse {
-        return insert(cipher.toEncryptedCipher(encryptionKey))
+        return insert(
+            EncryptedCipher(
+                cipher = cipher,
+                encryptionKey = encryptionKey
+            )
+        )
     }
 
     /**
@@ -137,7 +142,12 @@ class CipherClient(
      */
     @Throws(ClientException::class, ApiException::class)
     fun update(cipher: Cipher, encryptionKey: String): InsertResponse {
-        return update(cipher.toEncryptedCipher(encryptionKey))
+        return update(
+            EncryptedCipher(
+                cipher = cipher,
+                encryptionKey = encryptionKey
+            )
+        )
     }
 
     /**
