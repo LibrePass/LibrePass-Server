@@ -8,7 +8,6 @@ import java.util.*
 
 /**
  * Cipher is a representation of a single cipher entry.
- * It contains all the information about the cipher.
  * @property id The unique identifier of the cipher.
  * @property owner The unique identifier of the owner of the cipher.
  * @property type The type of the cipher.
