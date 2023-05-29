@@ -23,6 +23,7 @@ import java.util.*
  * @property collection The unique identifier of the collection the cipher belongs to.
  * @property favorite Whether the cipher is marked as favorite.
  * @property rePrompt Whether the password should be re-prompted. (Only UI-related)
+ * @property version The version of the cipher. (Currently 1)
  * @property created The date the cipher was created.
  * @property lastModified The date the cipher was last modified.
  * @see LoginCipherData
@@ -39,6 +40,7 @@ data class Cipher(
     val collection: UUID? = null,
     val favorite: Boolean = false,
     val rePrompt: Boolean = false,
+    val version: Int = 1,
     val created: Date? = null,
     val lastModified: Date? = null
 ) {
@@ -96,6 +98,7 @@ data class Cipher(
         collection = encryptedCipher.collection,
         favorite = encryptedCipher.favorite,
         rePrompt = encryptedCipher.rePrompt,
+        version = encryptedCipher.version,
         created = encryptedCipher.created,
         lastModified = encryptedCipher.lastModified
     )
@@ -111,6 +114,7 @@ data class Cipher(
  * @property collection The unique identifier of the collection the cipher belongs to.
  * @property favorite Whether the cipher is marked as favorite.
  * @property rePrompt Whether the password should be re-prompted. (Only UI-related)
+ * @property version The version of the cipher. (Currently 1)
  * @property created The date the cipher was created.
  * @property lastModified The date the cipher was last modified.
  * @see Cipher
@@ -127,6 +131,7 @@ data class EncryptedCipher(
     val collection: UUID? = null,
     val favorite: Boolean = false,
     val rePrompt: Boolean = false,
+    val version: Int = 1,
     @Serializable(with = DateSerializer::class)
     val created: Date? = null,
     @Serializable(with = DateSerializer::class)
@@ -156,6 +161,7 @@ data class EncryptedCipher(
         collection = cipher.collection,
         favorite = cipher.favorite,
         rePrompt = cipher.rePrompt,
+        version = cipher.version,
         created = cipher.created,
         lastModified = cipher.lastModified
     )

@@ -31,6 +31,8 @@ data class CipherTable(
     val collection: UUID? = null,
     val rePrompt: Boolean = false,
 
+    val version: Int = 1,
+
     @CreatedDate
     @Serializable(with = DateSerializer::class)
     val created: Date = Date(),
@@ -46,6 +48,7 @@ data class CipherTable(
         favorite = cipher.favorite,
         collection = cipher.collection,
         rePrompt = cipher.rePrompt,
+        version = cipher.version,
         created = cipher.created ?: Date(),
         lastModified = cipher.lastModified ?: Date()
     )
@@ -58,6 +61,7 @@ data class CipherTable(
         favorite = favorite,
         collection = collection,
         rePrompt = rePrompt,
+        version = version,
         created = created,
         lastModified = lastModified
     )
