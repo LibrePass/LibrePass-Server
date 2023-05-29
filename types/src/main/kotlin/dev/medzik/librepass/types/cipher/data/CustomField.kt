@@ -4,7 +4,6 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
-import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
@@ -35,12 +34,12 @@ enum class CipherFieldType {
  * Serializer for [CipherFieldType] enum class. Serializes to and from [Int].
  */
 private object CipherFieldTypeSerializer : KSerializer<CipherFieldType> {
-    override val descriptor: SerialDescriptor =
+    override val descriptor =
         PrimitiveSerialDescriptor("CipherFieldType", PrimitiveKind.INT)
 
     override fun serialize(encoder: Encoder, value: CipherFieldType) =
         encoder.encodeInt(value.ordinal)
 
-    override fun deserialize(decoder: Decoder): CipherFieldType =
+    override fun deserialize(decoder: Decoder) =
         CipherFieldType.values()[decoder.decodeInt()]
 }
