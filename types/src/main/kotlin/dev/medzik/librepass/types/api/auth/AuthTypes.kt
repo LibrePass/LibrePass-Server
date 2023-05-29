@@ -93,4 +93,3 @@ data class UserCredentials(
     val accessToken: String,
     val encryptionKey: String
 )
-
