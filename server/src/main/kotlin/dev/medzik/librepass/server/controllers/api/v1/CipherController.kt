@@ -26,7 +26,8 @@ class CipherController @Autowired constructor(
         @AuthorizedUser user: UserTable?,
         @RequestBody encryptedCipher: EncryptedCipher
     ): Response {
-        if (user == null) return ResponseError.Unauthorized
+        if (user == null)
+            return ResponseError.Unauthorized
 
         return try {
             val cipher = cipherRepository.save(CipherTable(encryptedCipher))
@@ -42,7 +43,8 @@ class CipherController @Autowired constructor(
 
     @GetMapping
     fun getAllCiphers(@AuthorizedUser user: UserTable?): Response {
-        if (user == null) return ResponseError.Unauthorized
+        if (user == null)
+            return ResponseError.Unauthorized
 
         // get all ciphers owned by user
         val ciphers = cipherRepository.getAll(owner = user.id)
@@ -59,7 +61,8 @@ class CipherController @Autowired constructor(
         @AuthorizedUser user: UserTable?,
         @RequestParam("lastSync") lastSyncUnixTimestamp: Long
     ): Response {
-        if (user == null) return ResponseError.Unauthorized
+        if (user == null)
+            return ResponseError.Unauthorized
 
         // convert timestamp to date
         val lastSyncDate = Date(lastSyncUnixTimestamp * 1000)
@@ -87,7 +90,8 @@ class CipherController @Autowired constructor(
         @AuthorizedUser user: UserTable?,
         @PathVariable id: UUID
     ): Response {
-        if (user == null) return ResponseError.Unauthorized
+        if (user == null)
+            return ResponseError.Unauthorized
 
         // get cipher by id
         val cipher = cipherRepository.findById(id).orElse(null)
@@ -109,7 +113,8 @@ class CipherController @Autowired constructor(
         @PathVariable id: UUID,
         @RequestBody encryptedCipher: EncryptedCipher
     ): Response {
-        if (user == null) return ResponseError.Unauthorized
+        if (user == null)
+            return ResponseError.Unauthorized
 
         // get cipher table from encrypted cipher
         val cipher = CipherTable(encryptedCipher)
@@ -132,7 +137,8 @@ class CipherController @Autowired constructor(
         @AuthorizedUser user: UserTable?,
         @PathVariable id: UUID
     ): Response {
-        if (user == null) return ResponseError.Unauthorized
+        if (user == null)
+            return ResponseError.Unauthorized
 
         // check if cipher exists and is owned by user (if not, return 404)
         if (!checkIfCipherExistsAndOwnedBy(id, user.id))
