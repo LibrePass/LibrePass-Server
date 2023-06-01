@@ -1,25 +1,27 @@
 package dev.medzik.librepass.client.api.v1
 
 import dev.medzik.librepass.client.utils.Cryptography.DefaultArgon2idParameters
-import net.datafaker.Faker
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 
 class AuthClientTests {
-    private val authClient = AuthClient("http://localhost:8080")
+    companion object {
+        private val authClient = AuthClient("http://localhost:8080")
 
-    private val email = "_test_" + Faker().internet().emailAddress()
-    private val password = Faker().internet().password()
+        private const val email = "_test_user@example.com"
+        private const val password = "_test_user@example.com"
 
-    @Test
-    fun register() {
-        authClient.register(email, password)
-        // wait for 1 second to prevent unauthorized error
-        Thread.sleep(1000)
+        @BeforeAll
+        @JvmStatic
+        fun register() {
+            authClient.register(email, password)
+            // wait for 1 second to prevent unauthorized error
+            Thread.sleep(1000)
+        }
     }
 
     @Test
     fun `get user argon2id parameters`() {
-        register() // register user first
         val parameters = authClient.getUserArgon2idParameters(email)
 
         assert(parameters.parallelism == DefaultArgon2idParameters.parallelism)
@@ -30,7 +32,6 @@ class AuthClientTests {
 
     @Test
     fun login() {
-        register() // register user first
         authClient.login(email, password)
     }
 }

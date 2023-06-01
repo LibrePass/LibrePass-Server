@@ -33,6 +33,14 @@ class AuthController @Autowired constructor(
     private val authComponent: AuthComponent,
     private val emailService: EmailService
 ) {
+    @Value("\${librepass.api.rateLimit.enabled}")
+    private val rateLimitEnabled = true
+
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
+    // coroutine scope
+    private val scope = CoroutineScope(Dispatchers.IO)
+
     /**
      * Rate limit for login endpoint per IP address.
      */
@@ -50,14 +58,7 @@ class AuthController @Autowired constructor(
         }
     }
 
-    @Value("\${librepass.api.rateLimit.enabled}")
-    private val rateLimitEnabled = true
-
     private val rateLimit = AuthRateLimitConfig()
-
-    private val logger = LoggerFactory.getLogger(this::class.java)
-
-    val scope = CoroutineScope(Dispatchers.IO)
 
     @PostMapping("/register")
     fun register(
@@ -205,8 +206,14 @@ class AuthController @Autowired constructor(
         if (user.emailVerificationCodeExpiresAt?.before(Date()) == true)
             return ResponseError.InvalidBody
 
+        // check if user email is already verified
+        if (user.emailVerified)
+            return ResponseError.InvalidBody
+
         // set email as verified
-        userRepository.save(user.copy(emailVerified = true))
+        userRepository.save(
+            user.copy(emailVerified = true)
+        )
 
         return ResponseSuccess.OK
     }
