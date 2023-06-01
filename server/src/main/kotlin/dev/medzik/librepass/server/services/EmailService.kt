@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Service
 
+/**
+ * Service to send emails.
+ */
 @Service
 class EmailService {
     @Autowired

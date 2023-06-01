@@ -31,31 +31,32 @@ class UserController @Autowired constructor(
         @AuthorizedUser user: UserTable?,
         @RequestBody body: ChangePasswordRequest
     ): Response {
-        if (user == null) return ResponseError.Unauthorized
+        if (user == null)
+            return ResponseError.Unauthorized
 
         // compare old password with password hash in database
         // if they match, update password hash with new password hash
-        if (!Argon2HashingFunction.verify(body.oldPassword, user.password)) {
+        if (!Argon2HashingFunction.verify(body.oldPassword, user.password))
             return ResponseError.InvalidBody
-        }
 
-        // update password hash in database
+        // compute new password hash
         val passwordSalt = Salt.generate(32)
         val newPasswordHash = Argon2DefaultHasher.hash(body.newPassword, passwordSalt)
 
-        val newUser = user.copy(
-            password = newPasswordHash.toString(),
-            encryptionKey = body.newEncryptionKey,
-            // argon2id parameters
-            parallelism = body.parallelism,
-            memory = body.memory,
-            iterations = body.iterations,
-            version = body.version,
-            // set last password change date
-            lastPasswordChange = Date()
+        // update user in database
+        userRepository.save(
+            user.copy(
+                password = newPasswordHash.toString(),
+                encryptionKey = body.newEncryptionKey,
+                // argon2id parameters
+                parallelism = body.parallelism,
+                memory = body.memory,
+                iterations = body.iterations,
+                version = body.version,
+                // set last password change date
+                lastPasswordChange = Date()
+            )
         )
-
-        userRepository.save(newUser)
 
         return ResponseSuccess.OK
     }
@@ -66,7 +67,8 @@ class UserController @Autowired constructor(
      */
     @GetMapping("/secrets")
     fun getSecrets(@AuthorizedUser user: UserTable?): Response {
-        if (user == null) return ResponseError.Unauthorized
+        if (user == null)
+            return ResponseError.Unauthorized
 
         val secrets = UserSecretsResponse(
             encryptionKey = user.encryptionKey,
