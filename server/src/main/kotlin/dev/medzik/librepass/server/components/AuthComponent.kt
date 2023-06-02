@@ -12,10 +12,6 @@ import java.security.PrivateKey
 import java.security.PublicKey
 import java.util.*
 
-/**
- * Type of the token.
- * @param expirationTime Time in milliseconds for which the token is valid.
- */
 enum class TokenType(val expirationTime: Long) {
     ACCESS_TOKEN(90 * 24 * 60 * 60 * 1000L), // 90 days
 }
