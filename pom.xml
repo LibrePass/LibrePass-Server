@@ -16,6 +16,9 @@
             <name>M3DZIK</name>
             <email>me@medzik.dev</email>
         </developer>
+        <developer>
+            <name>rafi612</name>
+        </developer>
     </developers>
 
     <scm>
@@ -38,8 +41,10 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <java.modules.version>9</java.modules.version>
+
+        <maven.compiler.source>9</maven.compiler.source>
+        <maven.compiler.target>9</maven.compiler.target>
 
         <kotlin.version>1.8.21</kotlin.version>
         <serialization.version>1.5.1</serialization.version>
@@ -48,6 +53,9 @@
         <medzik-libcrypto.version>0.3.1</medzik-libcrypto.version>
 
         <junit.jupiter.version>5.9.3</junit.jupiter.version>
+        <datafaker.version>1.9.0</datafaker.version>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencies>
@@ -76,7 +84,7 @@
         <!-- Kotlinx Serialization -->
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
-            <artifactId>kotlinx-serialization-json</artifactId>
+            <artifactId>kotlinx-serialization-json-jvm</artifactId>
             <version>${serialization.version}</version>
         </dependency>
 
@@ -132,6 +140,10 @@
                     <compilerPlugins>
                         <plugin>kotlinx-serialization</plugin>
                     </compilerPlugins>
+                    <sourceDirs>
+                        <sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
+                        <sourceDir>${project.basedir}/src/main/java</sourceDir>
+                    </sourceDirs>
                 </configuration>
 
                 <dependencies>
@@ -141,6 +153,36 @@
                         <version>${kotlin.version}</version>
                     </dependency>
                 </dependencies>
+            </plugin>
+
+            <!-- Java -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.10.1</version>
+                <executions>
+                    <execution>
+                        <id>java-compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <release>${java.modules.version}</release>
+                            <compileSourceRoots>
+                                <compileSourceRoot>${project.basedir}/src/main/kotlin</compileSourceRoot>
+                                <compileSourceRoot>${project.basedir}/src/main/java</compileSourceRoot>
+                            </compileSourceRoots>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>java-test-compile</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
             <!-- Javadoc -->
