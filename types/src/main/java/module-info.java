@@ -1,8 +1,11 @@
 module dev.medzik.librepass.types {
+    // Crypto
     requires dev.medzik.libcrypto;
-    requires kotlinx.serialization.core;
+
+    // Kotlin serialization
     requires kotlinx.serialization.json;
 
+    // export API types
     exports dev.medzik.librepass.types.api;
     exports dev.medzik.librepass.types.api.auth;
     exports dev.medzik.librepass.types.api.cipher;
@@ -10,6 +13,7 @@ module dev.medzik.librepass.types {
     exports dev.medzik.librepass.types.api.serializers;
     exports dev.medzik.librepass.types.api.user;
 
+    // export Cipher types
     exports dev.medzik.librepass.types.cipher;
     exports dev.medzik.librepass.types.cipher.data;
 }
