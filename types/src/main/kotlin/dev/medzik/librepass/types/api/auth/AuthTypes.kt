@@ -1,7 +1,7 @@
 package dev.medzik.librepass.types.api.auth
 
-import com.password4j.types.Argon2
 import dev.medzik.libcrypto.Argon2HashingFunction
+import dev.medzik.libcrypto.Argon2Type
 import dev.medzik.librepass.types.api.serializers.UUIDSerializer
 import kotlinx.serialization.Serializable
 import java.util.*
@@ -62,7 +62,7 @@ data class UserArgon2idParameters(
             parallelism,
             memory,
             iterations,
-            Argon2.ID,
+            Argon2Type.ID,
             version
         )
     }

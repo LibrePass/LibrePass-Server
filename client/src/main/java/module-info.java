@@ -1,5 +1,4 @@
 module dev.medzik.librepass.client {
-    requires password4j;
     requires dev.medzik.libcrypto;
     requires dev.medzik.librepass.types;
     requires okhttp3;
