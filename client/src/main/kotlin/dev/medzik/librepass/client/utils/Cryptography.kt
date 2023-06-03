@@ -16,11 +16,6 @@ object Cryptography {
     const val RSAKeySize = 4096
 
     /**
-     * Number of iterations for the final password hash.
-     */
-    private const val FinalHashIterations = 500
-
-    /**
      * Default argon2id settings.
      */
     val DefaultArgon2idParameters = UserArgon2idParameters(
@@ -65,7 +60,7 @@ object Cryptography {
     fun computeFinalPasswordHash(
         password: String,
         basePassword: String
-    ): String = Pbkdf2(FinalHashIterations).sha256(basePassword, password.toByteArray())
+    ): String = Pbkdf2(1).sha256(basePassword, password.toByteArray())
 
     /**
      * Compute password hashes of the user.
