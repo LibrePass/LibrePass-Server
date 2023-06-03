@@ -1,11 +1,19 @@
 module dev.medzik.librepass.client {
-    requires dev.medzik.libcrypto;
+    // LibrePass Types
     requires dev.medzik.librepass.types;
-    requires okhttp3;
-    requires kotlin.stdlib;
-    requires org.apache.commons.codec;
-    requires transitive kotlinx.serialization.json;
 
+    // Crypto
+    requires dev.medzik.libcrypto;
+
+    // HTTP Client
+    requires okhttp3;
+
+    // Kotlin std library
+    requires kotlin.stdlib;
+    // Kotlin serialization
+    requires kotlinx.serialization.json;
+
+    // export API Client
     exports dev.medzik.librepass.client;
     exports dev.medzik.librepass.client.api.v1;
     exports dev.medzik.librepass.client.errors;
