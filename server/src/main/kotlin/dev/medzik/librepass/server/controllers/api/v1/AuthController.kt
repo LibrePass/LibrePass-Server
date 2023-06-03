@@ -75,7 +75,7 @@ class AuthController @Autowired constructor(
         val passwordSalt = Salt.generate(32)
         val passwordHash = Argon2DefaultHasher.hash(request.password, passwordSalt).toString()
 
-        val verificationToken = UUID.randomUUID().toString()
+        val verificationToken = UUID.randomUUID()
 
         val user = UserTable(
             email = request.email,
@@ -108,7 +108,7 @@ class AuthController @Autowired constructor(
                 emailService.sendEmailVerification(
                     to = request.email,
                     user = user.id.toString(),
-                    code = user.emailVerificationCode!!
+                    code = user.emailVerificationCode.toString()
                 )
             } catch (e: Exception) {
                 logger.error("Failed to send email verification", e)
@@ -187,6 +187,37 @@ class AuthController @Autowired constructor(
     }
 
     /**
+     * Request password hint.
+     */
+    @GetMapping("/passwordHint")
+    fun requestPasswordHint(
+        httpServletRequest: HttpServletRequest,
+        @RequestParam("user") userID: String
+    ): Response {
+        if (rateLimitEnabled) {
+            val ip = httpServletRequest.remoteAddr
+            if (!rateLimit.resolveBucket(ip).tryConsume(1)) {
+                return ResponseError.TooManyRequests
+            }
+        }
+
+        // get user from database
+        val user = userRepository.findById(UUID.fromString(userID)).orElse(null)
+            ?: return ResponseError.InvalidBody
+
+        try {
+            emailService.sendPasswordHint(
+                to = user.email,
+                hint = user.passwordHint
+            )
+        } catch (e: Exception) {
+            logger.error("Failed to send password hint", e)
+        }
+
+        return ResponseSuccess.OK
+    }
+
+    /**
      * Verify email address. This endpoint is called when user clicks on the link in the email.
      */
     @GetMapping("/verifyEmail")
@@ -199,7 +230,7 @@ class AuthController @Autowired constructor(
             ?: return ResponseError.InvalidBody
 
         // check if code is valid
-        if (user.emailVerificationCode != verificationCode)
+        if (user.emailVerificationCode.toString() != verificationCode)
             return ResponseError.InvalidBody
 
         // check if code is expired
