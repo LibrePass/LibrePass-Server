@@ -20,7 +20,9 @@ class EmailService {
     private lateinit var apiDomain: String
 
     // get email template
-    private val emailTemplate = this::class.java.getResource("/templates/email.html")?.readText()
+    private val emailVerificationTemplate = this::class.java.getResource("/templates/email-verification.html")?.readText()
+        ?: throw Exception("Could not read email template")
+    private val passwordHintTemplate = this::class.java.getResource("/templates/password-hint.html")?.readText()
         ?: throw Exception("Could not read email template")
 
     /**
@@ -41,15 +43,24 @@ class EmailService {
 
     /**
      * Email the given address with the given code.
-     * @param to The email address to send the email to.
-     * @param code The code to send.
      */
     fun sendEmailVerification(to: String, user: String, code: String) {
         val url = "https://$apiDomain/api/v1/auth/verifyEmail?user=$user&code=$code"
 
         val subject = "Activate your LibrePass account"
-        val body = emailTemplate
+        val body = emailVerificationTemplate
             .replace("{{url}}", url)
+
+        send(to, subject, body)
+    }
+
+    /**
+     * Email the given address with the password hint.
+     */
+    fun sendPasswordHint(to: String, hint: String?) {
+        val subject = "Your LibrePass password hint"
+        val body = passwordHintTemplate
+            .replace("{{passwordHint}}", hint ?: "[No password hint set]")
 
         send(to, subject, body)
     }

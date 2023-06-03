@@ -126,4 +126,13 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
 
         return Json.decodeFromString(UserCredentials.serializer(), body)
     }
+
+    /**
+     * Request password hint.
+     * @param email email of the user
+     */
+    @Throws(ClientException::class, ApiException::class)
+    fun requestPasswordHint(email: String) {
+        client.get("$API_ENDPOINT/passwordHint?email=$email")
+    }
 }

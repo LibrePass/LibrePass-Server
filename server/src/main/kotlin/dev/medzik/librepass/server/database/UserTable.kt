@@ -16,7 +16,7 @@ data class UserTable (
     @Column(unique = true, columnDefinition = "TEXT")
     val email: String,
     val emailVerified: Boolean = false,
-    val emailVerificationCode: String? = null,
+    val emailVerificationCode: UUID? = null,
     val emailVerificationCodeExpiresAt: Date? = null,
 
     // argon2id parameters
@@ -35,7 +35,7 @@ data class UserTable (
     @Column(columnDefinition = "TEXT")
     val encryptionKey: String,
 
-    // RSA key pair
+    // Asymmetric encryption
     @Column(columnDefinition = "TEXT")
     val publicKey: String,
     @Column(columnDefinition = "TEXT")
