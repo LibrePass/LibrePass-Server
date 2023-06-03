@@ -2,7 +2,6 @@ package dev.medzik.librepass.server.components
 
 import dev.medzik.librepass.server.database.UserRepository
 import dev.medzik.librepass.server.database.UserTable
-import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.MethodParameter
 import org.springframework.stereotype.Component
@@ -22,10 +21,6 @@ import java.util.*
 @Target(AnnotationTarget.VALUE_PARAMETER, AnnotationTarget.ANNOTATION_CLASS)
 annotation class AuthorizedUser
 
-/**
- * Argument resolver for [AuthorizedUser] annotation.
- * @see AuthorizedUser
- */
 @Component
 class AuthorizedUserArgumentResolver @Autowired constructor(
     private val authComponent: AuthComponent,
@@ -42,9 +37,7 @@ class AuthorizedUserArgumentResolver @Autowired constructor(
         webRequest: NativeWebRequest,
         binderFactory: WebDataBinderFactory?
     ): UserTable? {
-        val request = webRequest.getNativeRequest(HttpServletRequest::class.java)
-            ?: return null
-        val authorizationHeader = request.getHeader("Authorization")
+        val authorizationHeader = webRequest.getHeader("Authorization")
             ?: return null
         val token = authorizationHeader.removePrefix("Bearer ")
 
