@@ -59,13 +59,13 @@ object Cryptography {
 
     /**
      * Compute final password hash
-     * @param basePassword base password hash of the user
-     * @param email email of the user
+     * @param password password of the user (not hashed)
+     * @param basePassword base password hash of the user (hashed)
      */
     fun computeFinalPasswordHash(
-        basePassword: String,
-        email: String
-    ): String = Pbkdf2(FinalHashIterations).sha256(basePassword, email.encodeToByteArray())
+        password: String,
+        basePassword: String
+    ): String = Pbkdf2(FinalHashIterations).sha256(basePassword, password.toByteArray())
 
     /**
      * Compute password hashes of the user.

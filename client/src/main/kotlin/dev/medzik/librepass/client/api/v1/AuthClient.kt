@@ -99,21 +99,22 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
             parameters = getUserArgon2idParameters(email)
         )
 
-        return login(email, basePassword)
+        return login(email, password, basePassword)
     }
 
     /**
      * Login a user
      * @param email email of the user
-     * @param basePassword base password of the user
+     * @param password password of the user (not hashed)
+     * @param basePassword base password of the user (hashed)
      * @return [UserCredentials]
      */
     @Throws(ClientException::class, ApiException::class)
-    fun login(email: String, basePassword: Argon2Hash): UserCredentials {
+    fun login(email: String, password: String, basePassword: Argon2Hash): UserCredentials {
         // compute the final password, it is required since the earlier hash is used to encrypt the encryption key
         val finalPassword = computeFinalPasswordHash(
+            password = password,
             basePassword = basePassword.toHexHash(),
-            email = email
         )
 
         val request = LoginRequest(
