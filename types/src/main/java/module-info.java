@@ -1,5 +1,4 @@
 module dev.medzik.librepass.types {
-    requires password4j;
     requires dev.medzik.libcrypto;
     requires kotlinx.serialization.core;
     requires kotlinx.serialization.json;
