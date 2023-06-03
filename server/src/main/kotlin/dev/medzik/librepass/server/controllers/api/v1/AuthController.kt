@@ -3,6 +3,7 @@ package dev.medzik.librepass.server.controllers.api.v1
 import dev.medzik.libcrypto.Argon2HashingFunction
 import dev.medzik.libcrypto.Salt
 import dev.medzik.librepass.server.components.AuthComponent
+import dev.medzik.librepass.server.components.RequestIP
 import dev.medzik.librepass.server.components.TokenType
 import dev.medzik.librepass.server.database.UserRepository
 import dev.medzik.librepass.server.database.UserTable
@@ -15,7 +16,6 @@ import dev.medzik.librepass.types.api.auth.UserCredentials
 import io.github.bucket4j.Bandwidth
 import io.github.bucket4j.Bucket
 import io.github.bucket4j.Refill
-import jakarta.servlet.http.HttpServletRequest
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -62,15 +62,11 @@ class AuthController @Autowired constructor(
 
     @PostMapping("/register")
     fun register(
-        httpServletRequest: HttpServletRequest,
+        @RequestIP ip: String,
         @RequestBody request: RegisterRequest
     ): Response {
-        if (rateLimitEnabled) {
-            val ip = httpServletRequest.remoteAddr
-            if (!rateLimit.resolveBucket(ip).tryConsume(1)) {
-                return ResponseError.TooManyRequests
-            }
-        }
+        if (rateLimitEnabled && !rateLimit.resolveBucket(ip).tryConsume(1))
+            return ResponseError.TooManyRequests
 
         val passwordSalt = Salt.generate(32)
         val passwordHash = Argon2DefaultHasher.hash(request.password, passwordSalt).toString()
@@ -124,15 +120,11 @@ class AuthController @Autowired constructor(
      */
     @GetMapping("/userArgon2Parameters")
     fun getUserArgon2Parameters(
-        httpServletRequest: HttpServletRequest,
+        @RequestIP ip: String,
         @RequestParam("email") email: String
     ): Response {
-        if (rateLimitEnabled) {
-            val ip = httpServletRequest.remoteAddr
-            if (!rateLimit.resolveBucket(ip).tryConsume(1)) {
-                return ResponseError.TooManyRequests
-            }
-        }
+        if (rateLimitEnabled && !rateLimit.resolveBucket(ip).tryConsume(1))
+            return ResponseError.TooManyRequests
 
         // check if email is empty
         if (email.isEmpty())
@@ -154,15 +146,11 @@ class AuthController @Autowired constructor(
 
     @PostMapping("/login")
     fun login(
-        httpServletRequest: HttpServletRequest,
+        @RequestIP ip: String,
         @RequestBody request: LoginRequest
     ): Response {
-        if (rateLimitEnabled) {
-            val ip = httpServletRequest.remoteAddr
-            if (!rateLimit.resolveBucket(ip).tryConsume(1)) {
-                return ResponseError.TooManyRequests
-            }
-        }
+        if (rateLimitEnabled && !rateLimit.resolveBucket(ip).tryConsume(1))
+            return ResponseError.TooManyRequests
 
         // check if email or password is empty
         if (request.email.isEmpty() || request.password.isEmpty())
@@ -191,15 +179,11 @@ class AuthController @Autowired constructor(
      */
     @GetMapping("/passwordHint")
     fun requestPasswordHint(
-        httpServletRequest: HttpServletRequest,
+        @RequestIP ip: String,
         @RequestParam("user") userID: String
     ): Response {
-        if (rateLimitEnabled) {
-            val ip = httpServletRequest.remoteAddr
-            if (!rateLimit.resolveBucket(ip).tryConsume(1)) {
-                return ResponseError.TooManyRequests
-            }
-        }
+        if (rateLimitEnabled && !rateLimit.resolveBucket(ip).tryConsume(1))
+            return ResponseError.TooManyRequests
 
         // get user from database
         val user = userRepository.findById(UUID.fromString(userID)).orElse(null)
