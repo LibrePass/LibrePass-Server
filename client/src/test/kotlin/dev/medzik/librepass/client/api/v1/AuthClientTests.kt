@@ -34,4 +34,9 @@ class AuthClientTests {
     fun login() {
         authClient.login(email, password)
     }
+
+    @Test
+    fun `request password hint`() {
+        authClient.requestPasswordHint(email)
+    }
 }
