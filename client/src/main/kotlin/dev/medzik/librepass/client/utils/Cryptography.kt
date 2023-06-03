@@ -4,7 +4,7 @@ import dev.medzik.libcrypto.Argon2Hash
 import dev.medzik.libcrypto.Pbkdf2
 import dev.medzik.libcrypto.Salt
 import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
-import org.apache.commons.codec.binary.Hex
+import java.util.*
 
 /**
  * Cryptography utilities. Used for password hashing.
@@ -35,7 +35,7 @@ object Cryptography {
      * @return encryption key
      */
     fun createEncryptionKey(): String {
-        val key = Hex.encodeHexString(Salt.generate(16))
+        val key = Base64.getEncoder().encodeToString(Salt.generate(16))
         val salt = Salt.generate(16)
 
         return Pbkdf2(1).sha256(key, salt)
