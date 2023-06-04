@@ -3,7 +3,7 @@ package dev.medzik.librepass.client
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
 import dev.medzik.librepass.types.api.ResponseError
-import dev.medzik.librepass.types.utils.JsonUtils
+import dev.medzik.librepass.client.utils.JsonUtils
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request

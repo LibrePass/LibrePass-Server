@@ -1,4 +1,4 @@
-package dev.medzik.librepass.types.utils
+package dev.medzik.librepass.client.utils
 
 import kotlinx.serialization.InternalSerializationApi
 import kotlinx.serialization.builtins.ListSerializer
