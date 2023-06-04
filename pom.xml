@@ -139,10 +139,12 @@
                     <compilerPlugins>
                         <plugin>kotlinx-serialization</plugin>
                     </compilerPlugins>
-                    <sourceDirs>
-                        <sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
-                        <sourceDir>${project.basedir}/src/main/java</sourceDir>
-                    </sourceDirs>
+<!--                    <sourceDirs>-->
+<!--                        <sourceDir>${project.basedir}/src/main/kotlin</sourceDir>-->
+<!--                        <sourceDir>${project.basedir}/src/main/java</sourceDir>-->
+<!--                        &lt;!&ndash; Tests &ndash;&gt;-->
+<!--                        <sourceDir>${project.basedir}/src/test/kotlin</sourceDir>-->
+<!--                    </sourceDirs>-->
                 </configuration>
 
                 <dependencies>
