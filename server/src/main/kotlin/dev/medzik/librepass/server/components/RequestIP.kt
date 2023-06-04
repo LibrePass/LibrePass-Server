@@ -35,14 +35,7 @@ class RequestIPArgumentResolver @Autowired constructor(
         val request = webRequest.getNativeRequest(HttpServletRequest::class.java)
             ?: return null
 
-        val ip = request.getHeader(ipHeader)
-
-//        // If header is empty, try to get IP from request
-//        if (ip == null || ip.isEmpty()) {
-//            val request = webRequest.getNativeRequest(HttpServletRequest::class.java)
-//            return request?.remoteAddr
-//        }
-
-        return ip
+        return request.getHeader(ipHeader)
+            ?: request.remoteAddr
     }
 }
