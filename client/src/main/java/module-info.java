@@ -10,6 +10,8 @@ module dev.medzik.librepass.client {
 
     // Kotlin std library
     requires kotlin.stdlib;
+    // Kotlin serialization
+    requires kotlinx.serialization.json;
 
     // export API Client
     exports dev.medzik.librepass.client;

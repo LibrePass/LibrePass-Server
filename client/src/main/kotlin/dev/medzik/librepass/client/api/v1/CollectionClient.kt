@@ -7,7 +7,7 @@ import dev.medzik.librepass.client.errors.ClientException
 import dev.medzik.librepass.types.api.cipher.InsertResponse
 import dev.medzik.librepass.types.api.collection.CipherCollection
 import dev.medzik.librepass.types.api.collection.CreateCollectionRequest
-import dev.medzik.librepass.types.utils.JsonUtils
+import dev.medzik.librepass.client.utils.JsonUtils
 import java.util.*
 
 /**

@@ -8,7 +8,7 @@ import dev.medzik.librepass.types.api.cipher.InsertResponse
 import dev.medzik.librepass.types.api.cipher.SyncResponse
 import dev.medzik.librepass.types.cipher.Cipher
 import dev.medzik.librepass.types.cipher.EncryptedCipher
-import dev.medzik.librepass.types.utils.JsonUtils
+import dev.medzik.librepass.client.utils.JsonUtils
 import okhttp3.OkHttpClient
 import java.io.IOException
 import java.util.*
