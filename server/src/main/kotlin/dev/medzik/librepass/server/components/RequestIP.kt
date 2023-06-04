@@ -32,13 +32,16 @@ class RequestIPArgumentResolver @Autowired constructor(
         webRequest: NativeWebRequest,
         binderFactory: WebDataBinderFactory?
     ): String? {
-        val ip = webRequest.getHeader(ipHeader)
+        val request = webRequest.getNativeRequest(HttpServletRequest::class.java)
+            ?: return null
 
-        // If header is empty, try to get IP from request
-        if (ip == null || ip.isEmpty()) {
-            val request = webRequest.getNativeRequest(HttpServletRequest::class.java)
-            return request?.remoteAddr
-        }
+        val ip = request.getHeader(ipHeader)
+
+//        // If header is empty, try to get IP from request
+//        if (ip == null || ip.isEmpty()) {
+//            val request = webRequest.getNativeRequest(HttpServletRequest::class.java)
+//            return request?.remoteAddr
+//        }
 
         return ip
     }
