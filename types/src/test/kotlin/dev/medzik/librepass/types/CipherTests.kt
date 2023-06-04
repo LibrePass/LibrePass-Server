@@ -1,20 +1,18 @@
 package dev.medzik.librepass.types
 
-import dev.medzik.libcrypto.Salt
 import dev.medzik.librepass.types.cipher.Cipher
 import dev.medzik.librepass.types.cipher.CipherType
 import dev.medzik.librepass.types.cipher.EncryptedCipher
 import dev.medzik.librepass.types.cipher.data.CipherField
 import dev.medzik.librepass.types.cipher.data.CipherFieldType
 import dev.medzik.librepass.types.cipher.data.CipherLoginData
-import org.apache.commons.codec.binary.Hex
 import org.junit.jupiter.api.Test
 import java.util.*
 import kotlin.test.assertEquals
 
 class CipherTests {
-    // generate encryption key
-    private val encryptionKey = Hex.encodeHexString(Salt.generate(32))
+    // example encryption key
+    private val encryptionKey = "1234567890123456789012345678901212345678901234567890123456789012"
 
     // example cipher
     private val cipher = Cipher(
