@@ -16,7 +16,7 @@ import dev.medzik.librepass.types.api.auth.LoginRequest
 import dev.medzik.librepass.types.api.auth.RegisterRequest
 import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
 import dev.medzik.librepass.types.api.auth.UserCredentials
-import kotlinx.serialization.json.Json
+import dev.medzik.librepass.types.utils.JsonUtils
 
 /**
  * Auth Client for the LibrePass API. This client is used to register and login users.
@@ -27,7 +27,7 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
         const val API_ENDPOINT = "/api/v1/auth"
     }
 
-    private val client = Client(null, apiUrl)
+    private val client = Client(apiUrl)
 
     /**
      * Register a new user
@@ -43,7 +43,7 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
         // create a random encryption key
         val encryptionKey = createEncryptionKey()
         // encrypt the encryption key with the base password hash
-        val encryptedEncryptionKey = AesCbc.encrypt(encryptionKey, passwordHashes.basePasswordHashString)
+        val protectedEncryptionKey = AesCbc.encrypt(encryptionKey, passwordHashes.basePasswordHash.toHexHash())
 
         // generate a new rsa keypair for the user
         val rsaKeypair = RSA.generateKeyPair(RSAKeySize)
@@ -59,7 +59,7 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
             email = email,
             password = passwordHashes.finalPasswordHash,
             passwordHint = passwordHint,
-            encryptionKey = encryptedEncryptionKey,
+            protectedEncryptionKey = protectedEncryptionKey,
             // argon2id parameters
             parallelism = passwordHashes.basePasswordHash.parallelism,
             memory = passwordHashes.basePasswordHash.memory,
@@ -70,7 +70,7 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
             privateKey = encryptedRsaPrivateKey
         )
 
-        client.post("$API_ENDPOINT/register", Json.encodeToString(RegisterRequest.serializer(), request))
+        client.post("$API_ENDPOINT/register", JsonUtils.serialize(request))
     }
 
     /**
@@ -80,8 +80,8 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
      */
     @Throws(ClientException::class, ApiException::class)
     fun getUserArgon2idParameters(email: String): UserArgon2idParameters {
-        val body = client.get("$API_ENDPOINT/userArgon2Parameters?email=$email")
-        return Json.decodeFromString(UserArgon2idParameters.serializer(), body)
+        val response = client.get("$API_ENDPOINT/userArgon2Parameters?email=$email")
+        return JsonUtils.deserialize(response)
     }
 
     /**
@@ -122,9 +122,8 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
             password = finalPassword
         )
 
-        val body = client.post("$API_ENDPOINT/login", Json.encodeToString(LoginRequest.serializer(), request))
-
-        return Json.decodeFromString(UserCredentials.serializer(), body)
+        val response = client.post("$API_ENDPOINT/login", JsonUtils.serialize(request))
+        return JsonUtils.deserialize(response)
     }
 
     /**

@@ -3,16 +3,13 @@ package dev.medzik.librepass.client.errors
 import java.io.IOException
 
 /**
- * Exception thrown when a client error occurs. When failed to execute a request. This exception is thrown.
- * @param ioException The underlying [IOException] that caused this exception to be thrown.
+ * Exception thrown when a client error occurred while executing a request. This is not thrown when the server returns
+ * an error response.
  */
-@Suppress("unused")
-class ClientException(
-    @Suppress("MemberVisibilityCanBePrivate")
-    val ioException: IOException
-) : Exception() {
-    constructor(message: String) : this(IOException(message))
-
+class ClientException(private val ioException: IOException) : Exception() {
     override val message: String
         get() = "Client error occurred while executing request ${ioException.message}"
+
+    override val cause: Throwable
+        get() = ioException
 }

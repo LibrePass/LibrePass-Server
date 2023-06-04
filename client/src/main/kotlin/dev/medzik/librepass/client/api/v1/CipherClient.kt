@@ -8,8 +8,7 @@ import dev.medzik.librepass.types.api.cipher.InsertResponse
 import dev.medzik.librepass.types.api.cipher.SyncResponse
 import dev.medzik.librepass.types.cipher.Cipher
 import dev.medzik.librepass.types.cipher.EncryptedCipher
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.json.Json
+import dev.medzik.librepass.types.utils.JsonUtils
 import okhttp3.OkHttpClient
 import java.io.IOException
 import java.util.*
@@ -63,7 +62,7 @@ class CipherClient(
         }
     }
 
-    private val client = Client(accessToken, apiUrl)
+    private val client = Client(apiUrl, accessToken)
 
     /**
      * Inserts a new cipher.
@@ -89,7 +88,7 @@ class CipherClient(
     @Throws(ClientException::class, ApiException::class)
     fun insert(cipher: EncryptedCipher): InsertResponse {
         val response = client.put(API_ENDPOINT, cipher.toJson())
-        return Json.decodeFromString(InsertResponse.serializer(), response)
+        return JsonUtils.deserialize(response)
     }
 
     /**
@@ -110,7 +109,7 @@ class CipherClient(
     @Throws(ClientException::class, ApiException::class)
     fun get(id: String): EncryptedCipher {
         val response = client.get("$API_ENDPOINT/$id")
-        return Json.decodeFromString(EncryptedCipher.serializer(), response)
+        return JsonUtils.deserialize(response)
     }
 
     /**
@@ -120,7 +119,7 @@ class CipherClient(
     @Throws(ClientException::class, ApiException::class)
     fun getAll(): List<EncryptedCipher> {
         val response = client.get(API_ENDPOINT)
-        return Json.decodeFromString(ListSerializer(EncryptedCipher.serializer()), response)
+        return JsonUtils.deserializeList(response)
     }
 
     /**
@@ -131,7 +130,7 @@ class CipherClient(
     @Throws(ClientException::class, ApiException::class)
     fun sync(lastSync: Date): SyncResponse {
         val response = client.get("$API_ENDPOINT/sync?lastSync=${lastSync.time / 1000}")
-        return Json.decodeFromString(SyncResponse.serializer(), response)
+        return JsonUtils.deserialize(response)
     }
 
     /**
@@ -158,7 +157,7 @@ class CipherClient(
     @Throws(ClientException::class, ApiException::class)
     fun update(cipher: EncryptedCipher): InsertResponse {
         val response = client.patch("$API_ENDPOINT/${cipher.id}", cipher.toJson())
-        return Json.decodeFromString(InsertResponse.serializer(), response)
+        return JsonUtils.deserialize(response)
     }
 
     /**
