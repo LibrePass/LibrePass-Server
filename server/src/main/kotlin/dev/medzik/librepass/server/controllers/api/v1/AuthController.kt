@@ -31,11 +31,10 @@ import java.util.concurrent.ConcurrentHashMap
 class AuthController @Autowired constructor(
     private val userRepository: UserRepository,
     private val authComponent: AuthComponent,
-    private val emailService: EmailService
-) {
+    private val emailService: EmailService,
     @Value("\${librepass.api.rateLimit.enabled}")
-    private val rateLimitEnabled = true
-
+    private val rateLimitEnabled: Boolean
+) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     // coroutine scope
@@ -58,8 +57,12 @@ class AuthController @Autowired constructor(
         }
     }
 
+    // rate limit for login endpoint
     private val rateLimit = AuthRateLimitConfig()
 
+    /**
+     * Register new user.
+     */
     @PostMapping("/register")
     fun register(
         @RequestIP ip: String,
@@ -72,9 +75,6 @@ class AuthController @Autowired constructor(
         val passwordHash = Argon2DefaultHasher.hash(request.password, passwordSalt).toString()
 
         val verificationToken = UUID.randomUUID()
-
-        println("R: " + request.password)
-        println("R: $passwordHash")
 
         val user = UserTable(
             email = request.email,
@@ -147,6 +147,10 @@ class AuthController @Autowired constructor(
         return ResponseHandler.generateResponse(argon2Parameters, HttpStatus.OK)
     }
 
+    /**
+     * Login user.
+     * @return [UserCredentials]
+     */
     @PostMapping("/login")
     fun login(
         @RequestIP ip: String,
@@ -162,9 +166,6 @@ class AuthController @Autowired constructor(
         // get user from database
         val user = userRepository.findByEmail(request.email)
             ?: return ResponseError.InvalidCredentials
-
-        println("L: "+request.password)
-        println("L: "+user.password)
 
         // check if password is correct
         if (!Argon2HashingFunction.verify(request.password, user.password))

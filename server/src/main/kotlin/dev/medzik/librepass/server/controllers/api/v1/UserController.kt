@@ -23,8 +23,6 @@ class UserController @Autowired constructor(
 ) {
     /**
      * Change user password.
-     * @see ChangePasswordRequest
-     * @return Empty response.
      */
     @PatchMapping("/password")
     fun changePassword(
@@ -63,7 +61,6 @@ class UserController @Autowired constructor(
 
     /**
      * Get user secrets (encryption key, RSA keypair).
-     * @return [UserSecretsResponse]
      */
     @GetMapping("/secrets")
     fun getSecrets(@AuthorizedUser user: UserTable?): Response {

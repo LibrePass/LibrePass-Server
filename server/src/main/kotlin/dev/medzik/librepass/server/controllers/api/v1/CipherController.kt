@@ -155,9 +155,6 @@ class CipherController @Autowired constructor(
 
     /**
      * Checks if cipher exists and is owned by user.
-     * @param id UUID of cipher
-     * @param owner UUID of user
-     * @return true if cipher exists and is owned by user, false otherwise
      */
     private fun checkIfCipherExistsAndOwnedBy(id: UUID, owner: UUID): Boolean {
         return cipherRepository.checkIfCipherExistsAndOwnedBy(id, owner)
