@@ -1,5 +1,6 @@
 package dev.medzik.librepass.server.components
 
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.MethodParameter
@@ -31,7 +32,14 @@ class RequestIPArgumentResolver @Autowired constructor(
         webRequest: NativeWebRequest,
         binderFactory: WebDataBinderFactory?
     ): String? {
-        return webRequest.getHeader(ipHeader)
-            ?: return null
+        val ip = webRequest.getHeader(ipHeader)
+
+        // If header is empty, try to get IP from request
+        if (ip == null || ip.isEmpty()) {
+            val request = webRequest.getNativeRequest(HttpServletRequest::class.java)
+            return request?.remoteAddr
+        }
+
+        return ip
     }
 }
