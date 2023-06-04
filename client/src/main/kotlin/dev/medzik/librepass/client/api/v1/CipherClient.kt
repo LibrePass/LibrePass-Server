@@ -25,41 +25,6 @@ class CipherClient(
 ) {
     companion object {
         const val API_ENDPOINT = "/api/v1/cipher"
-
-        /**
-         * Get website favicon (Using Cloudflare Workers).
-         * Always using default API URL (https://librepass.favicon.workers.dev)
-         * because this is not a part of server but Cloudflare Workers.
-         */
-        @JvmStatic
-        @Throws(ClientException::class)
-        fun getFavicon(url: String): ByteArray {
-            try {
-                // send request
-                val response = OkHttpClient().newCall(
-                    okhttp3.Request.Builder()
-                        .url("${DEFAULT_API_URL}/_cf/favicon/?url=$url")
-                        .get()
-                        .build()
-                ).execute()
-
-                // extract from response
-                val statusCode = response.code
-                val body = response.body.bytes()
-
-                // error handling
-                if (statusCode >= 300) {
-                    throw ApiException(
-                        status = statusCode,
-                        error = "Error while getting favicon: $body"
-                    )
-                }
-
-                return body
-            } catch (e: IOException) {
-                throw ClientException(e)
-            }
-        }
     }
 
     private val client = Client(apiUrl, accessToken)
@@ -176,5 +141,16 @@ class CipherClient(
     @Throws(ClientException::class, ApiException::class)
     fun delete(id: String) {
         client.delete("$API_ENDPOINT/$id")
+    }
+
+    /**
+     * Get website favicon.
+     * @param domain The domain of the website.
+     * @return Favicon image as byte array (PNG) or 404 if not found.
+     */
+    @Throws(ClientException::class, ApiException::class)
+    fun getFavicon(domain: String): ByteArray {
+        val response = client.get("$API_ENDPOINT/favicon?domain=$domain")
+        return response.toByteArray()
     }
 }
