@@ -119,7 +119,7 @@ class CipherClientTests {
 
     @Test
     fun getFavicon() {
-        val favicon = CipherClient.getFavicon("https://librepass.medzik.dev")
+        val favicon = cipherClient.getFavicon("https://librepass.medzik.dev")
         assert(favicon.isNotEmpty())
     }
 }

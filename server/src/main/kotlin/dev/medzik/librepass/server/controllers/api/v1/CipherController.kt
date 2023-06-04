@@ -12,9 +12,11 @@ import dev.medzik.librepass.types.api.cipher.SyncResponse
 import dev.medzik.librepass.types.cipher.EncryptedCipher
 import kotlinx.serialization.builtins.ListSerializer
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
+import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.client.RestTemplate
 import java.util.*
+
 
 @RestController
 @RequestMapping("/api/v1/cipher")
@@ -158,5 +160,31 @@ class CipherController @Autowired constructor(
      */
     private fun checkIfCipherExistsAndOwnedBy(id: UUID, owner: UUID): Boolean {
         return cipherRepository.checkIfCipherExistsAndOwnedBy(id, owner)
+    }
+
+    @GetMapping("/icon")
+    fun getWebsiteIcon(
+        @RequestParam("domain") domain: String
+    ): Any {
+        // Some APIs to get website icon:
+        //  google api: https://www.google.com/s2/favicons?domain=$domain&sz=128
+        //  duckduckgo api: https://icons.duckduckgo.com/ip3/$domain.ico
+        //  icon.horse: https://icon.horse/icon/$domain
+
+        // get using google api
+        val uri = "https://www.google.com/s2/favicons?domain=$domain&sz=128"
+
+        val restTemplate = RestTemplate()
+
+        val headers = HttpHeaders()
+        headers.accept = listOf(MediaType.IMAGE_PNG)
+
+        val entity = HttpEntity<String>(headers)
+
+        return try {
+            restTemplate.exchange(uri, HttpMethod.GET, entity, ByteArray::class.java)
+        } catch (e: Exception) {
+            ResponseError.NotFound
+        }
     }
 }
