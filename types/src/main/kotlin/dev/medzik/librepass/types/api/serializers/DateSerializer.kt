@@ -9,8 +9,6 @@ import java.util.*
 
 /**
  * Serializer for [Date] objects. It serializes [Date] to unix timestamp (seconds since epoch).
- *
- * @see Date
  */
 object DateSerializer : KSerializer<Date> {
     override val descriptor =
