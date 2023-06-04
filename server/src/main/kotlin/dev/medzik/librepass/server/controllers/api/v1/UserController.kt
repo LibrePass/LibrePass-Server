@@ -45,7 +45,7 @@ class UserController @Autowired constructor(
         userRepository.save(
             user.copy(
                 password = newPasswordHash.toString(),
-                encryptionKey = body.newEncryptionKey,
+                encryptionKey = body.newProtectedEncryptionKey,
                 // argon2id parameters
                 parallelism = body.parallelism,
                 memory = body.memory,

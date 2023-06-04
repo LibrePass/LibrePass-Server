@@ -7,8 +7,7 @@ import dev.medzik.librepass.client.errors.ClientException
 import dev.medzik.librepass.types.api.cipher.InsertResponse
 import dev.medzik.librepass.types.api.collection.CipherCollection
 import dev.medzik.librepass.types.api.collection.CreateCollectionRequest
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.json.Json
+import dev.medzik.librepass.types.utils.JsonUtils
 import java.util.*
 
 /**
@@ -24,7 +23,7 @@ class CollectionClient(
         const val API_ENDPOINT = "/api/v1/collection"
     }
 
-    private val client = Client(accessToken, apiUrl)
+    private val client = Client(apiUrl, accessToken)
 
     /**
      * Create a new collection.
@@ -34,8 +33,8 @@ class CollectionClient(
     @Throws(ClientException::class, ApiException::class)
     fun createCollection(name: String): InsertResponse {
         val request = CreateCollectionRequest(name = name)
-        val response = client.put(API_ENDPOINT, Json.encodeToString(CreateCollectionRequest.serializer(), request))
-        return Json.decodeFromString(InsertResponse.serializer(), response)
+        val response = client.put(API_ENDPOINT, JsonUtils.serialize(request))
+        return JsonUtils.deserialize(response)
     }
 
     /**
@@ -45,7 +44,7 @@ class CollectionClient(
     @Throws(ClientException::class, ApiException::class)
     fun getCollections(): List<CipherCollection> {
         val response = client.get(API_ENDPOINT)
-        return Json.decodeFromString(ListSerializer(CipherCollection.serializer()), response)
+        return JsonUtils.deserializeList(response)
     }
 
     /**
@@ -66,7 +65,7 @@ class CollectionClient(
     @Throws(ClientException::class, ApiException::class)
     fun getCollection(id: String): CipherCollection {
         val response = client.get("$API_ENDPOINT/$id")
-        return Json.decodeFromString(CipherCollection.serializer(), response)
+        return JsonUtils.deserialize(response)
     }
 
     /**
@@ -89,8 +88,8 @@ class CollectionClient(
     @Throws(ClientException::class, ApiException::class)
     fun updateCollection(id: String, name: String): InsertResponse {
         val request = CreateCollectionRequest(name = name)
-        val response = client.patch("$API_ENDPOINT/$id", Json.encodeToString(CreateCollectionRequest.serializer(), request))
-        return Json.decodeFromString(InsertResponse.serializer(), response)
+        val response = client.patch("$API_ENDPOINT/$id", JsonUtils.serialize(request))
+        return JsonUtils.deserialize(response)
     }
 
     /**

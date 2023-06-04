@@ -3,7 +3,7 @@ package dev.medzik.librepass.client
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
 import dev.medzik.librepass.types.api.ResponseError
-import kotlinx.serialization.json.Json
+import dev.medzik.librepass.types.utils.JsonUtils
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -31,8 +31,8 @@ private val HTTP_MEDIA_TYPE_JSON = "application/json; charset=utf-8".toMediaType
  * @param apiURL The API URL to use.
  */
 class Client(
+    private val apiURL: String,
     accessToken: String? = null,
-    private val apiURL: String
 ) {
     // create authorization header if access token is provided
     private val authorizationHeader = if (accessToken.isNullOrEmpty()) "" else "Bearer $accessToken"
@@ -145,7 +145,7 @@ class Client(
             if (statusCode >= 300) {
                 throw ApiException(
                     status = statusCode,
-                    error = Json.decodeFromString(ResponseError.serializer(), body).error
+                    error = JsonUtils.deserialize<ResponseError>(body).error
                 )
             }
 

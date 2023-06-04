@@ -4,21 +4,11 @@ import dev.medzik.libcrypto.AesCbc
 import dev.medzik.libcrypto.Argon2Hash
 import kotlinx.serialization.Serializable
 
-/**
- * Request for changing user password.
- * @property oldPassword Old user password. (hashed)
- * @property newPassword New user password. (hashed)
- * @property newEncryptionKey New user encryption key. (encrypted using new password)
- * @property parallelism Argon2id parallelism.
- * @property memory Argon2id memory.
- * @property iterations Argon2id iterations.
- * @property version Argon2id version.
- */
 @Serializable
 data class ChangePasswordRequest(
     val oldPassword: String,
     val newPassword: String,
-    val newEncryptionKey: String,
+    val newProtectedEncryptionKey: String,
     // new argon2 parameters
     val parallelism: Int,
     val memory: Int,
@@ -26,12 +16,6 @@ data class ChangePasswordRequest(
     val version: Int
 )
 
-/**
- * Response of user secrets.
- * @property encryptionKey User encryption key. (encrypted using user password)
- * @property publicKey User public key.
- * @property privateKey User private key. (encrypted using encryption key)
- */
 @Serializable
 data class UserSecretsResponse(
     val encryptionKey: String,
