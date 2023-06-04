@@ -150,7 +150,7 @@ class CipherClient(
      */
     @Throws(ClientException::class, ApiException::class)
     fun getFavicon(domain: String): ByteArray {
-        val response = client.get("$API_ENDPOINT/favicon?domain=$domain")
+        val response = client.get("$API_ENDPOINT/icon?domain=$domain")
         return response.toByteArray()
     }
 }
