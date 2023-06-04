@@ -10,14 +10,8 @@ import java.util.*
  * Cryptography utilities. Used for password hashing.
  */
 object Cryptography {
-    /**
-     * RSA key size.
-     */
     const val RSAKeySize = 4096
 
-    /**
-     * Default argon2id settings.
-     */
     val DefaultArgon2idParameters = UserArgon2idParameters(
         parallelism = 3,
         memory = 65536, // 64MB
@@ -26,8 +20,7 @@ object Cryptography {
     )
 
     /**
-     * Create random encryption key.
-     * @return encryption key
+     * Generate encryption key.
      */
     fun createEncryptionKey(): String {
         val key = Base64.getEncoder().encodeToString(Salt.generate(16))
@@ -37,7 +30,7 @@ object Cryptography {
     }
 
     /**
-     * Compute base password hash
+     * Compute base password hash.
      * @param password password of the user
      * @param email email of the user
      * @param parameters argon2id parameters
@@ -53,7 +46,7 @@ object Cryptography {
     }
 
     /**
-     * Compute final password hash
+     * Compute final password hash.
      * @param password password of the user (not hashed)
      * @param basePassword base password hash of the user (hashed)
      */
@@ -77,25 +70,17 @@ object Cryptography {
 
         return PasswordHashes(
             basePasswordHash = basePasswordHash,
-            basePasswordHashString = basePasswordHash.toHexHash(),
             finalPasswordHash = finalPasswordHash
         )
     }
 
-    /**
-     * Password hashes of the user.
-     */
     class PasswordHashes(
         /**
-         * Base password hash. Used for encrypting/decryption encryption key.
+         * Base Password Hash, used to encrypt the encryption key. It is not stored in the database.
          */
         val basePasswordHash: Argon2Hash,
         /**
-         * The string representation of [basePasswordHash].
-         */
-        val basePasswordHashString: String,
-        /**
-         * Final password hash. Used for authentication. Stored in the database.
+         * Final Password Hash, used to authenticate the user. It is stored in the database.
          */
         val finalPasswordHash: String
     )

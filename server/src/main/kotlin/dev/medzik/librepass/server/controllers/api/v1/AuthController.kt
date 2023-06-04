@@ -80,7 +80,7 @@ class AuthController @Autowired constructor(
             email = request.email,
             password = passwordHash,
             passwordHint = request.passwordHint,
-            encryptionKey = request.encryptionKey,
+            encryptionKey = request.protectedEncryptionKey,
             // argon2id parameters
             parallelism = request.parallelism,
             memory = request.memory,
@@ -175,7 +175,7 @@ class AuthController @Autowired constructor(
         val credentials = UserCredentials(
             userId = user.id,
             accessToken = authComponent.generateToken(TokenType.ACCESS_TOKEN, user.id),
-            encryptionKey = user.encryptionKey
+            protectedEncryptionKey = user.encryptionKey
         )
 
         return ResponseHandler.generateResponse(credentials, HttpStatus.OK)
