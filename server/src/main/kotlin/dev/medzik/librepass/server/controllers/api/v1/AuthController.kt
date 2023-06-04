@@ -73,6 +73,9 @@ class AuthController @Autowired constructor(
 
         val verificationToken = UUID.randomUUID()
 
+        println("R: " + request.password)
+        println("R: $passwordHash")
+
         val user = UserTable(
             email = request.email,
             password = passwordHash,
@@ -160,6 +163,9 @@ class AuthController @Autowired constructor(
         val user = userRepository.findByEmail(request.email)
             ?: return ResponseError.InvalidCredentials
 
+        println("L: "+request.password)
+        println("L: "+user.password)
+
         // check if password is correct
         if (!Argon2HashingFunction.verify(request.password, user.password))
             return ResponseError.InvalidCredentials
@@ -180,14 +186,14 @@ class AuthController @Autowired constructor(
     @GetMapping("/passwordHint")
     fun requestPasswordHint(
         @RequestIP ip: String,
-        @RequestParam("user") userID: String
+        @RequestParam("email") email: String
     ): Response {
         if (rateLimitEnabled && !rateLimit.resolveBucket(ip).tryConsume(1))
             return ResponseError.TooManyRequests
 
         // get user from database
-        val user = userRepository.findById(UUID.fromString(userID)).orElse(null)
-            ?: return ResponseError.InvalidBody
+        val user = userRepository.findByEmail(email)
+            ?: return ResponseError.InvalidCredentials
 
         try {
             emailService.sendPasswordHint(

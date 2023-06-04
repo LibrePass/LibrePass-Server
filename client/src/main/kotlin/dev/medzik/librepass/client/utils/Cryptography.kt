@@ -73,7 +73,7 @@ object Cryptography {
         email: String,
     ): PasswordHashes {
         val basePasswordHash = computeBasePasswordHash(password, email)
-        val finalPasswordHash = computeFinalPasswordHash(basePasswordHash.toHexHash(), email)
+        val finalPasswordHash = computeFinalPasswordHash(password, basePasswordHash.toHexHash())
 
         return PasswordHashes(
             basePasswordHash = basePasswordHash,
