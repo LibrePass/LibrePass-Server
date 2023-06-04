@@ -16,7 +16,4 @@ module dev.medzik.librepass.types {
     // export Cipher types
     exports dev.medzik.librepass.types.cipher;
     exports dev.medzik.librepass.types.cipher.data;
-
-    // export Utils
-    exports dev.medzik.librepass.types.utils;
 }

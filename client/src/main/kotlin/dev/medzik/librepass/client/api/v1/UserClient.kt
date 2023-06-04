@@ -10,7 +10,7 @@ import dev.medzik.librepass.client.utils.Cryptography.computeHashes
 import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
 import dev.medzik.librepass.types.api.user.ChangePasswordRequest
 import dev.medzik.librepass.types.api.user.UserSecretsResponse
-import dev.medzik.librepass.types.utils.JsonUtils
+import dev.medzik.librepass.client.utils.JsonUtils
 
 /**
  * User API client.

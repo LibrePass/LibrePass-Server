@@ -16,7 +16,7 @@ import dev.medzik.librepass.types.api.auth.LoginRequest
 import dev.medzik.librepass.types.api.auth.RegisterRequest
 import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
 import dev.medzik.librepass.types.api.auth.UserCredentials
-import dev.medzik.librepass.types.utils.JsonUtils
+import dev.medzik.librepass.client.utils.JsonUtils
 
 /**
  * Auth Client for the LibrePass API. This client is used to register and login users.
