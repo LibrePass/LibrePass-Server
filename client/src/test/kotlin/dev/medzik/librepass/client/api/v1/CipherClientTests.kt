@@ -6,12 +6,12 @@ import dev.medzik.librepass.types.cipher.CipherType
 import dev.medzik.librepass.types.cipher.data.CipherLoginData
 import org.apache.commons.codec.binary.Hex
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
-import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
 
 class CipherClientTests {
     // NOTE: This is a test key, do not use it in production
