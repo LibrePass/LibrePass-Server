@@ -6,9 +6,9 @@ import dev.medzik.librepass.types.cipher.EncryptedCipher
 import dev.medzik.librepass.types.cipher.data.CipherField
 import dev.medzik.librepass.types.cipher.data.CipherFieldType
 import dev.medzik.librepass.types.cipher.data.CipherLoginData
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.*
-import kotlin.test.assertEquals
 
 class CipherTests {
     // example encryption key

@@ -1,10 +1,10 @@
 package dev.medzik.librepass.client.api.v1
 
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 
 class CollectionClientTests {
     private lateinit var collectionClient: CollectionClient
@@ -40,7 +40,7 @@ class CollectionClientTests {
         val insertedCollection = collectionClient.createCollection("test")
         val collections = collectionClient.getCollections()
 
-        val collection = collections.firstOrNull { it.id == insertedCollection.id }
+        val collection = collections.first { it.id == insertedCollection.id }
 
         assertNotNull(collection)
         assertEquals(insertedCollection.id, collection.id)
