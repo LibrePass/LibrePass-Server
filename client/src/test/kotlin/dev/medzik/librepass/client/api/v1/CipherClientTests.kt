@@ -1,10 +1,9 @@
 package dev.medzik.librepass.client.api.v1
 
-import dev.medzik.libcrypto.Salt
+import dev.medzik.librepass.client.utils.Cryptography.computeBasePasswordHash
 import dev.medzik.librepass.types.cipher.Cipher
 import dev.medzik.librepass.types.cipher.CipherType
 import dev.medzik.librepass.types.cipher.data.CipherLoginData
-import org.apache.commons.codec.binary.Hex
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -14,18 +13,18 @@ import org.junit.jupiter.api.Test
 import java.util.*
 
 class CipherClientTests {
-    // NOTE: This is a test key, do not use it in production
-    private val encryptionKey = Hex.encodeHexString(Salt.generate(32))
-
     private lateinit var cipherClient: CipherClient
     private lateinit var userId: UUID
 
     companion object {
+        private const val email = "_test_cipher@example.com"
+        private const val password = "test password"
+
         @BeforeAll
         @JvmStatic
         fun setup() {
             val authClient = AuthClient("http://localhost:8080")
-            authClient.register("test_cipher@example.com", "test")
+            authClient.register(email, password)
             // wait for 1 second to prevent unauthorized error
             Thread.sleep(1000)
         }
@@ -34,7 +33,7 @@ class CipherClientTests {
         @JvmStatic
         fun cleanup() {
             val authClient = AuthClient("http://localhost:8080")
-            val credentials = authClient.login("test_cipher@example.com", "test")
+            val credentials = authClient.login(email, password)
 
             val cipherClient = CipherClient(credentials.accessToken, "http://localhost:8080")
 
@@ -44,13 +43,21 @@ class CipherClientTests {
         }
     }
 
+    private lateinit var encryptionKey: String
+
     @BeforeEach
     fun beforeEach() {
         val authClient = AuthClient("http://localhost:8080")
-        val credentials = authClient.login("test_cipher@example.com", "test")
+
+        // compute base password hash
+        val basePasswordHash = computeBasePasswordHash(password, email)
+
+        val credentials = authClient.login(email, password, basePasswordHash)
 
         cipherClient = CipherClient(credentials.accessToken, "http://localhost:8080")
         userId = credentials.userId
+
+        encryptionKey = credentials.decryptEncryptionKey(basePasswordHash)
     }
 
     private lateinit var cipherId: UUID
