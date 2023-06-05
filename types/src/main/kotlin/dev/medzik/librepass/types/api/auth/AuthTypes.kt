@@ -1,5 +1,7 @@
 package dev.medzik.librepass.types.api.auth
 
+import dev.medzik.libcrypto.AesCbc
+import dev.medzik.libcrypto.Argon2Hash
 import dev.medzik.libcrypto.Argon2HashingFunction
 import dev.medzik.libcrypto.Argon2Type
 import dev.medzik.librepass.types.api.serializers.UUIDSerializer
@@ -59,4 +61,11 @@ data class UserCredentials(
     val userId: UUID,
     val accessToken: String,
     val protectedEncryptionKey: String
-)
+) {
+    /**
+     * Decrypt encryption key using base password hash.
+     */
+    fun decryptEncryptionKey(basePasswordHash: Argon2Hash): String {
+        return AesCbc.decrypt(basePasswordHash.toHexHash(), protectedEncryptionKey)
+    }
+}

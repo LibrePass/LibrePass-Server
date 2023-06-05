@@ -8,7 +8,6 @@ module dev.medzik.librepass.client {
     // HTTP Client
     requires okhttp3;
 
-    // Kotlin std library
     // Kotlin serialization
     requires kotlinx.serialization.json;
 
