@@ -31,14 +31,17 @@ build/
 ### VS Code ###
 .vscode/
 
-/.env
+### Secrets ###
+.env
+*.pem
+*.p12
 
-/db-data/
+### Database ###
+db-data/
 
-/privateKey.pem
-/publicKey.pem
-/*.p12
-
+### Maven ###
 pom.xml.versionsBackup
 
+### Server Logs ###
 *.log
+*.log.*
