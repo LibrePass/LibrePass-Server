@@ -26,11 +26,11 @@ data class UserSecretsResponse(
      * Decrypt user secrets. (private key and encryption key)
      */
     fun decrypt(password: Argon2Hash): UserSecretsResponse {
-        val decryptedEncryptionKey = AesCbc.decrypt(encryptionKey, password.toHexHash())
+        val decryptedEncryptionKey = AesCbc.decrypt(password.toHexHash(), encryptionKey)
 
         return UserSecretsResponse(
             encryptionKey = decryptedEncryptionKey,
-            privateKey = AesCbc.decrypt(privateKey, decryptedEncryptionKey),
+            privateKey = AesCbc.decrypt(decryptedEncryptionKey, privateKey),
             publicKey = publicKey,
         )
     }
@@ -42,8 +42,8 @@ data class UserSecretsResponse(
         val secretKey = password.toHexHash()
 
         return UserSecretsResponse(
-            encryptionKey = AesCbc.encrypt(encryptionKey, secretKey),
-            privateKey = AesCbc.encrypt(privateKey, secretKey),
+            encryptionKey = AesCbc.encrypt(secretKey, encryptionKey),
+            privateKey = AesCbc.encrypt(secretKey, privateKey),
             publicKey = publicKey,
         )
     }

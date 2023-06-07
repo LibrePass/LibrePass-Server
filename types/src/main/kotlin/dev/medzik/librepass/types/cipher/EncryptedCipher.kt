@@ -57,12 +57,12 @@ data class EncryptedCipher(
         owner = cipher.owner,
         type = cipher.type.ordinal,
         data = AesCbc.encrypt(
+            encryptionKey,
             when (cipher.type) {
                 CipherType.Login -> Json.encodeToString(CipherLoginData.serializer(), cipher.loginData!!)
                 CipherType.SecureNote -> Json.encodeToString(CipherSecureNoteData.serializer(), cipher.secureNoteData!!)
                 CipherType.Card -> Json.encodeToString(CipherCardData.serializer(), cipher.cardData!!)
-            },
-            encryptionKey
+            }
         ),
         collection = cipher.collection,
         favorite = cipher.favorite,
@@ -88,7 +88,7 @@ data class EncryptedCipher(
      * @return JSON string of the decrypted cipher data.
      */
     fun decryptData(encryptionKey: String) =
-        AesCbc.decrypt(this.data, encryptionKey)!!
+        AesCbc.decrypt(encryptionKey, this.data)!!
 
     /**
      * Converts the cipher to a JSON string.

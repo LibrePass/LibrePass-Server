@@ -43,7 +43,7 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
         // create a random encryption key
         val encryptionKey = createEncryptionKey()
         // encrypt the encryption key with the base password hash
-        val protectedEncryptionKey = AesCbc.encrypt(encryptionKey, passwordHashes.basePasswordHash.toHexHash())
+        val protectedEncryptionKey = AesCbc.encrypt(passwordHashes.basePasswordHash.toHexHash(), encryptionKey)
 
         // generate a new rsa keypair for the user
         val rsaKeypair = RSA.generateKeyPair(RSAKeySize)
@@ -53,7 +53,7 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
         val rsaPrivateKey = RSA.KeyUtils.getPrivateKeyString(rsaKeypair.private)
 
         // encrypt private key with the encryption key
-        val encryptedRsaPrivateKey = AesCbc.encrypt(rsaPrivateKey, encryptionKey)
+        val encryptedRsaPrivateKey = AesCbc.encrypt(encryptionKey, rsaPrivateKey)
 
         val request = RegisterRequest(
             email = email,

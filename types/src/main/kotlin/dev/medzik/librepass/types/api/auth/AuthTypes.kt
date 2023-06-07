@@ -66,6 +66,6 @@ data class UserCredentials(
      * Decrypt encryption key using base password hash.
      */
     fun decryptEncryptionKey(basePasswordHash: Argon2Hash): String {
-        return AesCbc.decrypt(protectedEncryptionKey, basePasswordHash.toHexHash())
+        return AesCbc.decrypt(basePasswordHash.toHexHash(), protectedEncryptionKey)
     }
 }
