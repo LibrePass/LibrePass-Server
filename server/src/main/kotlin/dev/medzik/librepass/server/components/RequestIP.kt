@@ -35,7 +35,11 @@ class RequestIPArgumentResolver @Autowired constructor(
         val request = webRequest.getNativeRequest(HttpServletRequest::class.java)
             ?: return null
 
-        return request.getHeader(ipHeader)
-            ?: request.remoteAddr
+        return if (ipHeader == "remoteAddr") {
+            request.remoteAddr
+        } else {
+            request.getHeader(ipHeader)
+                ?: request.remoteAddr
+        }
     }
 }
