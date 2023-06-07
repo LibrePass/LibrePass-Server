@@ -34,7 +34,7 @@ class UserController @Autowired constructor(
 
         // compare old password with password hash in database
         // if they match, update password hash with new password hash
-        if (!Argon2.verify(body.oldPassword, user.password))
+        if (!Argon2.verify(body.oldPassword, user.passwordHash))
             return ResponseError.InvalidBody
 
         // compute new password hash
@@ -44,14 +44,15 @@ class UserController @Autowired constructor(
         // update user in database
         userRepository.save(
             user.copy(
-                password = newPasswordHash.toString(),
-                encryptionKey = body.newProtectedEncryptionKey,
-                // argon2id parameters
+                passwordHash = newPasswordHash.toString(),
+                // Argon2id parameters
                 parallelism = body.parallelism,
                 memory = body.memory,
                 iterations = body.iterations,
                 version = body.version,
-                // set last password change date
+                // Curve25519 key pair
+                protectedPrivateKey = body.newProtectedPrivateKey,
+                // Set last password change date to now
                 lastPasswordChange = Date()
             )
         )
@@ -68,8 +69,7 @@ class UserController @Autowired constructor(
             return ResponseError.Unauthorized
 
         val secrets = UserSecretsResponse(
-            encryptionKey = user.encryptionKey,
-            privateKey = user.privateKey,
+            protectedPrivateKey = user.protectedPrivateKey,
             publicKey = user.publicKey
         )
 

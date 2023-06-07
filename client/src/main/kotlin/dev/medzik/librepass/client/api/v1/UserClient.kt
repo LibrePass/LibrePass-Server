@@ -1,5 +1,6 @@
 package dev.medzik.librepass.client.api.v1
 
+import dev.medzik.libcrypto.AesCbc
 import dev.medzik.libcrypto.Argon2Hash
 import dev.medzik.librepass.client.Client
 import dev.medzik.librepass.client.DEFAULT_API_URL
@@ -7,27 +8,28 @@ import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
 import dev.medzik.librepass.client.utils.Cryptography.computeBasePasswordHash
 import dev.medzik.librepass.client.utils.Cryptography.computeHashes
+import dev.medzik.librepass.client.utils.JsonUtils
 import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
 import dev.medzik.librepass.types.api.user.ChangePasswordRequest
+import dev.medzik.librepass.types.api.user.UserSecrets
 import dev.medzik.librepass.types.api.user.UserSecretsResponse
-import dev.medzik.librepass.client.utils.JsonUtils
 
 /**
  * User API client.
  * @param email The email of the user.
- * @param accessToken The access token to use for authentication.
+ * @param apiKey The api key to use for authentication.
  * @param apiUrl The API URL to use. Defaults to [DEFAULT_API_URL].
  */
 class UserClient(
     private val email: String,
-    accessToken: String,
+    apiKey: String,
     private val apiUrl: String = DEFAULT_API_URL
 ) {
     companion object {
         const val API_ENDPOINT = "/api/v1/user"
     }
 
-    private val client = Client(apiUrl, accessToken)
+    private val client = Client(apiUrl, apiKey)
 
     /**
      * Change user password.
@@ -58,13 +60,16 @@ class UserClient(
             email = email,
         )
 
-        // encrypt the new secrets
-        val newSecrets = userSecrets.encrypt(newPasswordHashes.basePasswordHash)
+        // encrypt the private key with the new password
+        val protectedPrivateKey = AesCbc.encrypt(
+            newPasswordHashes.basePasswordHash.toHexHash(),
+            userSecrets.privateKey
+        )
 
         val request = ChangePasswordRequest(
             oldPassword = oldPasswordHashes.finalPasswordHash,
             newPassword = newPasswordHashes.finalPasswordHash,
-            newProtectedEncryptionKey = newSecrets.encryptionKey,
+            newProtectedPrivateKey = protectedPrivateKey,
             parallelism = argon2idParameters.parallelism,
             memory = argon2idParameters.memory,
             iterations = argon2idParameters.iterations,
@@ -82,7 +87,7 @@ class UserClient(
      * @param password User password.
      */
     @Throws(ClientException::class, ApiException::class)
-    fun getSecrets(password: String): UserSecretsResponse {
+    fun getSecrets(password: String): UserSecrets {
         val argon2idParameters = AuthClient(apiUrl = apiUrl).getUserArgon2idParameters(email)
 
         // compute base password
@@ -100,7 +105,7 @@ class UserClient(
      * @param basePassword User base password hash.
      */
     @Throws(ClientException::class, ApiException::class)
-    fun getSecrets(basePassword: Argon2Hash): UserSecretsResponse {
+    fun getSecrets(basePassword: Argon2Hash): UserSecrets {
         val response = client.get("${API_ENDPOINT}/secrets")
         val userSecrets = JsonUtils.deserialize<UserSecretsResponse>(response)
         return userSecrets.decrypt(basePassword)

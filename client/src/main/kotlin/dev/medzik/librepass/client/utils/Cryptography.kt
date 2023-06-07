@@ -1,17 +1,14 @@
 package dev.medzik.librepass.client.utils
 
 import dev.medzik.libcrypto.Argon2Hash
+import dev.medzik.libcrypto.Curve25519
 import dev.medzik.libcrypto.Pbkdf2
-import dev.medzik.libcrypto.Salt
 import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
-import java.util.*
 
 /**
  * Cryptography utilities. Used for password hashing.
  */
 object Cryptography {
-    const val RSAKeySize = 4096
-
     val DefaultArgon2idParameters = UserArgon2idParameters(
         parallelism = 3,
         memory = 65536, // 64MB
@@ -20,13 +17,10 @@ object Cryptography {
     )
 
     /**
-     * Generate encryption key.
+     * Calculate secret key from private and public keys. Used for AES encryption.
      */
-    fun createEncryptionKey(): String {
-        val key = Base64.getEncoder().encodeToString(Salt.generate(16))
-        val salt = Salt.generate(16)
-
-        return Pbkdf2(1).sha256(key, salt)
+    fun calculateSecretKey(privateKey: String, publicKey: String): String {
+        return Curve25519.calculateAgreement(privateKey, publicKey)
     }
 
     /**

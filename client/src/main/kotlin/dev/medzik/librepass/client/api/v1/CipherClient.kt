@@ -4,43 +4,41 @@ import dev.medzik.librepass.client.Client
 import dev.medzik.librepass.client.DEFAULT_API_URL
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
+import dev.medzik.librepass.client.utils.JsonUtils
 import dev.medzik.librepass.types.api.cipher.InsertResponse
 import dev.medzik.librepass.types.api.cipher.SyncResponse
 import dev.medzik.librepass.types.cipher.Cipher
 import dev.medzik.librepass.types.cipher.EncryptedCipher
-import dev.medzik.librepass.client.utils.JsonUtils
-import okhttp3.OkHttpClient
-import java.io.IOException
 import java.util.*
 
 /**
  * Cipher API client.
- * @param accessToken The access token to use for authentication.
+ * @param apiKey The api key to use for authentication.
  * @param apiUrl The API URL to use. Defaults to [DEFAULT_API_URL].
  */
 @Suppress("unused")
 class CipherClient(
-    accessToken: String,
+    apiKey: String,
     apiUrl: String  = DEFAULT_API_URL
 ) {
     companion object {
         const val API_ENDPOINT = "/api/v1/cipher"
     }
 
-    private val client = Client(apiUrl, accessToken)
+    private val client = Client(apiUrl, apiKey)
 
     /**
      * Inserts a new cipher.
      * @param cipher The cipher to insert.
-     * @param encryptionKey The encryption key to use for encrypting the cipher.
+     * @param secretKey The encryption key to use for encrypting the cipher.
      * @return [InsertResponse]
      */
     @Throws(ClientException::class, ApiException::class)
-    fun insert(cipher: Cipher, encryptionKey: String): InsertResponse {
+    fun insert(cipher: Cipher, secretKey: String): InsertResponse {
         return insert(
             EncryptedCipher(
                 cipher = cipher,
-                encryptionKey = encryptionKey
+                secretKey = secretKey
             )
         )
     }
@@ -101,15 +99,15 @@ class CipherClient(
     /**
      * Updates a cipher.
      * @param cipher The cipher to update.
-     * @param encryptionKey The encryption key to use for encrypting the cipher.
+     * @param secretKey The encryption key to use for encrypting the cipher.
      * @return [InsertResponse]
      */
     @Throws(ClientException::class, ApiException::class)
-    fun update(cipher: Cipher, encryptionKey: String): InsertResponse {
+    fun update(cipher: Cipher, secretKey: String): InsertResponse {
         return update(
             EncryptedCipher(
                 cipher = cipher,
-                encryptionKey = encryptionKey
+                secretKey = secretKey
             )
         )
     }

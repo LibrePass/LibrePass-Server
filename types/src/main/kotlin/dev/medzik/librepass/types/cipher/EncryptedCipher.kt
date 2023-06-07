@@ -46,18 +46,18 @@ data class EncryptedCipher(
     /**
      * Creates a new [EncryptedCipher] object from the [Cipher].
      * @param cipher The [Cipher] to encrypt.
-     * @param encryptionKey The key to encrypt the cipher with.
+     * @param secretKey The key to encrypt the cipher with.
      * @return The encrypted cipher.
      */
     constructor(
         cipher: Cipher,
-        encryptionKey: String
+        secretKey: String
     ) : this(
         id = cipher.id,
         owner = cipher.owner,
         type = cipher.type.ordinal,
         data = AesCbc.encrypt(
-            encryptionKey,
+            secretKey,
             when (cipher.type) {
                 CipherType.Login -> Json.encodeToString(CipherLoginData.serializer(), cipher.loginData!!)
                 CipherType.SecureNote -> Json.encodeToString(CipherSecureNoteData.serializer(), cipher.secureNoteData!!)
@@ -84,11 +84,11 @@ data class EncryptedCipher(
 
     /**
      * Decrypts the cipher data.
-     * @param encryptionKey The key to decrypt the cipher with.
+     * @param secretKey The key to decrypt the cipher with.
      * @return JSON string of the decrypted cipher data.
      */
-    fun decryptData(encryptionKey: String) =
-        AesCbc.decrypt(encryptionKey, this.data)!!
+    fun decryptData(secretKey: String) =
+        AesCbc.decrypt(secretKey, this.data)!!
 
     /**
      * Converts the cipher to a JSON string.

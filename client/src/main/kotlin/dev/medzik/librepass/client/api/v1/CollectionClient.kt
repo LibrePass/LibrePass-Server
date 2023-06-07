@@ -4,26 +4,26 @@ import dev.medzik.librepass.client.Client
 import dev.medzik.librepass.client.DEFAULT_API_URL
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
+import dev.medzik.librepass.client.utils.JsonUtils
 import dev.medzik.librepass.types.api.cipher.InsertResponse
 import dev.medzik.librepass.types.api.collection.CipherCollection
 import dev.medzik.librepass.types.api.collection.CreateCollectionRequest
-import dev.medzik.librepass.client.utils.JsonUtils
 import java.util.*
 
 /**
  * Collection Client for the LibrePass API. This client is used to manage collections.
- * @param accessToken The access token to use.
+ * @param apiKey The api key to use.
  * @param apiUrl The API URL to use. Defaults to [DEFAULT_API_URL].
  */
 class CollectionClient(
-    accessToken: String,
+    apiKey: String,
     apiUrl: String = DEFAULT_API_URL
 ) {
     companion object {
         const val API_ENDPOINT = "/api/v1/collection"
     }
 
-    private val client = Client(apiUrl, accessToken)
+    private val client = Client(apiUrl, apiKey)
 
     /**
      * Create a new collection.

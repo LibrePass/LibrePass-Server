@@ -72,24 +72,23 @@ class AuthController @Autowired constructor(
             return ResponseError.TooManyRequests
 
         val passwordSalt = Salt.generate(32)
-        val passwordHash = Argon2DefaultHasher.hash(request.password, passwordSalt).toString()
+        val passwordHash = Argon2DefaultHasher.hash(request.passwordHash, passwordSalt).toString()
 
         val verificationToken = UUID.randomUUID()
 
         val user = UserTable(
             email = request.email,
-            password = passwordHash,
+            passwordHash = passwordHash,
             passwordHint = request.passwordHint,
-            encryptionKey = request.protectedEncryptionKey,
-            // argon2id parameters
+            // Argon2id parameters
             parallelism = request.parallelism,
             memory = request.memory,
             iterations = request.iterations,
             version = request.version,
-            // RSA keypair
+            // Curve25519 key pair
             publicKey = request.publicKey,
-            privateKey = request.privateKey,
-            // email verification
+            protectedPrivateKey = request.protectedPrivateKey,
+            // Email verification token
             emailVerificationCode = verificationToken,
             emailVerificationCodeExpiresAt = Date.from(
                 Calendar.getInstance().apply {
@@ -160,7 +159,7 @@ class AuthController @Autowired constructor(
             return ResponseError.TooManyRequests
 
         // check if email or password is empty
-        if (request.email.isEmpty() || request.password.isEmpty())
+        if (request.email.isEmpty() || request.passwordHash.isEmpty())
             return ResponseError.InvalidBody
 
         // get user from database
@@ -168,14 +167,13 @@ class AuthController @Autowired constructor(
             ?: return ResponseError.InvalidCredentials
 
         // check if password is correct
-        if (!Argon2.verify(request.password, user.password))
+        if (!Argon2.verify(request.passwordHash, user.passwordHash))
             return ResponseError.InvalidCredentials
 
         // prepare response
         val credentials = UserCredentials(
             userId = user.id,
-            accessToken = authComponent.generateToken(TokenType.ACCESS_TOKEN, user.id),
-            protectedEncryptionKey = user.encryptionKey
+            apiKey = authComponent.generateToken(TokenType.API_KEY, user.id),
         )
 
         return ResponseHandler.generateResponse(credentials, HttpStatus.OK)

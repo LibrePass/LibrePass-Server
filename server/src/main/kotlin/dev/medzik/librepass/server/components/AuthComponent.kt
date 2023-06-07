@@ -13,7 +13,7 @@ import java.security.PublicKey
 import java.util.*
 
 enum class TokenType(val expirationTime: Long) {
-    ACCESS_TOKEN(90 * 24 * 60 * 60 * 1000L), // 90 days
+    API_KEY(90 * 24 * 60 * 60 * 1000L), // 90 days
 }
 
 @Component

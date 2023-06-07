@@ -11,9 +11,8 @@ import java.util.*
 @Serializable
 data class RegisterRequest(
     val email: String,
-    val password: String,
+    val passwordHash: String,
     val passwordHint: String? = null,
-    val protectedEncryptionKey: String,
 
     // argon2id parameters
     val parallelism: Int,
@@ -21,9 +20,9 @@ data class RegisterRequest(
     val iterations: Int,
     val version: Int,
 
-    // RSA keypair
+    // Curve25519 key pair
     val publicKey: String,
-    val privateKey: String
+    val protectedPrivateKey: String
 )
 
 @Serializable
@@ -34,8 +33,7 @@ data class UserArgon2idParameters(
     val version: Int
 ) {
     /**
-     * Convert to Argon2 instance.
-     * @return [Argon2]
+     * Convert to [Argon2] instance.
      */
     fun toHashingFunction(): Argon2 {
         return Argon2(
@@ -52,20 +50,18 @@ data class UserArgon2idParameters(
 @Serializable
 data class LoginRequest(
     val email: String,
-    val password: String
+    val passwordHash: String
 )
 
 @Serializable
 data class UserCredentials(
     @Serializable(with = UUIDSerializer::class)
     val userId: UUID,
-    val accessToken: String,
-    val protectedEncryptionKey: String
+    val apiKey: String,
+    val publicKey: String,
+    val protectedPrivateKey: String,
 ) {
-    /**
-     * Decrypt encryption key using base password hash.
-     */
-    fun decryptEncryptionKey(basePasswordHash: Argon2Hash): String {
-        return AesCbc.decrypt(basePasswordHash.toHexHash(), protectedEncryptionKey)
+    fun decryptPrivateKey(basePasswordHash: Argon2Hash): String {
+        return AesCbc.decrypt(basePasswordHash.toHexHash(), protectedPrivateKey)
     }
 }
