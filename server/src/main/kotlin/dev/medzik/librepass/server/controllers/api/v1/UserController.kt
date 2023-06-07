@@ -1,6 +1,6 @@
 package dev.medzik.librepass.server.controllers.api.v1
 
-import dev.medzik.libcrypto.Argon2HashingFunction
+import dev.medzik.libcrypto.Argon2
 import dev.medzik.libcrypto.Salt
 import dev.medzik.librepass.server.components.AuthorizedUser
 import dev.medzik.librepass.server.database.UserRepository
@@ -34,7 +34,7 @@ class UserController @Autowired constructor(
 
         // compare old password with password hash in database
         // if they match, update password hash with new password hash
-        if (!Argon2HashingFunction.verify(body.oldPassword, user.password))
+        if (!Argon2.verify(body.oldPassword, user.password))
             return ResponseError.InvalidBody
 
         // compute new password hash

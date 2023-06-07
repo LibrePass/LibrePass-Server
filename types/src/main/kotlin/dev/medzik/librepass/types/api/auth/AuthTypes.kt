@@ -1,8 +1,8 @@
 package dev.medzik.librepass.types.api.auth
 
 import dev.medzik.libcrypto.AesCbc
+import dev.medzik.libcrypto.Argon2
 import dev.medzik.libcrypto.Argon2Hash
-import dev.medzik.libcrypto.Argon2HashingFunction
 import dev.medzik.libcrypto.Argon2Type
 import dev.medzik.librepass.types.api.serializers.UUIDSerializer
 import kotlinx.serialization.Serializable
@@ -34,11 +34,11 @@ data class UserArgon2idParameters(
     val version: Int
 ) {
     /**
-     * Convert to Argon2HashingFunction instance.
-     * @return [Argon2HashingFunction]
+     * Convert to Argon2 instance.
+     * @return [Argon2]
      */
-    fun toHashingFunction(): Argon2HashingFunction {
-        return Argon2HashingFunction(
+    fun toHashingFunction(): Argon2 {
+        return Argon2(
             256 / 8, // 256 bits
             parallelism,
             memory,

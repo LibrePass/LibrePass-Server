@@ -1,6 +1,6 @@
 package dev.medzik.librepass.server.controllers.api.v1
 
-import dev.medzik.libcrypto.Argon2HashingFunction
+import dev.medzik.libcrypto.Argon2
 import dev.medzik.libcrypto.Salt
 import dev.medzik.librepass.server.components.AuthComponent
 import dev.medzik.librepass.server.components.RequestIP
@@ -168,7 +168,7 @@ class AuthController @Autowired constructor(
             ?: return ResponseError.InvalidCredentials
 
         // check if password is correct
-        if (!Argon2HashingFunction.verify(request.password, user.password))
+        if (!Argon2.verify(request.password, user.password))
             return ResponseError.InvalidCredentials
 
         // prepare response
