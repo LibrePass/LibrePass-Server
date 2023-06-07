@@ -174,6 +174,8 @@ class AuthController @Autowired constructor(
         val credentials = UserCredentials(
             userId = user.id,
             apiKey = authComponent.generateToken(TokenType.API_KEY, user.id),
+            publicKey = user.publicKey,
+            protectedPrivateKey = user.protectedPrivateKey
         )
 
         return ResponseHandler.generateResponse(credentials, HttpStatus.OK)
