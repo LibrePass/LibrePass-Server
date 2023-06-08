@@ -15,10 +15,10 @@ import dev.medzik.librepass.types.api.user.UserSecrets
 import dev.medzik.librepass.types.api.user.UserSecretsResponse
 
 /**
- * User API client.
- * @param email The email of the user.
- * @param apiKey The api key to use for authentication.
- * @param apiUrl The API URL to use. Defaults to [DEFAULT_API_URL].
+ * User Client for the LibrePass API. This client is used to manage user.
+ * @param email user email
+ * @param apiKey api key to use for authentication
+ * @param apiUrl api url address (optional)
  */
 class UserClient(
     private val email: String,

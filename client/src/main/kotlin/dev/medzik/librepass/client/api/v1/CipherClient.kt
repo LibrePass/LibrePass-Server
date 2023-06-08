@@ -12,7 +12,7 @@ import dev.medzik.librepass.types.cipher.EncryptedCipher
 import java.util.*
 
 /**
- * Cipher API client.
+ * Cipher Client for the LibrePass API. This client is used to manage ciphers.
  * @param apiKey api key to use for authentication
  * @param apiUrl api url address (optional)
  */
