@@ -7,7 +7,7 @@ import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Service
 
 /**
- * Service to send emails.
+ * Service for sending emails.
  */
 @Service
 class EmailService {
@@ -21,15 +21,15 @@ class EmailService {
 
     // get email template
     private val emailVerificationTemplate = this::class.java.getResource("/templates/email-verification.html")?.readText()
-        ?: throw Exception("Could not read email template")
+        ?: throw Exception("Could not read `email verification` email template")
     private val passwordHintTemplate = this::class.java.getResource("/templates/password-hint.html")?.readText()
-        ?: throw Exception("Could not read email template")
+        ?: throw Exception("Could not read `password hint` email template")
 
     /**
      * Email the given address.
-     * @param to The email address to send the email to.
-     * @param subject The subject of the email.
-     * @param body The body of the email.
+     * @param to email address to send to
+     * @param subject subject of the email
+     * @param body body of the email
      */
     fun send(to: String, subject: String, body: String) {
         val message = emailSender.createMimeMessage()

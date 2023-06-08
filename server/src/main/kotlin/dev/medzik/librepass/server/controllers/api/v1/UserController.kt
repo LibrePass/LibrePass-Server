@@ -61,7 +61,7 @@ class UserController @Autowired constructor(
     }
 
     /**
-     * Get user secrets (encryption key, RSA keypair).
+     * Get user secrets (encryption key, Curve25519 keypair).
      */
     @GetMapping("/secrets")
     fun getSecrets(@AuthorizedUser user: UserTable?): Response {

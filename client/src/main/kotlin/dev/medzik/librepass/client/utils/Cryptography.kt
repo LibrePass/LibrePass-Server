@@ -68,14 +68,13 @@ object Cryptography {
         )
     }
 
+    /**
+     * User password hashes.
+     * @property basePasswordHash base password hash, used for encrypt and decrypt the private key, not stored in the database
+     * @property finalPasswordHash final password hash, used for authentication, stored in the database
+     */
     class PasswordHashes(
-        /**
-         * Base Password Hash, used to encrypt the encryption key. It is not stored in the database.
-         */
         val basePasswordHash: Argon2Hash,
-        /**
-         * Final Password Hash, used to authenticate the user. It is stored in the database.
-         */
         val finalPasswordHash: String
     )
 }

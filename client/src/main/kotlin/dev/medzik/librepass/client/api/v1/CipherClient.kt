@@ -13,8 +13,8 @@ import java.util.*
 
 /**
  * Cipher API client.
- * @param apiKey The api key to use for authentication.
- * @param apiUrl The API URL to use. Defaults to [DEFAULT_API_URL].
+ * @param apiKey api key to use for authentication
+ * @param apiUrl api url address (optional)
  */
 @Suppress("unused")
 class CipherClient(
@@ -29,8 +29,8 @@ class CipherClient(
 
     /**
      * Inserts a new cipher.
-     * @param cipher The cipher to insert.
-     * @param secretKey The encryption key to use for encrypting the cipher.
+     * @param cipher cipher to insert
+     * @param secretKey secret key to use for encrypting the cipher
      * @return [InsertResponse]
      */
     @Throws(ClientException::class, ApiException::class)
@@ -45,7 +45,7 @@ class CipherClient(
 
     /**
      * Inserts a new cipher.
-     * @param cipher The cipher to insert.
+     * @param cipher encrypted cipher to insert
      * @return [InsertResponse]
      */
     @Throws(ClientException::class, ApiException::class)
@@ -55,8 +55,8 @@ class CipherClient(
     }
 
     /**
-     * Gets a cipher.
-     * @param id The UUID of the cipher.
+     * Gets a cipher by its ID.
+     * @param id cipher identifier
      * @return [EncryptedCipher]
      */
     @Throws(ClientException::class, ApiException::class)
@@ -66,7 +66,7 @@ class CipherClient(
 
     /**
      * Gets a cipher by its ID.
-     * @param id The UUID of the cipher.
+     * @param id cipher identifier
      * @return [EncryptedCipher]
      */
     @Throws(ClientException::class, ApiException::class)
@@ -87,8 +87,8 @@ class CipherClient(
 
     /**
      * Sync ciphers with the server.
-     * @param lastSync The last sync date.
-     * @return List of ciphers.
+     * @param lastSync date of the last sync
+     * @return [SyncResponse]
      */
     @Throws(ClientException::class, ApiException::class)
     fun sync(lastSync: Date): SyncResponse {
@@ -98,8 +98,8 @@ class CipherClient(
 
     /**
      * Updates a cipher.
-     * @param cipher The cipher to update.
-     * @param secretKey The encryption key to use for encrypting the cipher.
+     * @param cipher cipher to update
+     * @param secretKey secret key to use for encrypting the cipher
      * @return [InsertResponse]
      */
     @Throws(ClientException::class, ApiException::class)
@@ -114,7 +114,7 @@ class CipherClient(
 
     /**
      * Updates a cipher.
-     * @param cipher The cipher to update.
+     * @param cipher cipher to update
      * @return [InsertResponse]
      */
     @Throws(ClientException::class, ApiException::class)
@@ -125,7 +125,7 @@ class CipherClient(
 
     /**
      * Deletes a cipher.
-     * @param id The UUID of the cipher.
+     * @param id cipher identifier
      */
     @Throws(ClientException::class, ApiException::class)
     fun delete(id: UUID) {
@@ -134,7 +134,7 @@ class CipherClient(
 
     /**
      * Deletes a cipher.
-     * @param id The UUID of the cipher.
+     * @param id cipher identifier
      */
     @Throws(ClientException::class, ApiException::class)
     fun delete(id: String) {
@@ -143,7 +143,7 @@ class CipherClient(
 
     /**
      * Get website favicon.
-     * @param domain The domain of the website.
+     * @param domain website domain
      * @return Favicon image as byte array (PNG) or 404 if not found.
      */
     @Throws(ClientException::class, ApiException::class)

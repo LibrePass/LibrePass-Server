@@ -11,8 +11,8 @@ import org.junit.jupiter.api.Test
 import java.util.*
 
 class CipherTests {
-    // example encryption key
-    private val encryptionKey = "1234567890123456789012345678901212345678901234567890123456789012"
+    // example secret key
+    private val secretKey = "1234567890123456789012345678901212345678901234567890123456789012"
 
     // example cipher
     private val cipher = Cipher(
@@ -38,7 +38,7 @@ class CipherTests {
 
     @Test
     fun `encrypt cipher`() {
-        val encryptedCipher = EncryptedCipher(cipher, encryptionKey)
+        val encryptedCipher = EncryptedCipher(cipher, secretKey)
 
         assertEquals(cipher.id, encryptedCipher.id)
         assertEquals(cipher.owner, encryptedCipher.owner)
@@ -51,8 +51,8 @@ class CipherTests {
 
     @Test
     fun `encrypt and decrypt cipher`() {
-        val encryptedCipher = EncryptedCipher(cipher, encryptionKey)
-        val decryptedCipher = Cipher(encryptedCipher, encryptionKey)
+        val encryptedCipher = EncryptedCipher(cipher, secretKey)
+        val decryptedCipher = Cipher(encryptedCipher, secretKey)
 
         assertEquals(cipher.id, decryptedCipher.id)
         assertEquals(cipher.owner, decryptedCipher.owner)
@@ -65,7 +65,7 @@ class CipherTests {
 
     @Test
     fun `encrypt cipher to json`() {
-        val encryptedCipher = EncryptedCipher(cipher, encryptionKey)
+        val encryptedCipher = EncryptedCipher(cipher, secretKey)
         val cipherJson = encryptedCipher.toJson()
 
         assert(cipherJson.isNotEmpty())
@@ -73,9 +73,9 @@ class CipherTests {
 
     @Test
     fun `encrypt and decrypt cipher from json`() {
-        val cipherJson = EncryptedCipher(cipher, encryptionKey).toJson()
+        val cipherJson = EncryptedCipher(cipher, secretKey).toJson()
         val encryptedCipher = EncryptedCipher.from(cipherJson)
-        val decryptedCipher = Cipher(encryptedCipher, encryptionKey)
+        val decryptedCipher = Cipher(encryptedCipher, secretKey)
 
         assertEquals(cipher.id, decryptedCipher.id)
         assertEquals(cipher.owner, decryptedCipher.owner)

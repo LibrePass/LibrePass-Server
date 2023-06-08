@@ -33,9 +33,9 @@ class UserClient(
 
     /**
      * Change user password.
-     * @param oldPassword Old password.
-     * @param newPassword New password.
-     * @param parameters Argon2id parameters.
+     * @param oldPassword old password
+     * @param newPassword new password
+     * @param parameters argon2id parameters of the new password
      */
     @Throws(ClientException::class, ApiException::class)
     fun changePassword(
@@ -85,7 +85,8 @@ class UserClient(
 
     /**
      * Get user secrets.
-     * @param password User password.
+     * @param password user password
+     * @return [UserSecrets]
      */
     @Throws(ClientException::class, ApiException::class)
     fun getSecrets(password: String): UserSecrets {
@@ -103,7 +104,7 @@ class UserClient(
 
     /**
      * Get user secrets.
-     * @param basePassword User base password hash.
+     * @param basePassword base password hash of the user password
      */
     @Throws(ClientException::class, ApiException::class)
     fun getSecrets(basePassword: Argon2Hash): UserSecrets {

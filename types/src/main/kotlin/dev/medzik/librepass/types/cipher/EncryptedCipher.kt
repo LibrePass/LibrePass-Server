@@ -13,16 +13,16 @@ import java.util.*
 /**
  * EncryptedCipher is a representation of cipher stored in the database.
  * The data is encrypted and can only be decrypted with the encryption key.
- * @property id The unique identifier of the cipher.
- * @property owner The unique identifier of the owner of the cipher.
- * @property type The type of the cipher.
- * @property data The encrypted data of the cipher.
- * @property collection The unique identifier of the collection the cipher belongs to.
- * @property favorite Whether the cipher is marked as favorite.
- * @property rePrompt Whether the password should be re-prompted. (Only UI-related)
- * @property version The version of the cipher. (Currently 1)
- * @property created The date the cipher was created.
- * @property lastModified The date the cipher was last modified.
+ * @property id unique identifier of the cipher
+ * @property owner unique identifier of the owner of the cipher
+ * @property type type of the cipher
+ * @property data encrypted data of the cipher
+ * @property collection unique identifier of the collection the cipher belongs to
+ * @property favorite Whether the cipher is marked as favorite
+ * @property rePrompt Whether the password should be re-prompted (Only UI-related)
+ * @property version version of the cipher (Currently 1)
+ * @property created date the cipher was created
+ * @property lastModified date the cipher was last modified
  * @see Cipher
  */
 @Serializable
@@ -76,8 +76,6 @@ data class EncryptedCipher(
     companion object {
         /**
          * Creates a new [EncryptedCipher] object from the JSON string.
-         * @param cipher The JSON string to decode.
-         * @return The encrypted cipher.
          */
         fun from(cipher: String) =
             Json.decodeFromString(serializer(), cipher)
@@ -85,7 +83,6 @@ data class EncryptedCipher(
 
     /**
      * Decrypts the cipher data.
-     * @param secretKey The key to decrypt the cipher with.
      * @return JSON string of the decrypted cipher data.
      */
     fun decryptData(secretKey: String) =
@@ -93,7 +90,6 @@ data class EncryptedCipher(
 
     /**
      * Converts the cipher to a JSON string.
-     * @return JSON string of the cipher.
      */
     fun toJson() =
         Json.encodeToString(serializer(), this)

@@ -18,7 +18,7 @@ import dev.medzik.librepass.types.api.auth.UserCredentials
 
 /**
  * Auth Client for the LibrePass API. This client is used to register and login users.
- * @param apiUrl The API URL to use. Defaults to [DEFAULT_API_URL].
+ * @param apiUrl api url address (optional)
  */
 class AuthClient(apiUrl: String = DEFAULT_API_URL) {
     companion object {
@@ -29,9 +29,9 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
 
     /**
      * Register a new user
-     * @param email email of the user
-     * @param password password of the user
-     * @param passwordHint password hint of the user (optional)
+     * @param email user email address
+     * @param password user password
+     * @param passwordHint hint for the password (optional)
      */
     @Throws(ClientException::class, ApiException::class)
     fun register(email: String, password: String, passwordHint: String? = null) {
@@ -67,7 +67,7 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
 
     /**
      * Get the argon2id parameters of a user (for login)
-     * @param email email of the user
+     * @param email user email
      * @return [UserArgon2idParameters]
      */
     @Throws(ClientException::class, ApiException::class)
@@ -78,8 +78,8 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
 
     /**
      * Login a user
-     * @param email email of the user
-     * @param password password of the user
+     * @param email user email
+     * @param password user password
      * @return [UserCredentials]
      */
     @Throws(ClientException::class, ApiException::class)
@@ -95,10 +95,10 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
     }
 
     /**
-     * Login a user
-     * @param email email of the user
-     * @param password password of the user (not hashed)
-     * @param basePassword base password of the user (hashed)
+     * Login a user.
+     * @param email user email
+     * @param password user password (not hashed)
+     * @param basePassword base password hash (hashed)
      * @return [UserCredentials]
      */
     @Throws(ClientException::class, ApiException::class)
@@ -120,7 +120,7 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
 
     /**
      * Request password hint.
-     * @param email email of the user
+     * @param email user email
      */
     @Throws(ClientException::class, ApiException::class)
     fun requestPasswordHint(email: String) {

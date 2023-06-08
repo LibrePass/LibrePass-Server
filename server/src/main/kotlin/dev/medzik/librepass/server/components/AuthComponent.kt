@@ -47,9 +47,9 @@ class AuthComponent @Autowired constructor(
 
     /**
      * Generates a token for the given user.
-     * @param tokenType Type of the token.
-     * @param userId User ID.
-     * @return Generated token.
+     * @param tokenType token type
+     * @param userId user identifier
+     * @return Generated token as a string.
      */
     fun generateToken(tokenType: TokenType, userId: UUID): String {
         val claims: MutableMap<String, Any> = HashMap()
@@ -66,9 +66,9 @@ class AuthComponent @Autowired constructor(
 
     /**
      * Parses a token and returns the user id. Returns null if the token is invalid.
-     * @param type Type of the token.
-     * @param token Token to be parsed.
-     * @return Token claims.
+     * @param type token type
+     * @param token token to be parsed
+     * @return Token claims or null if the token is invalid.
      */
     fun parseToken(type: TokenType, token: String): Claims? {
         return try {

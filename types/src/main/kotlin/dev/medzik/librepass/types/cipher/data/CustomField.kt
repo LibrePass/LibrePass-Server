@@ -9,9 +9,9 @@ import kotlinx.serialization.encoding.Encoder
 
 /**
  * CipherField is a representation of a custom field of a cipher.
- * @property name The name of the custom field.
- * @property type The type of the custom field.
- * @property value The value of the custom field.
+ * @property name field name
+ * @property type field type
+ * @property value value of the field
  * @see CipherFieldType
  */
 @Serializable

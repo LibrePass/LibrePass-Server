@@ -49,7 +49,7 @@ class AuthorizedUserArgumentResolver @Autowired constructor(
         val tokenClaims = authComponent.parseToken(TokenType.API_KEY, token)
             ?: return null
         // get user id from token
-        val userID = tokenClaims[TokenClaims.TYPE.key] as String
+        val userID = tokenClaims[TokenClaims.TYPE.key].toString()
 
         // get user from database
         val user = userRepository
