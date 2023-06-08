@@ -28,7 +28,7 @@ class CollectionClient(
     /**
      * Create a new collection.
      * @param name collection name
-     * @return ID of the created collection.
+     * @return [InsertResponse]
      */
     @Throws(ClientException::class, ApiException::class)
     fun createCollection(name: String): InsertResponse {
@@ -39,7 +39,7 @@ class CollectionClient(
 
     /**
      * Get all collections.
-     * @return A list of all collections.
+     * @return List of [CipherCollection]
      */
     @Throws(ClientException::class, ApiException::class)
     fun getCollections(): List<CipherCollection> {
@@ -50,7 +50,7 @@ class CollectionClient(
     /**
      * Get a collection by ID.
      * @param id collection identifier
-     * @return The collection.
+     * @return [CipherCollection]
      */
     @Throws(ClientException::class, ApiException::class)
     fun getCollection(id: UUID): CipherCollection {
@@ -60,7 +60,7 @@ class CollectionClient(
     /**
      * Get a collection by ID.
      * @param id collection identifier
-     * @return The collection.
+     * @return [CipherCollection]
      */
     @Throws(ClientException::class, ApiException::class)
     fun getCollection(id: String): CipherCollection {
@@ -72,7 +72,7 @@ class CollectionClient(
      * Update a collection.
      * @param id collection identifier
      * @param name collection name
-     * @return The ID of the updated collection.
+     * @return [InsertResponse]
      */
     @Throws(ClientException::class, ApiException::class)
     fun updateCollection(id: UUID, name: String): InsertResponse {
@@ -83,7 +83,7 @@ class CollectionClient(
      * Update a collection.
      * @param id collection identifier
      * @param name collection name
-     * @return The ID of the updated collection.
+     * @return [InsertResponse]
      */
     @Throws(ClientException::class, ApiException::class)
     fun updateCollection(id: String, name: String): InsertResponse {

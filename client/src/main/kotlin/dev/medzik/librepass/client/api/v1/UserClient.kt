@@ -105,6 +105,7 @@ class UserClient(
     /**
      * Get user secrets.
      * @param basePassword base password hash of the user password
+     * @return [UserSecrets]
      */
     @Throws(ClientException::class, ApiException::class)
     fun getSecrets(basePassword: Argon2Hash): UserSecrets {
