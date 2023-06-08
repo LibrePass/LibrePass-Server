@@ -16,6 +16,11 @@ enum class TokenType(val expirationTime: Long) {
     API_KEY(90 * 24 * 60 * 60 * 1000L), // 90 days
 }
 
+enum class TokenClaims(val key: String) {
+    TYPE("typ"),
+    USER_ID("sub"),
+}
+
 @Component
 class AuthComponent @Autowired constructor(
     @Value("\${jwt.publicKeyFile}") publicKeyFile: String,
@@ -48,8 +53,8 @@ class AuthComponent @Autowired constructor(
      */
     fun generateToken(tokenType: TokenType, userId: UUID): String {
         val claims: MutableMap<String, Any> = HashMap()
-        claims["typ"] = tokenType.name
-        claims["sub"] = userId
+        claims[TokenClaims.TYPE.key] = tokenType.name
+        claims[TokenClaims.USER_ID.key] = userId
 
         return Jwts.builder()
             .setClaims(claims)
@@ -74,7 +79,7 @@ class AuthComponent @Autowired constructor(
                 .body
 
             // check if the token type is correct
-            if (claims["typ"] != type.name)
+            if (claims[TokenClaims.TYPE.key] != type.name)
                 return null
 
             claims
