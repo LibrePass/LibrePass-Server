@@ -25,7 +25,7 @@ class CollectionClientTests {
         val authClient = AuthClient("http://localhost:8080")
         val credentials = authClient.login("test_collection@example.com", "test")
 
-        collectionClient = CollectionClient(credentials.accessToken, "http://localhost:8080")
+        collectionClient = CollectionClient(credentials.apiKey, "http://localhost:8080")
     }
 
     @Test

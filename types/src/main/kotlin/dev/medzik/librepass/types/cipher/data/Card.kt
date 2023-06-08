@@ -3,15 +3,15 @@ package dev.medzik.librepass.types.cipher.data
 import kotlinx.serialization.Serializable
 
 /**
- * CipherCardData is a representation of the card data of a card cipher.
- * @param cardholderName The cardholder name of the card cipher.
- * @param brand The brand of the card cipher.
- * @param number The number of the card cipher.
- * @param expMonth The expiration month of the card cipher.
- * @param expYear The expiration year of the card cipher.
- * @param code The code of the card cipher.
- * @param notes The notes of the card cipher.
- * @param fields The list of custom fields.
+ * Card data for cipher.
+ * @param cardholderName cardholder name
+ * @param brand card brand
+ * @param number card number
+ * @param expMonth card expiration month
+ * @param expYear card expiration year
+ * @param code CVV card code
+ * @param notes notes for card
+ * @param fields custom fields
  */
 @Serializable
 data class CipherCardData(

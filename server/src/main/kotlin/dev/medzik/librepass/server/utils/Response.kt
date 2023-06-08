@@ -29,8 +29,8 @@ object ResponseHandler {
 
     /**
      * generateResponse generates a response with the given data that is serialized to JSON.
-     * @param data The data to serialize
-     * @param status The status of the response
+     * @param data data to serialize
+     * @param status status of the response
      * @return The response
      */
     @OptIn(InternalSerializationApi::class)
@@ -45,9 +45,9 @@ object ResponseHandler {
 
     /**
      * generateResponse generates a response with the given data that is serialized to JSON.
-     * @param serializer The serializer to use
-     * @param data The data to serialize
-     * @param status The status of the response
+     * @param serializer serializer to use
+     * @param data data to serialize
+     * @param status status of the response
      * @return The response
      */
     fun <T> generateResponse(serializer: SerializationStrategy<T>, data: T, status: HttpStatus): Response {
@@ -57,8 +57,8 @@ object ResponseHandler {
 
     /**
      * generateErrorResponse generates an error response with the given error and status.
-     * @param error The error
-     * @param status The status of the response
+     * @param error error message
+     * @param status status of the response
      * @return The response
      */
     fun generateErrorResponse(error: String, status: HttpStatus): Response {
