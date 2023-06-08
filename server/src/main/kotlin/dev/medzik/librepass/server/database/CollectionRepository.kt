@@ -10,15 +10,15 @@ import java.util.*
 interface CollectionRepository : CrudRepository<CollectionTable, UUID> {
     /**
      * Find a collection by its ID and owner.
-     * @param id The ID of the collection.
-     * @param owner The owner of the collection.
+     * @param id collection identifier
+     * @param owner user identifier
      * @return The collection with the given ID and owner, or null if it doesn't exist.
      */
     fun findByIdAndOwner(id: UUID, owner: UUID): CollectionTable?
 
     /**
      * Find all collections owned by the given user.
-     * @param owner The owner of the collections.
+     * @param owner user identifier
      * @return A list of all collections owned by the given user.
      */
     fun findAllByOwner(owner: UUID): List<CollectionTable>

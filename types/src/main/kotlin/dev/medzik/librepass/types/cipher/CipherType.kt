@@ -11,7 +11,7 @@ enum class CipherType {
     companion object {
         /**
          * Returns the [CipherType] from the given type integer.
-         * @param type The type of the cipher.
+         * @param type cipher type
          */
         fun from(type: Int) = values()[type]
     }

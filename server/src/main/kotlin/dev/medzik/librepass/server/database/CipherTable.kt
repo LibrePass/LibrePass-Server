@@ -1,10 +1,7 @@
 package dev.medzik.librepass.server.database
 
-import dev.medzik.librepass.types.api.serializers.DateSerializer
-import dev.medzik.librepass.types.api.serializers.UUIDSerializer
 import dev.medzik.librepass.types.cipher.EncryptedCipher
 import jakarta.persistence.*
-import kotlinx.serialization.Serializable
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
@@ -13,13 +10,10 @@ import java.util.*
 @Entity
 @EntityListeners(AuditingEntityListener::class)
 @Table(name = "ciphers")
-@Serializable
 data class CipherTable(
     @Id
-    @Serializable(with = UUIDSerializer::class)
     val id: UUID = UUID.randomUUID(),
 
-    @Serializable(with = UUIDSerializer::class)
     val owner: UUID,
 
     val type: Int,
@@ -27,24 +21,21 @@ data class CipherTable(
     val data: String,
 
     val favorite: Boolean = false,
-    @Serializable(with = UUIDSerializer::class)
     val collection: UUID? = null,
     val rePrompt: Boolean = false,
 
     val version: Int = 1,
 
     @CreatedDate
-    @Serializable(with = DateSerializer::class)
     val created: Date = Date(),
     @LastModifiedDate
-    @Serializable(with = DateSerializer::class)
     val lastModified: Date = Date()
 ) {
     constructor(cipher: EncryptedCipher) : this(
         id = cipher.id,
         owner = cipher.owner,
         type = cipher.type,
-        data = cipher.data,
+        data = cipher.protectedData,
         favorite = cipher.favorite,
         collection = cipher.collection,
         rePrompt = cipher.rePrompt,
@@ -60,7 +51,7 @@ data class CipherTable(
         id = id,
         owner = owner,
         type = type,
-        data = data,
+        protectedData = data,
         favorite = favorite,
         collection = collection,
         rePrompt = rePrompt,
