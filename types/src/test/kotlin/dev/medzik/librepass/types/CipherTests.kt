@@ -43,7 +43,7 @@ class CipherTests {
         assertEquals(cipher.id, encryptedCipher.id)
         assertEquals(cipher.owner, encryptedCipher.owner)
         assertEquals(cipher.type, CipherType.from(encryptedCipher.type))
-        assert(encryptedCipher.data.isNotEmpty())
+        assert(encryptedCipher.protectedData.isNotEmpty())
         assertEquals(cipher.collection, encryptedCipher.collection)
         assertEquals(cipher.favorite, encryptedCipher.favorite)
         assertEquals(cipher.rePrompt, encryptedCipher.rePrompt)

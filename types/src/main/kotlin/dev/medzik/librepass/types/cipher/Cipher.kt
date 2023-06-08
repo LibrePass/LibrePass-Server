@@ -9,7 +9,7 @@ import java.util.*
 /**
  * Cipher is a representation of a single cipher entry.
  * @property id cipher identifier
- * @property owner owner of the cipher
+ * @property owner owner identifier
  * @property type cipher type - [CipherType]
  * @property loginData login data (Only if the cipher is a login cipher) - [CipherLoginData]
  * @property secureNoteData secure note data (Only if the cipher is a secure cipher) - [CipherSecureNoteData]

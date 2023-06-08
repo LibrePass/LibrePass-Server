@@ -13,10 +13,10 @@ import java.util.*
 /**
  * EncryptedCipher is a representation of cipher stored in the database.
  * The data is encrypted and can only be decrypted with the encryption key.
- * @property id unique identifier of the cipher
- * @property owner unique identifier of the owner of the cipher
+ * @property id cipher identifier
+ * @property owner owner identifier
  * @property type type of the cipher
- * @property data encrypted data of the cipher
+ * @property protectedData encrypted cipher data
  * @property collection unique identifier of the collection the cipher belongs to
  * @property favorite Whether the cipher is marked as favorite
  * @property rePrompt Whether the password should be re-prompted (Only UI-related)
@@ -32,7 +32,7 @@ data class EncryptedCipher(
     @Serializable(with = UUIDSerializer::class)
     val owner: UUID,
     val type: Int = CipherType.Login.ordinal,
-    val data: String,
+    val protectedData: String,
     @Serializable(with = UUIDSerializer::class)
     val collection: UUID? = null,
     val favorite: Boolean = false,
@@ -56,7 +56,7 @@ data class EncryptedCipher(
         id = cipher.id,
         owner = cipher.owner,
         type = cipher.type.ordinal,
-        data = AES.encrypt(
+        protectedData = AES.encrypt(
             AES.GCM,
             secretKey,
             when (cipher.type) {
@@ -86,7 +86,7 @@ data class EncryptedCipher(
      * @return JSON string of the decrypted cipher data.
      */
     fun decryptData(secretKey: String) =
-        AES.decrypt(AES.GCM, secretKey, this.data)!!
+        AES.decrypt(AES.GCM, secretKey, this.protectedData)!!
 
     /**
      * Converts the cipher to a JSON string.
