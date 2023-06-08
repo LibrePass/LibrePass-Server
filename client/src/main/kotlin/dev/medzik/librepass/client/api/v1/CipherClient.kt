@@ -77,7 +77,7 @@ class CipherClient(
 
     /**
      * Get all ciphers.
-     * @return List of ciphers.
+     * @return List of [EncryptedCipher]
      */
     @Throws(ClientException::class, ApiException::class)
     fun getAll(): List<EncryptedCipher> {
