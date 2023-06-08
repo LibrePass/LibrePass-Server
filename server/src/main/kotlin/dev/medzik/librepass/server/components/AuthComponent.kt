@@ -13,7 +13,12 @@ import java.security.PublicKey
 import java.util.*
 
 enum class TokenType(val expirationTime: Long) {
-    ACCESS_TOKEN(90 * 24 * 60 * 60 * 1000L), // 90 days
+    API_KEY(90 * 24 * 60 * 60 * 1000L), // 90 days
+}
+
+enum class TokenClaims(val key: String) {
+    TYPE("typ"),
+    USER_ID("sub"),
 }
 
 @Component
@@ -42,14 +47,14 @@ class AuthComponent @Autowired constructor(
 
     /**
      * Generates a token for the given user.
-     * @param tokenType Type of the token.
-     * @param userId User ID.
-     * @return Generated token.
+     * @param tokenType token type
+     * @param userId user identifier
+     * @return Generated token as a string.
      */
     fun generateToken(tokenType: TokenType, userId: UUID): String {
         val claims: MutableMap<String, Any> = HashMap()
-        claims["typ"] = tokenType.name
-        claims["sub"] = userId
+        claims[TokenClaims.TYPE.key] = tokenType.name
+        claims[TokenClaims.USER_ID.key] = userId
 
         return Jwts.builder()
             .setClaims(claims)
@@ -61,9 +66,9 @@ class AuthComponent @Autowired constructor(
 
     /**
      * Parses a token and returns the user id. Returns null if the token is invalid.
-     * @param type Type of the token.
-     * @param token Token to be parsed.
-     * @return Token claims.
+     * @param type token type
+     * @param token token to be parsed
+     * @return Token claims or null if the token is invalid.
      */
     fun parseToken(type: TokenType, token: String): Claims? {
         return try {
@@ -74,7 +79,7 @@ class AuthComponent @Autowired constructor(
                 .body
 
             // check if the token type is correct
-            if (claims["typ"] != type.name)
+            if (claims[TokenClaims.TYPE.key] != type.name)
                 return null
 
             claims

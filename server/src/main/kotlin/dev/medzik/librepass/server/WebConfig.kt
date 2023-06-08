@@ -20,7 +20,7 @@ class WebConfig @Autowired constructor(
         // Add @AuthorizedUser annotation support
         resolvers.add(authorizedUserArgumentResolver)
         // Add @RequestIP annotation support
-        resolvers.add(requestIPArgumentResolver);
+        resolvers.add(requestIPArgumentResolver)
     }
 
     // CORS configuration

@@ -12,7 +12,7 @@ import java.util.*
 interface CipherRepository : CrudRepository<CipherTable, UUID> {
     /**
      * Get a list of all ciphers owned by the user.
-     * @param owner The owner of the ciphers.
+     * @param owner user identifier
      * @return A list of all ciphers owned by the user.
      */
     @Query("SELECT p FROM #{#entityName} p WHERE p.owner = :owner ORDER BY p.lastModified DESC")
@@ -20,8 +20,8 @@ interface CipherRepository : CrudRepository<CipherTable, UUID> {
 
     /**
      * Check if a cipher exists and is owned by the user.
-     * @param id The id of the cipher.
-     * @param owner The owner of the cipher.
+     * @param id cipher identifier
+     * @param owner user identifier
      * @return True if the cipher exists and is owned by the user, false otherwise.
      */
     @Query("SELECT EXISTS(SELECT 1 FROM #{#entityName} p WHERE p.id = :id AND p.owner = :owner)")

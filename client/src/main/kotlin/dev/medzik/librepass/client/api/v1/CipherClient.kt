@@ -4,50 +4,48 @@ import dev.medzik.librepass.client.Client
 import dev.medzik.librepass.client.DEFAULT_API_URL
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
+import dev.medzik.librepass.client.utils.JsonUtils
 import dev.medzik.librepass.types.api.cipher.InsertResponse
 import dev.medzik.librepass.types.api.cipher.SyncResponse
 import dev.medzik.librepass.types.cipher.Cipher
 import dev.medzik.librepass.types.cipher.EncryptedCipher
-import dev.medzik.librepass.client.utils.JsonUtils
-import okhttp3.OkHttpClient
-import java.io.IOException
 import java.util.*
 
 /**
- * Cipher API client.
- * @param accessToken The access token to use for authentication.
- * @param apiUrl The API URL to use. Defaults to [DEFAULT_API_URL].
+ * Cipher Client for the LibrePass API. This client is used to manage ciphers.
+ * @param apiKey api key to use for authentication
+ * @param apiUrl api url address (optional)
  */
 @Suppress("unused")
 class CipherClient(
-    accessToken: String,
+    apiKey: String,
     apiUrl: String  = DEFAULT_API_URL
 ) {
     companion object {
         const val API_ENDPOINT = "/api/v1/cipher"
     }
 
-    private val client = Client(apiUrl, accessToken)
+    private val client = Client(apiUrl, apiKey)
 
     /**
      * Inserts a new cipher.
-     * @param cipher The cipher to insert.
-     * @param encryptionKey The encryption key to use for encrypting the cipher.
+     * @param cipher cipher to insert
+     * @param secretKey secret key to use for encrypting the cipher
      * @return [InsertResponse]
      */
     @Throws(ClientException::class, ApiException::class)
-    fun insert(cipher: Cipher, encryptionKey: String): InsertResponse {
+    fun insert(cipher: Cipher, secretKey: String): InsertResponse {
         return insert(
             EncryptedCipher(
                 cipher = cipher,
-                encryptionKey = encryptionKey
+                secretKey = secretKey
             )
         )
     }
 
     /**
      * Inserts a new cipher.
-     * @param cipher The cipher to insert.
+     * @param cipher encrypted cipher to insert
      * @return [InsertResponse]
      */
     @Throws(ClientException::class, ApiException::class)
@@ -57,8 +55,8 @@ class CipherClient(
     }
 
     /**
-     * Gets a cipher.
-     * @param id The UUID of the cipher.
+     * Gets a cipher by its ID.
+     * @param id cipher identifier
      * @return [EncryptedCipher]
      */
     @Throws(ClientException::class, ApiException::class)
@@ -68,7 +66,7 @@ class CipherClient(
 
     /**
      * Gets a cipher by its ID.
-     * @param id The UUID of the cipher.
+     * @param id cipher identifier
      * @return [EncryptedCipher]
      */
     @Throws(ClientException::class, ApiException::class)
@@ -89,8 +87,8 @@ class CipherClient(
 
     /**
      * Sync ciphers with the server.
-     * @param lastSync The last sync date.
-     * @return List of ciphers.
+     * @param lastSync date of the last sync
+     * @return [SyncResponse]
      */
     @Throws(ClientException::class, ApiException::class)
     fun sync(lastSync: Date): SyncResponse {
@@ -100,23 +98,23 @@ class CipherClient(
 
     /**
      * Updates a cipher.
-     * @param cipher The cipher to update.
-     * @param encryptionKey The encryption key to use for encrypting the cipher.
+     * @param cipher cipher to update
+     * @param secretKey secret key to use for encrypting the cipher
      * @return [InsertResponse]
      */
     @Throws(ClientException::class, ApiException::class)
-    fun update(cipher: Cipher, encryptionKey: String): InsertResponse {
+    fun update(cipher: Cipher, secretKey: String): InsertResponse {
         return update(
             EncryptedCipher(
                 cipher = cipher,
-                encryptionKey = encryptionKey
+                secretKey = secretKey
             )
         )
     }
 
     /**
      * Updates a cipher.
-     * @param cipher The cipher to update.
+     * @param cipher cipher to update
      * @return [InsertResponse]
      */
     @Throws(ClientException::class, ApiException::class)
@@ -127,7 +125,7 @@ class CipherClient(
 
     /**
      * Deletes a cipher.
-     * @param id The UUID of the cipher.
+     * @param id cipher identifier
      */
     @Throws(ClientException::class, ApiException::class)
     fun delete(id: UUID) {
@@ -136,7 +134,7 @@ class CipherClient(
 
     /**
      * Deletes a cipher.
-     * @param id The UUID of the cipher.
+     * @param id cipher identifier
      */
     @Throws(ClientException::class, ApiException::class)
     fun delete(id: String) {
@@ -145,7 +143,7 @@ class CipherClient(
 
     /**
      * Get website favicon.
-     * @param domain The domain of the website.
+     * @param domain website domain
      * @return Favicon image as byte array (PNG) or 404 if not found.
      */
     @Throws(ClientException::class, ApiException::class)

@@ -4,31 +4,31 @@ import dev.medzik.librepass.client.Client
 import dev.medzik.librepass.client.DEFAULT_API_URL
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
+import dev.medzik.librepass.client.utils.JsonUtils
 import dev.medzik.librepass.types.api.cipher.InsertResponse
 import dev.medzik.librepass.types.api.collection.CipherCollection
 import dev.medzik.librepass.types.api.collection.CreateCollectionRequest
-import dev.medzik.librepass.client.utils.JsonUtils
 import java.util.*
 
 /**
  * Collection Client for the LibrePass API. This client is used to manage collections.
- * @param accessToken The access token to use.
- * @param apiUrl The API URL to use. Defaults to [DEFAULT_API_URL].
+ * @param apiKey api key to use for authentication
+ * @param apiUrl api url address (optional)
  */
 class CollectionClient(
-    accessToken: String,
+    apiKey: String,
     apiUrl: String = DEFAULT_API_URL
 ) {
     companion object {
         const val API_ENDPOINT = "/api/v1/collection"
     }
 
-    private val client = Client(apiUrl, accessToken)
+    private val client = Client(apiUrl, apiKey)
 
     /**
      * Create a new collection.
-     * @param name The name of the collection.
-     * @return The ID of the created collection.
+     * @param name collection name
+     * @return ID of the created collection.
      */
     @Throws(ClientException::class, ApiException::class)
     fun createCollection(name: String): InsertResponse {
@@ -49,7 +49,7 @@ class CollectionClient(
 
     /**
      * Get a collection by ID.
-     * @param id The ID of the collection.
+     * @param id collection identifier
      * @return The collection.
      */
     @Throws(ClientException::class, ApiException::class)
@@ -59,7 +59,7 @@ class CollectionClient(
 
     /**
      * Get a collection by ID.
-     * @param id The ID of the collection.
+     * @param id collection identifier
      * @return The collection.
      */
     @Throws(ClientException::class, ApiException::class)
@@ -70,8 +70,8 @@ class CollectionClient(
 
     /**
      * Update a collection.
-     * @param id The ID of the collection.
-     * @param name The new name of the collection.
+     * @param id collection identifier
+     * @param name collection name
      * @return The ID of the updated collection.
      */
     @Throws(ClientException::class, ApiException::class)
@@ -81,8 +81,8 @@ class CollectionClient(
 
     /**
      * Update a collection.
-     * @param id The ID of the collection.
-     * @param name The new name of the collection.
+     * @param id collection identifier
+     * @param name collection name
      * @return The ID of the updated collection.
      */
     @Throws(ClientException::class, ApiException::class)
@@ -94,7 +94,7 @@ class CollectionClient(
 
     /**
      * Delete a collection.
-     * @param id The ID of the collection.
+     * @param id collection identifier
      */
     @Throws(ClientException::class, ApiException::class)
     fun deleteCollection(id: UUID) {
@@ -103,7 +103,7 @@ class CollectionClient(
 
     /**
      * Delete a collection.
-     * @param id The ID of the collection.
+     * @param id collection identifier
      */
     @Throws(ClientException::class, ApiException::class)
     fun deleteCollection(id: String) {

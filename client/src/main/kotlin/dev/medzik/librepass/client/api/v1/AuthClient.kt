@@ -1,26 +1,24 @@
 package dev.medzik.librepass.client.api.v1
 
-import dev.medzik.libcrypto.AesCbc
+import dev.medzik.libcrypto.AES
 import dev.medzik.libcrypto.Argon2Hash
-import dev.medzik.libcrypto.RSA
+import dev.medzik.libcrypto.Curve25519
 import dev.medzik.librepass.client.Client
 import dev.medzik.librepass.client.DEFAULT_API_URL
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
-import dev.medzik.librepass.client.utils.Cryptography.RSAKeySize
 import dev.medzik.librepass.client.utils.Cryptography.computeBasePasswordHash
 import dev.medzik.librepass.client.utils.Cryptography.computeFinalPasswordHash
 import dev.medzik.librepass.client.utils.Cryptography.computeHashes
-import dev.medzik.librepass.client.utils.Cryptography.createEncryptionKey
+import dev.medzik.librepass.client.utils.JsonUtils
 import dev.medzik.librepass.types.api.auth.LoginRequest
 import dev.medzik.librepass.types.api.auth.RegisterRequest
 import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
 import dev.medzik.librepass.types.api.auth.UserCredentials
-import dev.medzik.librepass.client.utils.JsonUtils
 
 /**
  * Auth Client for the LibrePass API. This client is used to register and login users.
- * @param apiUrl The API URL to use. Defaults to [DEFAULT_API_URL].
+ * @param apiUrl api url address (optional)
  */
 class AuthClient(apiUrl: String = DEFAULT_API_URL) {
     companion object {
@@ -31,43 +29,37 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
 
     /**
      * Register a new user
-     * @param email email of the user
-     * @param password password of the user
-     * @param passwordHint password hint of the user (optional)
+     * @param email user email address
+     * @param password user password
+     * @param passwordHint hint for the password (optional)
      */
     @Throws(ClientException::class, ApiException::class)
     fun register(email: String, password: String, passwordHint: String? = null) {
         // compute password hashes
         val passwordHashes = computeHashes(password, email)
 
-        // create a random encryption key
-        val encryptionKey = createEncryptionKey()
-        // encrypt the encryption key with the base password hash
-        val protectedEncryptionKey = AesCbc.encrypt(encryptionKey, passwordHashes.basePasswordHash.toHexHash())
+        // generate Curve25519 keypair
+        val keyPair = Curve25519.generateKeyPair()
 
-        // generate a new rsa keypair for the user
-        val rsaKeypair = RSA.generateKeyPair(RSAKeySize)
-
-        // get the public and private key as string
-        val rsaPublicKey = RSA.KeyUtils.getPublicKeyString(rsaKeypair.public)
-        val rsaPrivateKey = RSA.KeyUtils.getPrivateKeyString(rsaKeypair.private)
-
-        // encrypt private key with the encryption key
-        val encryptedRsaPrivateKey = AesCbc.encrypt(rsaPrivateKey, encryptionKey)
+        // encrypt private key with password hash
+        val protectedPrivateKey = AES.encrypt(
+            AES.GCM,
+            passwordHashes.basePasswordHash.toHexHash(),
+            keyPair.privateKey
+        )
 
         val request = RegisterRequest(
             email = email,
-            password = passwordHashes.finalPasswordHash,
+            passwordHash = passwordHashes.finalPasswordHash,
             passwordHint = passwordHint,
-            protectedEncryptionKey = protectedEncryptionKey,
-            // argon2id parameters
+            // Argon2id parameters
             parallelism = passwordHashes.basePasswordHash.parallelism,
             memory = passwordHashes.basePasswordHash.memory,
             iterations = passwordHashes.basePasswordHash.iterations,
             version = passwordHashes.basePasswordHash.version,
-            // rsa keypair
-            publicKey = rsaPublicKey,
-            privateKey = encryptedRsaPrivateKey
+            // Curve25519 keypair
+            publicKey = keyPair.publicKey,
+            protectedPrivateKey = protectedPrivateKey
         )
 
         client.post("$API_ENDPOINT/register", JsonUtils.serialize(request))
@@ -75,7 +67,7 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
 
     /**
      * Get the argon2id parameters of a user (for login)
-     * @param email email of the user
+     * @param email user email
      * @return [UserArgon2idParameters]
      */
     @Throws(ClientException::class, ApiException::class)
@@ -86,8 +78,8 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
 
     /**
      * Login a user
-     * @param email email of the user
-     * @param password password of the user
+     * @param email user email
+     * @param password user password
      * @return [UserCredentials]
      */
     @Throws(ClientException::class, ApiException::class)
@@ -103,10 +95,10 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
     }
 
     /**
-     * Login a user
-     * @param email email of the user
-     * @param password password of the user (not hashed)
-     * @param basePassword base password of the user (hashed)
+     * Login a user.
+     * @param email user email
+     * @param password user password (not hashed)
+     * @param basePassword base password hash (hashed)
      * @return [UserCredentials]
      */
     @Throws(ClientException::class, ApiException::class)
@@ -119,7 +111,7 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
 
         val request = LoginRequest(
             email = email,
-            password = finalPassword
+            passwordHash = finalPassword
         )
 
         val response = client.post("$API_ENDPOINT/login", JsonUtils.serialize(request))
@@ -128,7 +120,7 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
 
     /**
      * Request password hint.
-     * @param email email of the user
+     * @param email user email
      */
     @Throws(ClientException::class, ApiException::class)
     fun requestPasswordHint(email: String) {

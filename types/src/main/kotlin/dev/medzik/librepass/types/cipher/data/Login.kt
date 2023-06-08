@@ -5,15 +5,15 @@ import kotlinx.serialization.Serializable
 import java.util.*
 
 /**
- * CipherLoginData is a representation of the login data of a login cipher.
- * @property name The name of the login cipher.
- * @property username The username of the login cipher.
- * @property password The password of the login cipher.
- * @property passwordHistory The password history of the login cipher.
- * @property uris The list of URIs of the login cipher.
- * @property twoFactor The two-factor authentication code of the login cipher.
- * @property notes The notes of the login cipher.
- * @property fields The list of custom fields.
+ * Login data for cipher.
+ * @property name cipher name
+ * @property username login username
+ * @property password login password
+ * @property passwordHistory password history
+ * @property uris list of URIs
+ * @property twoFactor two-factor authentication secret
+ * @property notes notes for the cipher
+ * @property fields custom fields
  */
 @Serializable
 data class CipherLoginData(
@@ -28,9 +28,9 @@ data class CipherLoginData(
 )
 
 /**
- * PasswordHistory is a representation of the password history of a login cipher.
- * @param password The password of the login cipher.
- * @param lastUsed The date the password was last used.
+ * Passwords history in [CipherLoginData].
+ * @param password login password
+ * @param lastUsed date when the password was changed
  */
 @Serializable
 data class PasswordHistory(

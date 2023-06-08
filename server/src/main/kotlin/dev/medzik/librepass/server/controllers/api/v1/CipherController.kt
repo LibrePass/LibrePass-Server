@@ -52,8 +52,9 @@ class CipherController @Autowired constructor(
         val ciphers = cipherRepository.getAll(owner = user.id)
 
         return ResponseHandler.generateResponse(
-            serializer = ListSerializer(CipherTable.serializer()),
-            data = ciphers,
+            serializer = ListSerializer(EncryptedCipher.serializer()),
+            // convert to encrypted ciphers
+            data = ciphers.map { it.toEncryptedCipher() },
             status = HttpStatus.OK
         )
     }
