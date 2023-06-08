@@ -1,6 +1,6 @@
 package dev.medzik.librepass.types.api.auth
 
-import dev.medzik.libcrypto.AesCbc
+import dev.medzik.libcrypto.AES
 import dev.medzik.libcrypto.Argon2
 import dev.medzik.libcrypto.Argon2Hash
 import dev.medzik.libcrypto.Argon2Type
@@ -62,6 +62,6 @@ data class UserCredentials(
     val protectedPrivateKey: String,
 ) {
     fun decryptPrivateKey(basePasswordHash: Argon2Hash): String {
-        return AesCbc.decrypt(basePasswordHash.toHexHash(), protectedPrivateKey)
+        return AES.decrypt(AES.GCM, basePasswordHash.toHexHash(), protectedPrivateKey)
     }
 }

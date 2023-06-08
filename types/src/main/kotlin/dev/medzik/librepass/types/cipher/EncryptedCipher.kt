@@ -1,6 +1,6 @@
 package dev.medzik.librepass.types.cipher
 
-import dev.medzik.libcrypto.AesCbc
+import dev.medzik.libcrypto.AES
 import dev.medzik.librepass.types.api.serializers.DateSerializer
 import dev.medzik.librepass.types.api.serializers.UUIDSerializer
 import dev.medzik.librepass.types.cipher.data.CipherCardData
@@ -56,7 +56,8 @@ data class EncryptedCipher(
         id = cipher.id,
         owner = cipher.owner,
         type = cipher.type.ordinal,
-        data = AesCbc.encrypt(
+        data = AES.encrypt(
+            AES.GCM,
             secretKey,
             when (cipher.type) {
                 CipherType.Login -> Json.encodeToString(CipherLoginData.serializer(), cipher.loginData!!)
@@ -88,7 +89,7 @@ data class EncryptedCipher(
      * @return JSON string of the decrypted cipher data.
      */
     fun decryptData(secretKey: String) =
-        AesCbc.decrypt(secretKey, this.data)!!
+        AES.decrypt(AES.GCM, secretKey, this.data)!!
 
     /**
      * Converts the cipher to a JSON string.

@@ -1,6 +1,6 @@
 package dev.medzik.librepass.client.api.v1
 
-import dev.medzik.libcrypto.AesCbc
+import dev.medzik.libcrypto.AES
 import dev.medzik.libcrypto.Argon2Hash
 import dev.medzik.librepass.client.Client
 import dev.medzik.librepass.client.DEFAULT_API_URL
@@ -61,7 +61,8 @@ class UserClient(
         )
 
         // encrypt the private key with the new password
-        val protectedPrivateKey = AesCbc.encrypt(
+        val protectedPrivateKey = AES.encrypt(
+            AES.GCM,
             newPasswordHashes.basePasswordHash.toHexHash(),
             userSecrets.privateKey
         )

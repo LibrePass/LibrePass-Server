@@ -1,6 +1,6 @@
 package dev.medzik.librepass.types.api.user
 
-import dev.medzik.libcrypto.AesCbc
+import dev.medzik.libcrypto.AES
 import dev.medzik.libcrypto.Argon2Hash
 import kotlinx.serialization.Serializable
 
@@ -28,7 +28,7 @@ data class UserSecretsResponse(
         val secretKey = password.toHexHash()
 
         return UserSecrets(
-            privateKey = AesCbc.decrypt(secretKey, protectedPrivateKey),
+            privateKey = AES.decrypt(AES.GCM, secretKey, protectedPrivateKey),
             publicKey = publicKey,
         )
     }
@@ -46,7 +46,7 @@ data class UserSecrets(
 
         return UserSecretsResponse(
             publicKey = publicKey,
-            protectedPrivateKey = AesCbc.encrypt(secretKey, privateKey)
+            protectedPrivateKey = AES.encrypt(AES.GCM, secretKey, privateKey)
         )
     }
 }

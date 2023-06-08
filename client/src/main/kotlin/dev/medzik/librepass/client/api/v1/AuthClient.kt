@@ -1,6 +1,6 @@
 package dev.medzik.librepass.client.api.v1
 
-import dev.medzik.libcrypto.AesCbc
+import dev.medzik.libcrypto.AES
 import dev.medzik.libcrypto.Argon2Hash
 import dev.medzik.libcrypto.Curve25519
 import dev.medzik.librepass.client.Client
@@ -42,7 +42,11 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
         val keyPair = Curve25519.generateKeyPair()
 
         // encrypt private key with password hash
-        val protectedPrivateKey = AesCbc.encrypt(passwordHashes.basePasswordHash.toHexHash(), keyPair.privateKey)
+        val protectedPrivateKey = AES.encrypt(
+            AES.GCM,
+            passwordHashes.basePasswordHash.toHexHash(),
+            keyPair.privateKey
+        )
 
         val request = RegisterRequest(
             email = email,
