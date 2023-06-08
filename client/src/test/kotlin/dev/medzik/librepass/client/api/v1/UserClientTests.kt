@@ -23,7 +23,7 @@ class UserClientTests {
         val authClient = AuthClient("http://localhost:8080")
         val credentials = authClient.login("test_user@example.com", "test")
 
-        userClient = UserClient("test_user@example.com", credentials.accessToken, "http://localhost:8080")
+        userClient = UserClient("test_user@example.com", credentials.apiKey, "http://localhost:8080")
     }
 
     @Test
@@ -36,7 +36,7 @@ class UserClientTests {
         // login with new password
         val authClient = AuthClient("http://localhost:8080")
         val credentials = authClient.login("test_user@example.com", "test2")
-        userClient = UserClient("test_user@example.com", credentials.accessToken, "http://localhost:8080")
+        userClient = UserClient("test_user@example.com", credentials.apiKey, "http://localhost:8080")
 
         // wait for 1 second to prevent unauthorized error
         Thread.sleep(1000)
