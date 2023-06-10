@@ -17,10 +17,10 @@ object Cryptography {
     )
 
     /**
-     * Calculate secret key from private and public keys. Used for AES encryption.
+     * Compute secret key from private and public keys. Used for AES encryption.
      */
     fun calculateSecretKey(privateKey: String, publicKey: String): String {
-        return Curve25519.calculateAgreement(privateKey, publicKey)
+        return Curve25519.computeSharedSecret(privateKey, publicKey)
     }
 
     /**
