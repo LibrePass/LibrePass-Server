@@ -1,7 +1,6 @@
 package dev.medzik.librepass.server.controllers.api.v1
 
-import dev.medzik.libcrypto.Argon2
-import dev.medzik.libcrypto.Salt
+import dev.medzik.libcrypto.Curve25519
 import dev.medzik.librepass.server.components.AuthComponent
 import dev.medzik.librepass.server.components.RequestIP
 import dev.medzik.librepass.server.components.TokenType
@@ -9,10 +8,7 @@ import dev.medzik.librepass.server.database.UserRepository
 import dev.medzik.librepass.server.database.UserTable
 import dev.medzik.librepass.server.services.EmailService
 import dev.medzik.librepass.server.utils.*
-import dev.medzik.librepass.types.api.auth.LoginRequest
-import dev.medzik.librepass.types.api.auth.RegisterRequest
-import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
-import dev.medzik.librepass.types.api.auth.UserCredentials
+import dev.medzik.librepass.types.api.auth.*
 import io.github.bucket4j.Bandwidth
 import io.github.bucket4j.Bucket
 import io.github.bucket4j.Refill
@@ -39,6 +35,8 @@ class AuthController @Autowired constructor(
 
     // coroutine scope
     private val scope = CoroutineScope(Dispatchers.IO)
+
+    private val serverKeyPair = Curve25519.generateKeyPair()
 
     /**
      * Rate limit for login endpoint per IP address.
@@ -71,14 +69,17 @@ class AuthController @Autowired constructor(
         if (rateLimitEnabled && !rateLimit.resolveBucket(ip).tryConsume(1))
             return ResponseError.TooManyRequests
 
-        val passwordSalt = Salt.generate(32)
-        val passwordHash = Argon2DefaultHasher.hash(request.passwordHash, passwordSalt).toString()
+        // compute shared key
+        val sharedKey = Curve25519.computeSharedSecret(serverKeyPair.privateKey, request.publicKey)
+
+        // validate shared key
+        if (request.sharedKey != sharedKey)
+            return ResponseError.InvalidBody
 
         val verificationToken = UUID.randomUUID()
 
         val user = UserTable(
             email = request.email,
-            passwordHash = passwordHash,
             passwordHint = request.passwordHint,
             // Argon2id parameters
             parallelism = request.parallelism,
@@ -87,7 +88,6 @@ class AuthController @Autowired constructor(
             version = request.version,
             // Curve25519 key pair
             publicKey = request.publicKey,
-            protectedPrivateKey = request.protectedPrivateKey,
             // Email verification token
             emailVerificationCode = verificationToken,
             emailVerificationCodeExpiresAt = Date.from(
@@ -147,6 +147,18 @@ class AuthController @Autowired constructor(
     }
 
     /**
+     * Get server public key. Used for authentication.
+     */
+    @GetMapping("/serverPublicKey")
+    fun getServerPublicKey(): Response {
+        val response = ServerPublicKey(
+            publicKey = serverKeyPair.publicKey
+        )
+
+        return ResponseHandler.generateResponse(response, HttpStatus.OK)
+    }
+
+    /**
      * Login user.
      * @return [UserCredentials]
      */
@@ -158,24 +170,21 @@ class AuthController @Autowired constructor(
         if (rateLimitEnabled && !rateLimit.resolveBucket(ip).tryConsume(1))
             return ResponseError.TooManyRequests
 
-        // check if email or password is empty
-        if (request.email.isEmpty() || request.passwordHash.isEmpty())
-            return ResponseError.InvalidBody
-
         // get user from database
         val user = userRepository.findByEmail(request.email)
             ?: return ResponseError.InvalidCredentials
 
-        // check if password is correct
-        if (!Argon2.verify(request.passwordHash, user.passwordHash))
-            return ResponseError.InvalidCredentials
+        // compute shared key
+        val sharedKey = Curve25519.computeSharedSecret(serverKeyPair.privateKey, user.publicKey)
+
+        // validate shared key
+        if (request.sharedKey != sharedKey)
+            return ResponseError.InvalidBody
 
         // prepare response
         val credentials = UserCredentials(
             userId = user.id,
-            apiKey = authComponent.generateToken(TokenType.API_KEY, user.id),
-            publicKey = user.publicKey,
-            protectedPrivateKey = user.protectedPrivateKey
+            apiKey = authComponent.generateToken(TokenType.API_KEY, user.id)
         )
 
         return ResponseHandler.generateResponse(credentials, HttpStatus.OK)

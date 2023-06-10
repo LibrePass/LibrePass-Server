@@ -2,7 +2,6 @@ package dev.medzik.librepass.client.utils
 
 import dev.medzik.libcrypto.Argon2Hash
 import dev.medzik.libcrypto.Curve25519
-import dev.medzik.libcrypto.Pbkdf2
 import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
 
 /**
@@ -24,12 +23,12 @@ object Cryptography {
     }
 
     /**
-     * Compute base password hash.
+     * Compute password hash.
      * @param password password of the user
      * @param email email of the user
      * @param parameters argon2id parameters
      */
-    fun computeBasePasswordHash(
+    fun computePasswordHash(
         password: String,
         email: String,
         parameters: UserArgon2idParameters = DefaultArgon2idParameters
@@ -40,41 +39,28 @@ object Cryptography {
     }
 
     /**
-     * Compute final password hash.
-     * @param password password of the user (not hashed)
-     * @param basePassword base password hash of the user (hashed)
-     */
-    fun computeFinalPasswordHash(
-        password: String,
-        basePassword: String
-    ): String = Pbkdf2(1).sha256(basePassword, password.toByteArray())
-
-    /**
-     * Compute password hashes of the user.
-     * @param password password of the user
+     * Compute secret key from password.
      * @param email email of the user
-     * @return password hashes
+     * @param password password of the user
+     * @return secret key
      */
-    fun computeHashes(
-        password: String,
-        email: String,
-    ): PasswordHashes {
-        val basePasswordHash = computeBasePasswordHash(password, email)
-        val finalPasswordHash = computeFinalPasswordHash(password, basePasswordHash.toHexHash())
+    fun computeSecretKeyFromPassword(email: String, password: String, ): String {
+        // compute base password hash
+        val passwordHash = computePasswordHash(password, email)
 
-        return PasswordHashes(
-            basePasswordHash = basePasswordHash,
-            finalPasswordHash = finalPasswordHash
-        )
+        return computeSecretKeyFromPassword(passwordHash)
     }
 
     /**
-     * User password hashes.
-     * @property basePasswordHash base password hash, used for encrypt and decrypt the private key, not stored in the database
-     * @property finalPasswordHash final password hash, used for authentication, stored in the database
+     * Compute secret key from password hash.
+     * @param passwordHash password hash of the user
+     * @return secret key
      */
-    class PasswordHashes(
-        val basePasswordHash: Argon2Hash,
-        val finalPasswordHash: String
-    )
+    fun computeSecretKeyFromPassword(passwordHash: Argon2Hash): String {
+        // compute public key from private key
+        val keyPair = Curve25519.fromPrivateKey(passwordHash.toHexHash())
+
+        // calculate secret key
+        return calculateSecretKey(keyPair.privateKey, keyPair.publicKey)
+    }
 }
