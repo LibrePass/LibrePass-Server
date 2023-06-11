@@ -71,7 +71,7 @@ class UserClient(
 
         // re-encrypt ciphers data with new password
         val cipherClient = CipherClient(apiKey, apiUrl)
-        lateinit var ciphers: List<ChangePasswordCipherData>
+        val ciphers = mutableListOf<ChangePasswordCipherData>()
         cipherClient.getAll().forEach { cipher ->
             // decrypt cipher data with old secret key
             val oldData = AES.decrypt(AES.GCM, oldSecretKey, cipher.protectedData)
