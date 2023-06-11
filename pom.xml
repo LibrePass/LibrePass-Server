@@ -5,7 +5,7 @@
 
     <groupId>dev.medzik.librepass</groupId>
     <artifactId>core</artifactId>
-    <version>0.1.0-alpha13</version>
+    <version>0.1.0-SNAPSHOT-01</version>
     <packaging>pom</packaging>
     <name>LibrePass</name>
     <description>The core LibrePass infrastructure</description>
@@ -105,8 +105,8 @@
 
     <distributionManagement>
         <repository>
-            <id>librepass-maven</id>
-            <url>https://librepass-maven.medzik.dev/snapshots</url>
+            <id>medzik</id>
+            <url>https://maven.medzik.dev/snapshots</url>
         </repository>
     </distributionManagement>
 
