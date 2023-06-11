@@ -1,5 +1,7 @@
 package dev.medzik.librepass.server.database
 
+import jakarta.transaction.Transactional
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
@@ -40,6 +42,8 @@ interface CipherRepository : CrudRepository<CipherTable, UUID> {
      * @param id cipher identifier
      * @param data new cipher data
      */
+    @Transactional
+    @Modifying
     @Query("UPDATE #{#entityName} p SET p.data = :data WHERE p.id = :id")
     fun updateData(@Param("id") id: UUID, @Param("data") data: String)
 }

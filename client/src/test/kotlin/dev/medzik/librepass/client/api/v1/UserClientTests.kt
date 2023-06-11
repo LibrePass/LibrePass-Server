@@ -89,6 +89,7 @@ class UserClientTests {
         var authClient = AuthClient("http://localhost:8080")
         var credentials = authClient.login("test_user@example.com", "test2")
         userClient = UserClient("test_user@example.com", credentials.apiKey, "http://localhost:8080")
+        cipherClient = CipherClient(credentials.apiKey, "http://localhost:8080")
 
         checkCipher("test2")
 
@@ -104,6 +105,7 @@ class UserClientTests {
         authClient = AuthClient("http://localhost:8080")
         credentials = authClient.login("test_user@example.com", "test")
         userClient = UserClient("test_user@example.com", credentials.apiKey, "http://localhost:8080")
+        cipherClient = CipherClient(credentials.apiKey, "http://localhost:8080")
 
         checkCipher("test")
     }

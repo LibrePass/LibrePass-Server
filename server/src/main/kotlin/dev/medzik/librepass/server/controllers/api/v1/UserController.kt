@@ -28,13 +28,8 @@ class UserController @Autowired constructor(
         if (user == null)
             return ResponseError.Unauthorized
 
-        println("SERVER KEY: ${ServerKeyPair.publicKey}")
-
         // compute shared key with new public key
         val sharedKey = Curve25519.computeSharedSecret(ServerKeyPair.privateKey, body.newPublicKey)
-
-        println("SHARED KEY S: $sharedKey")
-        println("SHARED KEY R: ${body.sharedKey}")
 
         // validate shared key
         if (body.sharedKey != sharedKey)

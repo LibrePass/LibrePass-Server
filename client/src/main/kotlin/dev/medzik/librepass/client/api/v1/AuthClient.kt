@@ -42,13 +42,13 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
         val passwordHash = computePasswordHash(password, email)
 
         // compute Curve25519 public key using base password hash as private key
-        val publicKey = Curve25519.fromPrivateKey(passwordHash.toHexHash())
+        val keyPair = Curve25519.fromPrivateKey(passwordHash.toHexHash())
 
         // get server public key for shared key computation
         val serverPublicKey = getServerPublicKey()
 
         // compute shared key
-        val sharedKey = Curve25519.computeSharedSecret(serverPublicKey.publicKey, publicKey.publicKey)
+        val sharedKey = Curve25519.computeSharedSecret(keyPair.privateKey, serverPublicKey.publicKey)
 
         val request = RegisterRequest(
             email = email,
@@ -60,7 +60,7 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
             iterations = passwordHash.iterations,
             version = passwordHash.version,
             // Curve25519 keypair
-            publicKey = publicKey.publicKey
+            publicKey = keyPair.publicKey
         )
 
         client.post("$API_ENDPOINT/register", JsonUtils.serialize(request))
@@ -103,13 +103,13 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
     @Throws(ClientException::class, ApiException::class)
     fun login(email: String, passwordHash: Argon2Hash): UserCredentials {
         // compute Curve25519 public key using base password hash as private key
-        val publicKey = Curve25519.fromPrivateKey(passwordHash.toHexHash())
+        val keyPair = Curve25519.fromPrivateKey(passwordHash.toHexHash())
 
         // get server public key for shared key computation
         val serverPublicKey = getServerPublicKey()
 
         // compute shared key
-        val sharedKey = Curve25519.computeSharedSecret(serverPublicKey.publicKey, publicKey.publicKey)
+        val sharedKey = Curve25519.computeSharedSecret(keyPair.privateKey, serverPublicKey.publicKey)
 
         val request = LoginRequest(
             email = email,

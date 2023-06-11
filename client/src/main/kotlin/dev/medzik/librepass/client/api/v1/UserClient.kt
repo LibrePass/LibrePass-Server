@@ -56,20 +56,18 @@ class UserClient(
             password = newPassword,
             email = email,
             parameters = parameters
-        )
+        ).toHexHash()
 
-        val keyPair = Curve25519.fromPrivateKey(newPasswordHash.toHexHash())
+        val newKeyPair = Curve25519.fromPrivateKey(newPasswordHash)
 
         // get server public key
         val serverPublicKey = AuthClient(apiUrl).getServerPublicKey().publicKey
 
-        println("SERVER KEY: $serverPublicKey")
-
         // compute shared key with new private key and server public key
-        val sharedKey = Curve25519.computeSharedSecret(keyPair.privateKey, serverPublicKey)
+        val sharedKey = Curve25519.computeSharedSecret(newKeyPair.privateKey, serverPublicKey)
 
         // compute new secret key
-        val newSecretKey = calculateSecretKey(keyPair.privateKey, keyPair.publicKey)
+        val newSecretKey = calculateSecretKey(newKeyPair.privateKey, newKeyPair.publicKey)
 
         // re-encrypt ciphers data with new password
         val cipherClient = CipherClient(apiKey, apiUrl)
@@ -96,7 +94,7 @@ class UserClient(
             iterations = parameters.iterations,
             version = parameters.version,
             // Curve25519 public key
-            newPublicKey = keyPair.publicKey,
+            newPublicKey = newKeyPair.publicKey,
             // ciphers data re-encrypted with new password
             ciphers = ciphers
         )
