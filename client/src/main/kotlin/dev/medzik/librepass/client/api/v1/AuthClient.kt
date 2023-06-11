@@ -7,6 +7,8 @@ import dev.medzik.librepass.client.DEFAULT_API_URL
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
 import dev.medzik.librepass.client.utils.Cryptography.computePasswordHash
+import dev.medzik.librepass.client.utils.Cryptography.computeSecretKey
+import dev.medzik.librepass.client.utils.Cryptography.computeSharedKey
 import dev.medzik.librepass.client.utils.JsonUtils
 import dev.medzik.librepass.types.api.auth.*
 
@@ -25,9 +27,9 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
      * Get the public key of the server.
      */
     @Throws(ClientException::class, ApiException::class)
-    fun getServerPublicKey(): ServerPublicKey {
+    fun getServerPublicKey(): String {
         val response = client.get("$API_ENDPOINT/serverPublicKey")
-        return JsonUtils.deserialize(response)
+        return JsonUtils.deserialize<ServerPublicKey>(response).publicKey
     }
 
     /**
@@ -48,7 +50,7 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
         val serverPublicKey = getServerPublicKey()
 
         // compute shared key
-        val sharedKey = Curve25519.computeSharedSecret(keyPair.privateKey, serverPublicKey.publicKey)
+        val sharedKey = computeSharedKey(keyPair.privateKey, serverPublicKey)
 
         val request = RegisterRequest(
             email = email,
@@ -109,15 +111,23 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
         val serverPublicKey = getServerPublicKey()
 
         // compute shared key
-        val sharedKey = Curve25519.computeSharedSecret(keyPair.privateKey, serverPublicKey.publicKey)
+        val sharedKey = computeSharedKey(keyPair.privateKey, serverPublicKey)
 
         val request = LoginRequest(
             email = email,
             sharedKey = sharedKey,
         )
 
-        val response = client.post("$API_ENDPOINT/login", JsonUtils.serialize(request))
-        return JsonUtils.deserialize(response)
+        val responseBody = client.post("$API_ENDPOINT/login", JsonUtils.serialize(request))
+        val response = JsonUtils.deserialize<LoginResponse>(responseBody)
+
+        return UserCredentials(
+            userId = response.userId,
+            apiKey = response.apiKey,
+            privateKey = keyPair.privateKey,
+            publicKey = keyPair.publicKey,
+            secretKey = computeSecretKey(keyPair)
+        )
     }
 
     /**

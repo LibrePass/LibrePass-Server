@@ -57,8 +57,16 @@ data class LoginRequest(
 )
 
 @Serializable
-data class UserCredentials(
+data class LoginResponse(
     @Serializable(with = UUIDSerializer::class)
     val userId: UUID,
     val apiKey: String
+)
+
+data class UserCredentials(
+    val userId: UUID,
+    val apiKey: String,
+    val publicKey: String,
+    val privateKey: String,
+    val secretKey: String
 )

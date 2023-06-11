@@ -7,9 +7,10 @@ import dev.medzik.librepass.client.DEFAULT_API_URL
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
 import dev.medzik.librepass.client.utils.Cryptography.DefaultArgon2idParameters
-import dev.medzik.librepass.client.utils.Cryptography.calculateSecretKey
 import dev.medzik.librepass.client.utils.Cryptography.computePasswordHash
+import dev.medzik.librepass.client.utils.Cryptography.computeSecretKey
 import dev.medzik.librepass.client.utils.Cryptography.computeSecretKeyFromPassword
+import dev.medzik.librepass.client.utils.Cryptography.computeSharedKey
 import dev.medzik.librepass.client.utils.JsonUtils
 import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
 import dev.medzik.librepass.types.api.user.ChangePasswordCipherData
@@ -61,13 +62,13 @@ class UserClient(
         val newKeyPair = Curve25519.fromPrivateKey(newPasswordHash)
 
         // get server public key
-        val serverPublicKey = AuthClient(apiUrl).getServerPublicKey().publicKey
+        val serverPublicKey = AuthClient(apiUrl).getServerPublicKey()
 
         // compute shared key with new private key and server public key
-        val sharedKey = Curve25519.computeSharedSecret(newKeyPair.privateKey, serverPublicKey)
+        val sharedKey = computeSharedKey(newKeyPair.privateKey, serverPublicKey)
 
         // compute new secret key
-        val newSecretKey = calculateSecretKey(newKeyPair.privateKey, newKeyPair.publicKey)
+        val newSecretKey = computeSecretKey(newKeyPair)
 
         // re-encrypt ciphers data with new password
         val cipherClient = CipherClient(apiKey, apiUrl)

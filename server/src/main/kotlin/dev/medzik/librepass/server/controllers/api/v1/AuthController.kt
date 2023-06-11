@@ -22,6 +22,11 @@ import java.time.Duration
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
+// The server's key pair is used for authentication using a shared key.
+//
+// It is not required that the key pair be the same all the time, so it
+// is generated when the server is started and each time it is restarted
+// the key is different.
 val ServerKeyPair = Curve25519.generateKeyPair()!!
 
 @RestController
@@ -58,9 +63,6 @@ class AuthController @Autowired constructor(
     // rate limit for login endpoint
     private val rateLimit = AuthRateLimitConfig()
 
-    /**
-     * Register new user.
-     */
     @PostMapping("/register")
     fun register(
         @RequestIP ip: String,
@@ -116,10 +118,6 @@ class AuthController @Autowired constructor(
         return ResponseHandler.generateResponse(HttpStatus.CREATED)
     }
 
-    /**
-     * Get argon2id parameters for user. Used for client-side password hashing.
-     * @return [UserArgon2idParameters]
-     */
     @GetMapping("/userArgon2Parameters")
     fun getUserArgon2Parameters(
         @RequestIP ip: String,
@@ -146,9 +144,6 @@ class AuthController @Autowired constructor(
         return ResponseHandler.generateResponse(argon2Parameters, HttpStatus.OK)
     }
 
-    /**
-     * Get server public key. Used for authentication.
-     */
     @GetMapping("/serverPublicKey")
     fun getServerPublicKey(): Response {
         val response = ServerPublicKey(
@@ -158,10 +153,6 @@ class AuthController @Autowired constructor(
         return ResponseHandler.generateResponse(response, HttpStatus.OK)
     }
 
-    /**
-     * Login user.
-     * @return [UserCredentials]
-     */
     @PostMapping("/login")
     fun login(
         @RequestIP ip: String,
@@ -182,7 +173,7 @@ class AuthController @Autowired constructor(
             return ResponseError.InvalidCredentials
 
         // prepare response
-        val credentials = UserCredentials(
+        val credentials = LoginResponse(
             userId = user.id,
             apiKey = authComponent.generateToken(TokenType.API_KEY, user.id)
         )
@@ -190,9 +181,6 @@ class AuthController @Autowired constructor(
         return ResponseHandler.generateResponse(credentials, HttpStatus.OK)
     }
 
-    /**
-     * Request password hint.
-     */
     @GetMapping("/passwordHint")
     fun requestPasswordHint(
         @RequestIP ip: String,
@@ -217,9 +205,6 @@ class AuthController @Autowired constructor(
         return ResponseSuccess.OK
     }
 
-    /**
-     * Verify email address. This endpoint is called when user clicks on the link in the email.
-     */
     @GetMapping("/verifyEmail")
     fun verifyEmail(
         @RequestParam("user") userID: String,

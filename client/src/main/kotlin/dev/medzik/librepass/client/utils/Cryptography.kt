@@ -2,6 +2,7 @@ package dev.medzik.librepass.client.utils
 
 import dev.medzik.libcrypto.Argon2Hash
 import dev.medzik.libcrypto.Curve25519
+import dev.medzik.libcrypto.Curve25519KeyPair
 import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
 
 /**
@@ -16,9 +17,16 @@ object Cryptography {
     )
 
     /**
+     * Compute secret key for user key pair.
+     */
+    fun computeSecretKey(keyPair: Curve25519KeyPair): String {
+        return computeSharedKey(keyPair.privateKey, keyPair.publicKey)
+    }
+
+    /**
      * Compute secret key from private and public keys. Used for AES encryption.
      */
-    fun calculateSecretKey(privateKey: String, publicKey: String): String {
+    fun computeSharedKey(privateKey: String, publicKey: String): String {
         return Curve25519.computeSharedSecret(privateKey, publicKey)
     }
 
@@ -46,7 +54,7 @@ object Cryptography {
      */
     fun computeSecretKeyFromPassword(email: String, password: String, parameters: UserArgon2idParameters): String {
         // compute base password hash
-        val passwordHash = computePasswordHash(password, email)
+        val passwordHash = computePasswordHash(password, email, parameters)
 
         return computeSecretKeyFromPassword(passwordHash)
     }
@@ -57,10 +65,7 @@ object Cryptography {
      * @return secret key
      */
     fun computeSecretKeyFromPassword(passwordHash: Argon2Hash): String {
-        // compute public key from private key
         val keyPair = Curve25519.fromPrivateKey(passwordHash.toHexHash())
-
-        // calculate secret key
-        return calculateSecretKey(keyPair.privateKey, keyPair.publicKey)
+        return computeSecretKey(keyPair)
     }
 }
