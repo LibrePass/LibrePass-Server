@@ -44,37 +44,37 @@ class UserClientTests {
         cipherClient = CipherClient(credentials.apiKey, "http://localhost:8080")
     }
 
-    private val testCipher = Cipher(
-        id = UUID.randomUUID(),
-        owner = userId,
-        type = CipherType.Login,
-        loginData = CipherLoginData(
-            name = "test",
-            username = "test",
-            password = "test"
-        )
-    )
-
-    private fun insertTestCipher() {
-        cipherClient.insert(EncryptedCipher(testCipher, secretKey))
-    }
-
-    private fun checkCipher(password: String) {
-        val ciphers = cipherClient.getAll()
-
-        secretKey = Cryptography.computeSecretKeyFromPassword(
-            "test_user@example.com",
-            password,
-            Cryptography.DefaultArgon2idParameters
-        )
-
-        val cipher = Cipher(ciphers[0], secretKey)
-
-        assert(cipher == testCipher)
-    }
-
     @Test
     fun changePassword() {
+        val testCipher = Cipher(
+            id = UUID.randomUUID(),
+            owner = userId,
+            type = CipherType.Login,
+            loginData = CipherLoginData(
+                name = "test",
+                username = "test",
+                password = "test"
+            )
+        )
+
+        fun insertTestCipher() {
+            cipherClient.insert(EncryptedCipher(testCipher, secretKey))
+        }
+
+        fun checkCipher(password: String) {
+            val ciphers = cipherClient.getAll()
+
+            secretKey = Cryptography.computeSecretKeyFromPassword(
+                "test_user@example.com",
+                password,
+                Cryptography.DefaultArgon2idParameters
+            )
+
+            val cipher = Cipher(ciphers[0], secretKey)
+
+            assert(cipher == testCipher)
+        }
+
         insertTestCipher()
 
         checkCipher("test")
