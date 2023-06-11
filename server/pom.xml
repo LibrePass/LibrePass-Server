@@ -21,6 +21,9 @@
         <spring-dotenv.version>4.0.0</spring-dotenv.version>
         <jwt.version>0.11.5</jwt.version>
         <bucket4j.version>8.3.0</bucket4j.version>
+
+        <!-- skip deploy -->
+        <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
 
     <dependencyManagement>
@@ -174,16 +177,6 @@
                         <version>${kotlin.version}</version>
                     </dependency>
                 </dependencies>
-            </plugin>
-
-            <!-- Skip deploy for this module -->
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
-                </configuration>
             </plugin>
         </plugins>
     </build>

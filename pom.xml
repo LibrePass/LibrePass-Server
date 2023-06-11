@@ -103,6 +103,13 @@
         </dependency>
     </dependencies>
 
+    <distributionManagement>
+        <repository>
+            <id>librepass-maven</id>
+            <url>https://librepass-maven.medzik.dev/snapshots</url>
+        </repository>
+    </distributionManagement>
+
     <build>
         <plugins>
             <!-- Kotlin -->
@@ -204,17 +211,6 @@
             </plugin>
 
             <!-- Deploy -->
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.13</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
