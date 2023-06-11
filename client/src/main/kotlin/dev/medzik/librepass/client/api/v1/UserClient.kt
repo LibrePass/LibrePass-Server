@@ -63,6 +63,8 @@ class UserClient(
         // get server public key
         val serverPublicKey = AuthClient(apiUrl).getServerPublicKey().publicKey
 
+        println("SERVER KEY: $serverPublicKey")
+
         // compute shared key with new private key and server public key
         val sharedKey = Curve25519.computeSharedSecret(keyPair.privateKey, serverPublicKey)
 
