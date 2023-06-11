@@ -5,6 +5,7 @@ import dev.medzik.librepass.types.cipher.Cipher
 import dev.medzik.librepass.types.cipher.CipherType
 import dev.medzik.librepass.types.cipher.EncryptedCipher
 import dev.medzik.librepass.types.cipher.data.CipherLoginData
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -72,7 +73,7 @@ class UserClientTests {
 
             val cipher = Cipher(ciphers[0], secretKey)
 
-            assert(cipher == testCipher)
+            assertEquals(testCipher, cipher)
         }
 
         insertTestCipher()
