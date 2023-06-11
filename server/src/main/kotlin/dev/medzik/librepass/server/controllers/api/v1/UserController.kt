@@ -33,7 +33,7 @@ class UserController @Autowired constructor(
 
         // validate shared key
         if (body.sharedKey != sharedKey)
-            return ResponseError.InvalidBody
+            return ResponseError.InvalidCredentials
 
         // get all user cipher ids
         val cipherIds = cipherRepository.getAllIds(user.id)

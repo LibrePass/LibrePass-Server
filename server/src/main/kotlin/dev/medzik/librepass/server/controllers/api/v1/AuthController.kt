@@ -74,7 +74,7 @@ class AuthController @Autowired constructor(
 
         // validate shared key
         if (request.sharedKey != sharedKey)
-            return ResponseError.InvalidBody
+            return ResponseError.InvalidCredentials
 
         val verificationToken = UUID.randomUUID()
 
@@ -179,7 +179,7 @@ class AuthController @Autowired constructor(
 
         // validate shared key
         if (request.sharedKey != sharedKey)
-            return ResponseError.InvalidBody
+            return ResponseError.InvalidCredentials
 
         // prepare response
         val credentials = UserCredentials(
