@@ -19,24 +19,20 @@ data class UserTable (
     val emailVerificationCode: UUID? = null,
     val emailVerificationCodeExpiresAt: Date? = null,
 
+    @Column(columnDefinition = "TEXT")
+    val passwordHint: String? = null,
+    @Temporal(TemporalType.TIMESTAMP)
+    val lastPasswordChange: Date = Date(),
+
     // Argon2id parameters
     val parallelism: Int,
     val memory: Int,
     val iterations: Int,
     val version: Int,
 
-    @Column(columnDefinition = "TEXT")
-    val passwordHash: String,
-    @Column(columnDefinition = "TEXT")
-    val passwordHint: String? = null,
-    @Temporal(TemporalType.TIMESTAMP)
-    val lastPasswordChange: Date = Date(),
-
-    // Curve25519 key pair
+    // Curve25519 public key
     @Column(columnDefinition = "TEXT")
     val publicKey: String,
-    @Column(columnDefinition = "TEXT")
-    val protectedPrivateKey: String,
 
     @CreatedDate
     @Temporal(TemporalType.TIMESTAMP)

@@ -1,52 +1,26 @@
 package dev.medzik.librepass.types.api.user
 
-import dev.medzik.libcrypto.AES
-import dev.medzik.libcrypto.Argon2Hash
+import dev.medzik.librepass.types.api.serializers.UUIDSerializer
 import kotlinx.serialization.Serializable
+import java.util.*
 
 @Serializable
 data class ChangePasswordRequest(
-    val oldPassword: String,
-    val newPassword: String,
-    val newProtectedPrivateKey: String,
+    val newPasswordHint: String?,
+    val newPublicKey: String,
+    val sharedKey: String,
     // New Argon2 parameters
     val parallelism: Int,
     val memory: Int,
     val iterations: Int,
-    val version: Int
+    val version: Int,
+    // Update ciphers data due to password change
+    val ciphers: List<ChangePasswordCipherData>
 )
 
 @Serializable
-data class UserSecretsResponse(
-    val publicKey: String,
-    val protectedPrivateKey: String
-) {
-    /**
-     * Decrypts user secrets.
-     */
-    fun decrypt(password: Argon2Hash): UserSecrets {
-        val secretKey = password.toHexHash()
-
-        return UserSecrets(
-            privateKey = AES.decrypt(AES.GCM, secretKey, protectedPrivateKey),
-            publicKey = publicKey,
-        )
-    }
-}
-
-data class UserSecrets(
-    val publicKey: String,
-    val privateKey: String
-) {
-    /**
-     * Encrypts user secrets.
-     */
-    fun encrypt(password: Argon2Hash): UserSecretsResponse {
-        val secretKey = password.toHexHash()
-
-        return UserSecretsResponse(
-            publicKey = publicKey,
-            protectedPrivateKey = AES.encrypt(AES.GCM, secretKey, privateKey)
-        )
-    }
-}
+data class ChangePasswordCipherData(
+    @Serializable(with = UUIDSerializer::class)
+    val id: UUID,
+    val data: String
+)

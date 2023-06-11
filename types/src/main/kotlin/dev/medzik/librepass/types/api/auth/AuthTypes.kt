@@ -1,8 +1,6 @@
 package dev.medzik.librepass.types.api.auth
 
-import dev.medzik.libcrypto.AES
 import dev.medzik.libcrypto.Argon2
-import dev.medzik.libcrypto.Argon2Hash
 import dev.medzik.libcrypto.Argon2Type
 import dev.medzik.librepass.types.api.serializers.UUIDSerializer
 import kotlinx.serialization.Serializable
@@ -11,18 +9,18 @@ import java.util.*
 @Serializable
 data class RegisterRequest(
     val email: String,
-    val passwordHash: String,
     val passwordHint: String? = null,
 
-    // argon2id parameters
+    val sharedKey: String,
+
+    // Argon2id parameters
     val parallelism: Int,
     val memory: Int,
     val iterations: Int,
     val version: Int,
 
-    // Curve25519 key pair
-    val publicKey: String,
-    val protectedPrivateKey: String
+    // Curve25519 public key
+    val publicKey: String
 )
 
 @Serializable
@@ -48,20 +46,27 @@ data class UserArgon2idParameters(
 }
 
 @Serializable
-data class LoginRequest(
-    val email: String,
-    val passwordHash: String
+data class ServerPublicKey(
+    val publicKey: String
 )
 
 @Serializable
-data class UserCredentials(
+data class LoginRequest(
+    val email: String,
+    val sharedKey: String
+)
+
+@Serializable
+data class LoginResponse(
     @Serializable(with = UUIDSerializer::class)
+    val userId: UUID,
+    val apiKey: String
+)
+
+data class UserCredentials(
     val userId: UUID,
     val apiKey: String,
     val publicKey: String,
-    val protectedPrivateKey: String,
-) {
-    fun decryptPrivateKey(basePasswordHash: Argon2Hash): String {
-        return AES.decrypt(AES.GCM, basePasswordHash.toHexHash(), protectedPrivateKey)
-    }
-}
+    val privateKey: String,
+    val secretKey: String
+)
