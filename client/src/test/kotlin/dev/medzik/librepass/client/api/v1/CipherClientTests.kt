@@ -1,7 +1,7 @@
 package dev.medzik.librepass.client.api.v1
 
-import dev.medzik.librepass.client.utils.Cryptography
-import dev.medzik.librepass.client.utils.Cryptography.computeBasePasswordHash
+import dev.medzik.librepass.client.utils.Cryptography.computePasswordHash
+import dev.medzik.librepass.client.utils.Cryptography.computeSecretKeyFromPassword
 import dev.medzik.librepass.types.cipher.Cipher
 import dev.medzik.librepass.types.cipher.CipherType
 import dev.medzik.librepass.types.cipher.data.CipherLoginData
@@ -51,16 +51,15 @@ class CipherClientTests {
         val authClient = AuthClient("http://localhost:8080")
 
         // compute base password hash
-        val basePasswordHash = computeBasePasswordHash(password, email)
+        val basePasswordHash = computePasswordHash(password, email)
 
-        val credentials = authClient.login(email, password, basePasswordHash)
+        val credentials = authClient.login(email, basePasswordHash)
 
         cipherClient = CipherClient(credentials.apiKey, "http://localhost:8080")
         userId = credentials.userId
 
-        val privateKey = credentials.decryptPrivateKey(basePasswordHash)
-
-        secretKey = Cryptography.calculateSecretKey(privateKey, credentials.publicKey)
+        // compute secret key
+        secretKey = computeSecretKeyFromPassword(basePasswordHash)
     }
 
     private lateinit var cipherId: UUID

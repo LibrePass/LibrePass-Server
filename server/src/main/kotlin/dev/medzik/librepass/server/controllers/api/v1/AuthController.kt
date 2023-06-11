@@ -1,7 +1,6 @@
 package dev.medzik.librepass.server.controllers.api.v1
 
-import dev.medzik.libcrypto.Argon2
-import dev.medzik.libcrypto.Salt
+import dev.medzik.libcrypto.Curve25519
 import dev.medzik.librepass.server.components.AuthComponent
 import dev.medzik.librepass.server.components.RequestIP
 import dev.medzik.librepass.server.components.TokenType
@@ -9,10 +8,7 @@ import dev.medzik.librepass.server.database.UserRepository
 import dev.medzik.librepass.server.database.UserTable
 import dev.medzik.librepass.server.services.EmailService
 import dev.medzik.librepass.server.utils.*
-import dev.medzik.librepass.types.api.auth.LoginRequest
-import dev.medzik.librepass.types.api.auth.RegisterRequest
-import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
-import dev.medzik.librepass.types.api.auth.UserCredentials
+import dev.medzik.librepass.types.api.auth.*
 import io.github.bucket4j.Bandwidth
 import io.github.bucket4j.Bucket
 import io.github.bucket4j.Refill
@@ -25,6 +21,13 @@ import org.springframework.web.bind.annotation.*
 import java.time.Duration
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+
+// The server's key pair is used for authentication using a shared key.
+//
+// It is not required that the key pair be the same all the time, so it
+// is generated when the server is started and each time it is restarted
+// the key is different.
+val ServerKeyPair = Curve25519.generateKeyPair()!!
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -60,9 +63,6 @@ class AuthController @Autowired constructor(
     // rate limit for login endpoint
     private val rateLimit = AuthRateLimitConfig()
 
-    /**
-     * Register new user.
-     */
     @PostMapping("/register")
     fun register(
         @RequestIP ip: String,
@@ -71,14 +71,17 @@ class AuthController @Autowired constructor(
         if (rateLimitEnabled && !rateLimit.resolveBucket(ip).tryConsume(1))
             return ResponseError.TooManyRequests
 
-        val passwordSalt = Salt.generate(32)
-        val passwordHash = Argon2DefaultHasher.hash(request.passwordHash, passwordSalt).toString()
+        // compute shared key
+        val sharedKey = Curve25519.computeSharedSecret(ServerKeyPair.privateKey, request.publicKey)
+
+        // validate shared key
+        if (request.sharedKey != sharedKey)
+            return ResponseError.InvalidCredentials
 
         val verificationToken = UUID.randomUUID()
 
         val user = UserTable(
             email = request.email,
-            passwordHash = passwordHash,
             passwordHint = request.passwordHint,
             // Argon2id parameters
             parallelism = request.parallelism,
@@ -87,7 +90,6 @@ class AuthController @Autowired constructor(
             version = request.version,
             // Curve25519 key pair
             publicKey = request.publicKey,
-            protectedPrivateKey = request.protectedPrivateKey,
             // Email verification token
             emailVerificationCode = verificationToken,
             emailVerificationCodeExpiresAt = Date.from(
@@ -116,10 +118,6 @@ class AuthController @Autowired constructor(
         return ResponseHandler.generateResponse(HttpStatus.CREATED)
     }
 
-    /**
-     * Get argon2id parameters for user. Used for client-side password hashing.
-     * @return [UserArgon2idParameters]
-     */
     @GetMapping("/userArgon2Parameters")
     fun getUserArgon2Parameters(
         @RequestIP ip: String,
@@ -146,10 +144,15 @@ class AuthController @Autowired constructor(
         return ResponseHandler.generateResponse(argon2Parameters, HttpStatus.OK)
     }
 
-    /**
-     * Login user.
-     * @return [UserCredentials]
-     */
+    @GetMapping("/serverPublicKey")
+    fun getServerPublicKey(): Response {
+        val response = ServerPublicKey(
+            publicKey = ServerKeyPair.publicKey
+        )
+
+        return ResponseHandler.generateResponse(response, HttpStatus.OK)
+    }
+
     @PostMapping("/login")
     fun login(
         @RequestIP ip: String,
@@ -158,32 +161,26 @@ class AuthController @Autowired constructor(
         if (rateLimitEnabled && !rateLimit.resolveBucket(ip).tryConsume(1))
             return ResponseError.TooManyRequests
 
-        // check if email or password is empty
-        if (request.email.isEmpty() || request.passwordHash.isEmpty())
-            return ResponseError.InvalidBody
-
         // get user from database
         val user = userRepository.findByEmail(request.email)
             ?: return ResponseError.InvalidCredentials
 
-        // check if password is correct
-        if (!Argon2.verify(request.passwordHash, user.passwordHash))
+        // compute shared key
+        val sharedKey = Curve25519.computeSharedSecret(ServerKeyPair.privateKey, user.publicKey)
+
+        // validate shared key
+        if (request.sharedKey != sharedKey)
             return ResponseError.InvalidCredentials
 
         // prepare response
-        val credentials = UserCredentials(
+        val credentials = LoginResponse(
             userId = user.id,
-            apiKey = authComponent.generateToken(TokenType.API_KEY, user.id),
-            publicKey = user.publicKey,
-            protectedPrivateKey = user.protectedPrivateKey
+            apiKey = authComponent.generateToken(TokenType.API_KEY, user.id)
         )
 
         return ResponseHandler.generateResponse(credentials, HttpStatus.OK)
     }
 
-    /**
-     * Request password hint.
-     */
     @GetMapping("/passwordHint")
     fun requestPasswordHint(
         @RequestIP ip: String,
@@ -208,9 +205,6 @@ class AuthController @Autowired constructor(
         return ResponseSuccess.OK
     }
 
-    /**
-     * Verify email address. This endpoint is called when user clicks on the link in the email.
-     */
     @GetMapping("/verifyEmail")
     fun verifyEmail(
         @RequestParam("user") userID: String,

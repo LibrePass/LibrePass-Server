@@ -50,7 +50,7 @@
         <serialization.version>1.5.1</serialization.version>
         <coroutines.version>1.7.1</coroutines.version>
 
-        <medzik-libcrypto.version>0.5.1</medzik-libcrypto.version>
+        <medzik-libcrypto.version>0.5.2</medzik-libcrypto.version>
 
         <junit.jupiter.version>5.9.3</junit.jupiter.version>
 
