@@ -1,7 +1,19 @@
 package dev.medzik.librepass.client.api.v1
 
+import dev.medzik.libcrypto.AES
+import dev.medzik.libcrypto.Curve25519
 import dev.medzik.librepass.client.Client
 import dev.medzik.librepass.client.DEFAULT_API_URL
+import dev.medzik.librepass.client.errors.ApiException
+import dev.medzik.librepass.client.errors.ClientException
+import dev.medzik.librepass.client.utils.Cryptography.DefaultArgon2idParameters
+import dev.medzik.librepass.client.utils.Cryptography.calculateSecretKey
+import dev.medzik.librepass.client.utils.Cryptography.computePasswordHash
+import dev.medzik.librepass.client.utils.Cryptography.computeSecretKeyFromPassword
+import dev.medzik.librepass.client.utils.JsonUtils
+import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
+import dev.medzik.librepass.types.api.user.ChangePasswordCipherData
+import dev.medzik.librepass.types.api.user.ChangePasswordRequest
 
 /**
  * User Client for the LibrePass API. This client is used to manage user.
@@ -11,7 +23,7 @@ import dev.medzik.librepass.client.DEFAULT_API_URL
  */
 class UserClient(
     private val email: String,
-    apiKey: String,
+    private val apiKey: String,
     private val apiUrl: String = DEFAULT_API_URL
 ) {
     companion object {
@@ -20,86 +32,76 @@ class UserClient(
 
     private val client = Client(apiUrl, apiKey)
 
-//    /**
-//     * Change user password.
-//     * @param oldPassword old password
-//     * @param newPassword new password
-//     * @param parameters argon2id parameters of the new password
-//     */
-//    @Throws(ClientException::class, ApiException::class)
-//    fun changePassword(
-//        oldPassword: String,
-//        newPassword: String,
-//        parameters: UserArgon2idParameters? = null
-//    ) {
-//        // get the user secrets from the server
-//        val userSecrets = getSecrets(oldPassword)
-//
-//        val argon2idParameters = parameters ?: AuthClient(apiUrl).getUserArgon2idParameters(email)
-//
-//        // compute old password hashes
-//        val oldPasswordHashes = computeHashes(
-//            password = oldPassword,
-//            email = email,
-//        )
-//
-//        // compute new password hashes
-//        val newPasswordHashes = computeHashes(
-//            password = newPassword,
-//            email = email,
-//        )
-//
-//        // encrypt the private key with the new password
-//        val protectedPrivateKey = AES.encrypt(
-//            AES.GCM,
-//            newPasswordHashes.basePasswordHash.toHexHash(),
-//            userSecrets.privateKey
-//        )
-//
-//        val request = ChangePasswordRequest(
-//            oldPassword = oldPasswordHashes.finalPasswordHash,
-//            newPassword = newPasswordHashes.finalPasswordHash,
-//            newProtectedPrivateKey = protectedPrivateKey,
-//            parallelism = argon2idParameters.parallelism,
-//            memory = argon2idParameters.memory,
-//            iterations = argon2idParameters.iterations,
-//            version = argon2idParameters.version
-//        )
-//
-//        client.patch(
-//            "${API_ENDPOINT}/password",
-//            JsonUtils.serialize(request)
-//        )
-//    }
-//
-//    /**
-//     * Get user secrets.
-//     * @param password user password
-//     * @return [UserSecrets]
-//     */
-//    @Throws(ClientException::class, ApiException::class)
-//    fun getSecrets(password: String): UserSecrets {
-//        val argon2idParameters = AuthClient(apiUrl = apiUrl).getUserArgon2idParameters(email)
-//
-//        // compute base password
-//        val basePassword = computeBasePasswordHash(
-//            password = password,
-//            email = email,
-//            parameters = argon2idParameters
-//        )
-//
-//        return getSecrets(basePassword)
-//    }
-//
-//    /**
-//     * Get user secrets.
-//     * @param basePassword base password hash of the user password
-//     * @return [UserSecrets]
-//     */
-//    @Throws(ClientException::class, ApiException::class)
-//    fun getSecrets(basePassword: Argon2Hash): UserSecrets {
-//        val response = client.get("${API_ENDPOINT}/secrets")
-//        val userSecrets = JsonUtils.deserialize<UserSecretsResponse>(response)
-//        return userSecrets.decrypt(basePassword)
-//    }
+    /**
+     * Change user password.
+     * @param oldPassword old password
+     * @param newPassword new password
+     * @param newPasswordHint hint for the new password
+     * @param parameters argon2id parameters of the new password
+     */
+    @Throws(ClientException::class, ApiException::class)
+    fun changePassword(
+        oldPassword: String,
+        newPassword: String,
+        newPasswordHint: String? = null,
+        parameters: UserArgon2idParameters = DefaultArgon2idParameters
+    ) {
+        val oldArgon2idParameters = AuthClient(apiUrl).getUserArgon2idParameters(email)
+
+        // compute old secret key
+        val oldSecretKey = computeSecretKeyFromPassword(email, oldPassword, oldArgon2idParameters)
+
+        // compute new password hashes
+        val newPasswordHash = computePasswordHash(
+            password = newPassword,
+            email = email,
+            parameters = parameters
+        )
+
+        val keyPair = Curve25519.fromPrivateKey(newPasswordHash.toHexHash())
+
+        // get server public key
+        val serverPublicKey = AuthClient(apiUrl).getServerPublicKey().publicKey
+
+        // compute shared key with new private key and server public key
+        val sharedKey = Curve25519.computeSharedSecret(keyPair.privateKey, serverPublicKey)
+
+        // compute new secret key
+        val newSecretKey = calculateSecretKey(keyPair.privateKey, keyPair.publicKey)
+
+        // re-encrypt ciphers data with new password
+        val cipherClient = CipherClient(apiKey, apiUrl)
+        lateinit var ciphers: List<ChangePasswordCipherData>
+        cipherClient.getAll().forEach { cipher ->
+            // decrypt cipher data with old secret key
+            val oldData = AES.decrypt(AES.GCM, oldSecretKey, cipher.protectedData)
+
+            // encrypt cipher data with new secret key
+            val newData = AES.encrypt(AES.GCM, newSecretKey, oldData)
+
+            ciphers += ChangePasswordCipherData(
+                id = cipher.id,
+                data = newData
+            )
+        }
+
+        val request = ChangePasswordRequest(
+            newPasswordHint = newPasswordHint,
+            sharedKey = sharedKey,
+            // Argon2id parameters
+            parallelism = parameters.parallelism,
+            memory = parameters.memory,
+            iterations = parameters.iterations,
+            version = parameters.version,
+            // Curve25519 public key
+            newPublicKey = keyPair.publicKey,
+            // ciphers data re-encrypted with new password
+            ciphers = ciphers
+        )
+
+        client.patch(
+            "${API_ENDPOINT}/password",
+            JsonUtils.serialize(request)
+        )
+    }
 }

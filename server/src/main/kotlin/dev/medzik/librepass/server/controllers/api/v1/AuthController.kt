@@ -22,6 +22,8 @@ import java.time.Duration
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
+val ServerKeyPair = Curve25519.generateKeyPair()!!
+
 @RestController
 @RequestMapping("/api/v1/auth")
 class AuthController @Autowired constructor(
@@ -35,8 +37,6 @@ class AuthController @Autowired constructor(
 
     // coroutine scope
     private val scope = CoroutineScope(Dispatchers.IO)
-
-    private val serverKeyPair = Curve25519.generateKeyPair()
 
     /**
      * Rate limit for login endpoint per IP address.
@@ -70,7 +70,7 @@ class AuthController @Autowired constructor(
             return ResponseError.TooManyRequests
 
         // compute shared key
-        val sharedKey = Curve25519.computeSharedSecret(serverKeyPair.privateKey, request.publicKey)
+        val sharedKey = Curve25519.computeSharedSecret(ServerKeyPair.privateKey, request.publicKey)
 
         // validate shared key
         if (request.sharedKey != sharedKey)
@@ -152,7 +152,7 @@ class AuthController @Autowired constructor(
     @GetMapping("/serverPublicKey")
     fun getServerPublicKey(): Response {
         val response = ServerPublicKey(
-            publicKey = serverKeyPair.publicKey
+            publicKey = ServerKeyPair.publicKey
         )
 
         return ResponseHandler.generateResponse(response, HttpStatus.OK)
@@ -175,7 +175,7 @@ class AuthController @Autowired constructor(
             ?: return ResponseError.InvalidCredentials
 
         // compute shared key
-        val sharedKey = Curve25519.computeSharedSecret(serverKeyPair.privateKey, user.publicKey)
+        val sharedKey = Curve25519.computeSharedSecret(ServerKeyPair.privateKey, user.publicKey)
 
         // validate shared key
         if (request.sharedKey != sharedKey)

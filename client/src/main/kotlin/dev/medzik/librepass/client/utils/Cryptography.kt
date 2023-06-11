@@ -44,7 +44,7 @@ object Cryptography {
      * @param password password of the user
      * @return secret key
      */
-    fun computeSecretKeyFromPassword(email: String, password: String, ): String {
+    fun computeSecretKeyFromPassword(email: String, password: String, parameters: UserArgon2idParameters): String {
         // compute base password hash
         val passwordHash = computePasswordHash(password, email)
 

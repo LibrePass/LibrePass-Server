@@ -26,4 +26,20 @@ interface CipherRepository : CrudRepository<CipherTable, UUID> {
      */
     @Query("SELECT EXISTS(SELECT 1 FROM #{#entityName} p WHERE p.id = :id AND p.owner = :owner)")
     fun checkIfCipherExistsAndOwnedBy(@Param("id") id: UUID, @Param("owner") owner: UUID): Boolean
+
+    /**
+     * Get all user cipher ids.
+     * @param owner user identifier
+     * @return A list of all user cipher ids.
+     */
+    @Query("SELECT p.id FROM #{#entityName} p WHERE p.owner = :owner")
+    fun getAllIds(@Param("owner") owner: UUID): List<UUID>
+
+    /**
+     * Update cipher data.
+     * @param id cipher identifier
+     * @param data new cipher data
+     */
+    @Query("UPDATE #{#entityName} p SET p.data = :data WHERE p.id = :id")
+    fun updateData(@Param("id") id: UUID, @Param("data") data: String)
 }
