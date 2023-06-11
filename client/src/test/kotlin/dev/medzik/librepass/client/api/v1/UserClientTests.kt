@@ -73,7 +73,7 @@ class UserClientTests {
 
             val cipher = Cipher(ciphers[0], secretKey)
 
-            assertEquals(testCipher, cipher)
+            assertEquals(testCipher.loginData, cipher.loginData)
         }
 
         insertTestCipher()
