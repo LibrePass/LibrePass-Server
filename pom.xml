@@ -46,7 +46,7 @@
         <maven.compiler.source>9</maven.compiler.source>
         <maven.compiler.target>9</maven.compiler.target>
 
-        <kotlin.version>1.8.21</kotlin.version>
+        <kotlin.version>1.8.22</kotlin.version>
         <serialization.version>1.5.1</serialization.version>
         <coroutines.version>1.7.1</coroutines.version>
 
