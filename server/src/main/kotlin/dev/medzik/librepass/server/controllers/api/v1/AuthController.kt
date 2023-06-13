@@ -35,7 +35,7 @@ class AuthController @Autowired constructor(
     private val userRepository: UserRepository,
     private val authComponent: AuthComponent,
     private val emailService: EmailService,
-    @Value("\${librepass.api.rateLimit.enabled}")
+    @Value("\${server.api.rateLimit.enabled}")
     private val rateLimitEnabled: Boolean
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
