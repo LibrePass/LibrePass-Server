@@ -16,7 +16,7 @@ class EmailService {
     @Value("\${smtp.mail.address}")
     private lateinit var senderAddress: String
 
-    @Value("\${librepass.api.domain}")
+    @Value("\${server.api.domain}")
     private lateinit var apiDomain: String
 
     // get email template
