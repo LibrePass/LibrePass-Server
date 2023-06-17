@@ -58,9 +58,7 @@ object Cryptography {
      */
     @JvmStatic
     fun computeSecretKeyFromPassword(email: String, password: String, parameters: UserArgon2idParameters): String {
-        // compute base password hash
         val passwordHash = computePasswordHash(password, email, parameters)
-
         return computeSecretKeyFromPassword(passwordHash)
     }
 
@@ -71,7 +69,7 @@ object Cryptography {
      */
     @JvmStatic
     fun computeSecretKeyFromPassword(passwordHash: Argon2Hash): String {
-        val keyPair = Curve25519.fromPrivateKey(passwordHash.toHexHash())
+        val keyPair = generateKeyPairFromPrivate(passwordHash)
         return computeSecretKey(keyPair)
     }
 
@@ -80,8 +78,8 @@ object Cryptography {
      * @param privateKey private key
      */
     @JvmStatic
-    fun generateKeyPairFromPrivate(privateKey: String): String {
-        return Curve25519.fromPrivateKey(privateKey).publicKey
+    fun generateKeyPairFromPrivate(privateKey: String): Curve25519KeyPair {
+        return Curve25519.fromPrivateKey(privateKey)
     }
 
     /**
@@ -89,7 +87,7 @@ object Cryptography {
      * @param privateKey private key (password hash)
      */
     @JvmStatic
-    fun generateKeyPairFromPrivate(privateKey: Argon2Hash): String {
-        return Curve25519.fromPrivateKey(privateKey.toHexHash()).publicKey
+    fun generateKeyPairFromPrivate(privateKey: Argon2Hash): Curve25519KeyPair {
+        return generateKeyPairFromPrivate(privateKey.toHexHash())
     }
 }
