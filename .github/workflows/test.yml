@@ -61,6 +61,7 @@ jobs:
           MAIL_SMTP_TLS_ENABLED: false
           SMTP_EMAIL_ADDRESS: librepass@localhost
           RATE_LIMIT_ENABLED: false
+          EMAIL_VERIFICATION_REQUIRED: false
 
       - name: Run tests
         run: ./mvnw clean test
@@ -82,6 +83,7 @@ jobs:
           MAIL_SMTP_TLS_ENABLED: false
           SMTP_EMAIL_ADDRESS: librepass@localhost
           RATE_LIMIT_ENABLED: false
+          EMAIL_VERIFICATION_REQUIRED: false
 
       - name: Log server output for debugging purposes
         if: always()
