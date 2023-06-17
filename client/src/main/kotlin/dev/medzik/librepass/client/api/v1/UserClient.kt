@@ -28,7 +28,7 @@ class UserClient(
     private val apiUrl: String = DEFAULT_API_URL
 ) {
     companion object {
-        const val API_ENDPOINT = "/api/v1/user"
+        private const val API_ENDPOINT = "/api/v1/user"
     }
 
     private val client = Client(apiUrl, apiKey)

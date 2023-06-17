@@ -18,7 +18,7 @@ import dev.medzik.librepass.types.api.auth.*
  */
 class AuthClient(apiUrl: String = DEFAULT_API_URL) {
     companion object {
-        const val API_ENDPOINT = "/api/v1/auth"
+        private const val API_ENDPOINT = "/api/v1/auth"
     }
 
     private val client = Client(apiUrl)

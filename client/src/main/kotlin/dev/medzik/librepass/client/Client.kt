@@ -13,13 +13,13 @@ import java.io.IOException
 const val DEFAULT_API_URL = "https://librepass-api.medzik.dev"
 
 /**
- * HTTP Client for sending requests to the API
+ * HTTP Client for sending requests to the API.
  * @param apiURL api url address
  * @param accessToken access token to use for authorization
  */
 class Client(
     private val apiURL: String,
-    accessToken: String? = null,
+    private val accessToken: String? = null,
 ) {
     private val httpClient = OkHttpClient()
     private val httpMediaTypeJson = "application/json; charset=utf-8".toMediaType()
@@ -28,7 +28,7 @@ class Client(
     private val authorizationHeader = if (accessToken.isNullOrEmpty()) "" else "Bearer $accessToken"
 
     /**
-     * Send a GET request to the API
+     * Send a GET request to the API.
      * @param endpoint endpoint of the API
      * @return response body
      */
@@ -44,7 +44,7 @@ class Client(
     }
 
     /**
-     * Send a DELETE request to the API
+     * Send a DELETE request to the API.
      * @param endpoint endpoint of the API
      * @return response body
      */
@@ -60,7 +60,7 @@ class Client(
     }
 
     /**
-     * Send a POST request to the API
+     * Send a POST request to the API.
      * @param endpoint endpoint of the API
      * @param json JSON body of the request
      * @return response body
@@ -79,7 +79,7 @@ class Client(
     }
 
     /**
-     * Send a PATCH request to the API
+     * Send a PATCH request to the API.
      * @param endpoint endpoint of the API
      * @param json JSON body of the request
      * @return response body
@@ -98,7 +98,7 @@ class Client(
     }
 
     /**
-     * Send a PUT request to the API
+     * Send a PUT request to the API.
      * @param endpoint endpoint of the API
      * @param json JSON body of the request
      * @return response body
@@ -117,9 +117,7 @@ class Client(
     }
 
     /**
-     * Execute a request and extract the body
-     * @param request request to execute
-     * @return response body
+     * Execute a request and extract the body from the response.
      */
     @Throws(ClientException::class, ApiException::class)
     private fun executeAndExtractBody(request: Request): String {

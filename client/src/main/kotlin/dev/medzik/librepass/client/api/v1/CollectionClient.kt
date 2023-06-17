@@ -20,7 +20,7 @@ class CollectionClient(
     apiUrl: String = DEFAULT_API_URL
 ) {
     companion object {
-        const val API_ENDPOINT = "/api/v1/collection"
+        private const val API_ENDPOINT = "/api/v1/collection"
     }
 
     private val client = Client(apiUrl, apiKey)
