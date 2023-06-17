@@ -36,7 +36,9 @@ class AuthController @Autowired constructor(
     private val authComponent: AuthComponent,
     private val emailService: EmailService,
     @Value("\${server.api.rateLimit.enabled}")
-    private val rateLimitEnabled: Boolean
+    private val rateLimitEnabled: Boolean,
+    @Value("\${email.verification.required}")
+    private val emailVerificationRequired: Boolean
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -164,6 +166,10 @@ class AuthController @Autowired constructor(
         // get user from database
         val user = userRepository.findByEmail(request.email)
             ?: return ResponseError.InvalidCredentials
+
+        // check if email is verified
+        if (emailVerificationRequired && !user.emailVerified)
+            return ResponseError.EmailNotVerified
 
         // compute shared key
         val sharedKey = Curve25519.computeSharedSecret(ServerKeyPair.privateKey, user.publicKey)

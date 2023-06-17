@@ -92,6 +92,7 @@ object ResponseError {
 
     val InvalidBody = generateErrorResponse("invalid_body", HttpStatus.BAD_REQUEST)
     val InvalidCredentials = generateErrorResponse("invalid_credentials", HttpStatus.UNAUTHORIZED)
+    val EmailNotVerified = generateErrorResponse("email_not_verified", HttpStatus.UNAUTHORIZED)
 
     val Unauthorized = generateErrorResponse("unauthorized", HttpStatus.UNAUTHORIZED)
     val NotFound = generateErrorResponse("not_found", HttpStatus.NOT_FOUND)
