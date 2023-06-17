@@ -9,6 +9,7 @@ import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
  * Cryptography utilities. Used for password hashing.
  */
 object Cryptography {
+    @JvmStatic
     val DefaultArgon2idParameters = UserArgon2idParameters(
         parallelism = 3,
         memory = 65536, // 64MB
@@ -19,6 +20,7 @@ object Cryptography {
     /**
      * Compute secret key for user key pair.
      */
+    @JvmStatic
     fun computeSecretKey(keyPair: Curve25519KeyPair): String {
         return computeSharedKey(keyPair.privateKey, keyPair.publicKey)
     }
@@ -26,6 +28,7 @@ object Cryptography {
     /**
      * Compute secret key from private and public keys. Used for AES encryption.
      */
+    @JvmStatic
     fun computeSharedKey(privateKey: String, publicKey: String): String {
         return Curve25519.computeSharedSecret(privateKey, publicKey)
     }
@@ -36,6 +39,7 @@ object Cryptography {
      * @param email email of the user
      * @param parameters argon2id parameters
      */
+    @JvmStatic
     fun computePasswordHash(
         password: String,
         email: String,
@@ -52,6 +56,7 @@ object Cryptography {
      * @param password password of the user
      * @return secret key
      */
+    @JvmStatic
     fun computeSecretKeyFromPassword(email: String, password: String, parameters: UserArgon2idParameters): String {
         // compute base password hash
         val passwordHash = computePasswordHash(password, email, parameters)
@@ -64,8 +69,27 @@ object Cryptography {
      * @param passwordHash password hash of the user
      * @return secret key
      */
+    @JvmStatic
     fun computeSecretKeyFromPassword(passwordHash: Argon2Hash): String {
         val keyPair = Curve25519.fromPrivateKey(passwordHash.toHexHash())
         return computeSecretKey(keyPair)
+    }
+
+    /**
+     * Generate key pair from private key.
+     * @param privateKey private key
+     */
+    @JvmStatic
+    fun generateKeyPairFromPrivate(privateKey: String): String {
+        return Curve25519.fromPrivateKey(privateKey).publicKey
+    }
+
+    /**
+     * Generate key pair from private key.
+     * @param privateKey private key (password hash)
+     */
+    @JvmStatic
+    fun generateKeyPairFromPrivate(privateKey: Argon2Hash): String {
+        return Curve25519.fromPrivateKey(privateKey.toHexHash()).publicKey
     }
 }
