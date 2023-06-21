@@ -44,7 +44,7 @@ class CollectionClient(
     @Throws(ClientException::class, ApiException::class)
     fun getCollections(): List<CipherCollection> {
         val response = client.get(API_ENDPOINT)
-        return JsonUtils.deserializeList(response)
+        return JsonUtils.deserialize(response)
     }
 
     /**

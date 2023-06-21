@@ -10,7 +10,6 @@ import dev.medzik.librepass.server.utils.ResponseHandler
 import dev.medzik.librepass.types.api.cipher.InsertResponse
 import dev.medzik.librepass.types.api.collection.CipherCollection
 import dev.medzik.librepass.types.api.collection.CreateCollectionRequest
-import kotlinx.serialization.builtins.ListSerializer
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -57,7 +56,6 @@ class CollectionController @Autowired constructor(
         }
 
         return ResponseHandler.generateResponse(
-            serializer = ListSerializer(CipherCollection.serializer()),
             data = cipherCollections,
             status = HttpStatus.OK
         )

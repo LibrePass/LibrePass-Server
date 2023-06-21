@@ -1,7 +1,7 @@
 package dev.medzik.librepass.types.cipher.data
 
-import dev.medzik.librepass.types.api.serializers.DateSerializer
-import kotlinx.serialization.Serializable
+import com.google.gson.annotations.JsonAdapter
+import dev.medzik.librepass.types.adapters.DateAdapter
 import java.util.*
 
 /**
@@ -15,7 +15,6 @@ import java.util.*
  * @property notes notes for the cipher
  * @property fields custom fields
  */
-@Serializable
 data class CipherLoginData(
     val name: String,
     val username: String? = null,
@@ -32,9 +31,8 @@ data class CipherLoginData(
  * @param password login password
  * @param lastUsed date when the password was changed
  */
-@Serializable
 data class PasswordHistory(
     val password: String,
-    @Serializable(with = DateSerializer::class)
+    @JsonAdapter(DateAdapter::class)
     val lastUsed: Date
 )

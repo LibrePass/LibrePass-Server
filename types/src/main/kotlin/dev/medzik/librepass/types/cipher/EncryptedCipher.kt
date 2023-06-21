@@ -1,13 +1,9 @@
 package dev.medzik.librepass.types.cipher
 
+import com.google.gson.Gson
+import com.google.gson.annotations.JsonAdapter
 import dev.medzik.libcrypto.AES
-import dev.medzik.librepass.types.api.serializers.DateSerializer
-import dev.medzik.librepass.types.api.serializers.UUIDSerializer
-import dev.medzik.librepass.types.cipher.data.CipherCardData
-import dev.medzik.librepass.types.cipher.data.CipherLoginData
-import dev.medzik.librepass.types.cipher.data.CipherSecureNoteData
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
+import dev.medzik.librepass.types.adapters.DateAdapter
 import java.util.*
 
 /**
@@ -20,27 +16,23 @@ import java.util.*
  * @property collection unique identifier of the collection the cipher belongs to
  * @property favorite Whether the cipher is marked as favorite
  * @property rePrompt Whether the password should be re-prompted (Only UI-related)
- * @property version version of the cipher (Currently 1)
+ * @property version version of the cipher (the current version is 1)
  * @property created date the cipher was created
  * @property lastModified date the cipher was last modified
  * @see Cipher
  */
-@Serializable
 data class EncryptedCipher(
-    @Serializable(with = UUIDSerializer::class)
     val id: UUID,
-    @Serializable(with = UUIDSerializer::class)
     val owner: UUID,
     val type: Int = CipherType.Login.ordinal,
     val protectedData: String,
-    @Serializable(with = UUIDSerializer::class)
     val collection: UUID? = null,
     val favorite: Boolean = false,
     val rePrompt: Boolean = false,
     val version: Int = 1,
-    @Serializable(with = DateSerializer::class)
+    @JsonAdapter(DateAdapter::class)
     val created: Date? = null,
-    @Serializable(with = DateSerializer::class)
+    @JsonAdapter(DateAdapter::class)
     val lastModified: Date? = null
 ) {
     /**
@@ -59,11 +51,13 @@ data class EncryptedCipher(
         protectedData = AES.encrypt(
             AES.GCM,
             secretKey,
-            when (cipher.type) {
-                CipherType.Login -> Json.encodeToString(CipherLoginData.serializer(), cipher.loginData!!)
-                CipherType.SecureNote -> Json.encodeToString(CipherSecureNoteData.serializer(), cipher.secureNoteData!!)
-                CipherType.Card -> Json.encodeToString(CipherCardData.serializer(), cipher.cardData!!)
-            }
+            Gson().toJson(
+                when (cipher.type) {
+                    CipherType.Login -> cipher.loginData
+                    CipherType.Card -> cipher.cardData
+                    CipherType.SecureNote -> cipher.secureNoteData
+                }
+            )!!
         ),
         collection = cipher.collection,
         favorite = cipher.favorite,
@@ -77,8 +71,8 @@ data class EncryptedCipher(
         /**
          * Creates a new [EncryptedCipher] object from the JSON string.
          */
-        fun from(cipher: String) =
-            Json.decodeFromString(serializer(), cipher)
+        fun from(cipher: String): EncryptedCipher =
+            Gson().fromJson(cipher, EncryptedCipher::class.java)
     }
 
     /**
@@ -92,5 +86,5 @@ data class EncryptedCipher(
      * Converts the cipher to a JSON string.
      */
     fun toJson() =
-        Json.encodeToString(serializer(), this)
+        Gson().toJson(this)
 }

@@ -1,9 +1,9 @@
 package dev.medzik.librepass.types.cipher
 
+import com.google.gson.Gson
 import dev.medzik.librepass.types.cipher.data.CipherCardData
 import dev.medzik.librepass.types.cipher.data.CipherLoginData
 import dev.medzik.librepass.types.cipher.data.CipherSecureNoteData
-import kotlinx.serialization.json.Json
 import java.util.*
 
 /**
@@ -17,7 +17,7 @@ import java.util.*
  * @property collection collection identifier
  * @property favorite whether the cipher is a favorite cipher
  * @property rePrompt whether the cipher should be re-prompted (Only UI feature)
- * @property version cipher version (Current version is 1)
+ * @property version cipher version (the current version is 1)
  * @property created created date
  * @property lastModified last modified date
  */
@@ -90,7 +90,7 @@ data class Cipher(
             secretKey: String
         ): T? =
             if (type.ordinal == encryptedCipher.type)
-                Json.decodeFromString(encryptedCipher.decryptData(secretKey))
+                Gson().fromJson(encryptedCipher.decryptData(secretKey), T::class.java)
             else null
     }
 }

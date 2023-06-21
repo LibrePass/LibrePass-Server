@@ -1,7 +1,5 @@
 package dev.medzik.librepass.types.cipher.data
 
-import kotlinx.serialization.Serializable
-
 /**
  * Card data for cipher.
  * @param cardholderName cardholder name
@@ -13,7 +11,6 @@ import kotlinx.serialization.Serializable
  * @param notes notes for card
  * @param fields custom fields
  */
-@Serializable
 data class CipherCardData(
     val cardholderName: String,
     val brand: String? = null,
