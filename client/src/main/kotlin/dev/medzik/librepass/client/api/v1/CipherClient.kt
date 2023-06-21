@@ -19,7 +19,7 @@ import java.util.*
 @Suppress("unused")
 class CipherClient(
     apiKey: String,
-    apiUrl: String  = DEFAULT_API_URL
+    apiUrl: String = DEFAULT_API_URL
 ) {
     companion object {
         private const val API_ENDPOINT = "/api/v1/cipher"
