@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.client.RestTemplate
 import java.util.*
 
-
 @RestController
 @RequestMapping("/api/v1/cipher")
 class CipherController @Autowired constructor(
