@@ -13,6 +13,9 @@ data class InsertResponse(
 
 @Serializable
 data class SyncResponse(
-    val ids: List<@Serializable(with = UUIDSerializer::class) UUID>,
+    val ids: List<
+        @Serializable(with = UUIDSerializer::class)
+        UUID
+        >,
     val ciphers: List<EncryptedCipher>
 )

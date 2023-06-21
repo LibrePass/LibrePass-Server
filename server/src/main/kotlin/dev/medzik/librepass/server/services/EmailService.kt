@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service
 class EmailService {
     @Autowired
     private lateinit var emailSender: JavaMailSender
+
     @Value("\${smtp.mail.address}")
     private lateinit var senderAddress: String
 
