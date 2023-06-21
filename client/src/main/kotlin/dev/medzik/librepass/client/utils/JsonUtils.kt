@@ -1,39 +1,19 @@
 package dev.medzik.librepass.client.utils
 
-import kotlinx.serialization.InternalSerializationApi
-import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.serializer
+import com.google.gson.Gson
 
 object JsonUtils {
     /**
      * Serialize data to JSON string.
      * @param data data to serialize
      */
-    @OptIn(InternalSerializationApi::class)
-    inline fun <reified T : Any> serialize(data: T): String {
-        val serializer = T::class.serializer()
-
-        return Json.encodeToString(serializer, data)
-    }
+    fun serialize(data: Any): String =
+        Gson().toJson(data)
 
     /**
      * Deserialize JSON string to data.
      * @param data JSON string
      */
-    @OptIn(InternalSerializationApi::class)
-    inline fun <reified T : Any> deserialize(data: String): T {
-        val serializer = T::class.serializer()
-        return Json.decodeFromString(serializer, data)
-    }
-
-    /**
-     * Deserialize JSON string to data.
-     * @param data JSON string
-     */
-    @OptIn(InternalSerializationApi::class)
-    inline fun <reified T : Any> deserializeList(data: String): List<T> {
-        val serializer = T::class.serializer()
-        return Json.decodeFromString(ListSerializer(serializer), data)
-    }
+    inline fun <reified T> deserialize(data: String): T =
+        Gson().fromJson(data, T::class.java)
 }
