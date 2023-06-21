@@ -6,6 +6,7 @@ import dev.medzik.librepass.types.cipher.EncryptedCipher
 import dev.medzik.librepass.types.cipher.data.CipherField
 import dev.medzik.librepass.types.cipher.data.CipherFieldType
 import dev.medzik.librepass.types.cipher.data.CipherLoginData
+import dev.medzik.librepass.types.cipher.data.PasswordHistory
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.*
@@ -23,6 +24,13 @@ class CipherTests {
             name = "Example",
             username = "librepass@example.com",
             password = "SomeSecretPassword123!",
+            passwordHistory = listOf(
+                PasswordHistory(
+                    password = "very secret password",
+                    // current date without milliseconds (because it is broken when comparing dates)
+                    lastUsed = Date(System.currentTimeMillis() / 1000 * 1000)
+                )
+            ),
             fields = listOf(
                 CipherField(
                     name = "test",

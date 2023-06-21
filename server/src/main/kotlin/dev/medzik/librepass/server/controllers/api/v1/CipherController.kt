@@ -10,7 +10,6 @@ import dev.medzik.librepass.server.utils.ResponseHandler
 import dev.medzik.librepass.types.api.cipher.InsertResponse
 import dev.medzik.librepass.types.api.cipher.SyncResponse
 import dev.medzik.librepass.types.cipher.EncryptedCipher
-import kotlinx.serialization.builtins.ListSerializer
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
@@ -51,7 +50,6 @@ class CipherController @Autowired constructor(
         val ciphers = cipherRepository.getAll(owner = user.id)
 
         return ResponseHandler.generateResponse(
-            serializer = ListSerializer(EncryptedCipher.serializer()),
             // convert to encrypted ciphers
             data = ciphers.map { it.toEncryptedCipher() },
             status = HttpStatus.OK
