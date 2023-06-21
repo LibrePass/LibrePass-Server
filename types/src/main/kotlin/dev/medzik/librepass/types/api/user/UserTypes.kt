@@ -1,10 +1,7 @@
 package dev.medzik.librepass.types.api.user
 
-import dev.medzik.librepass.types.api.serializers.UUIDSerializer
-import kotlinx.serialization.Serializable
 import java.util.*
 
-@Serializable
 data class ChangePasswordRequest(
     val newPasswordHint: String?,
     val newPublicKey: String,
@@ -18,9 +15,7 @@ data class ChangePasswordRequest(
     val ciphers: List<ChangePasswordCipherData>
 )
 
-@Serializable
 data class ChangePasswordCipherData(
-    @Serializable(with = UUIDSerializer::class)
     val id: UUID,
     val data: String
 )
