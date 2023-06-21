@@ -101,7 +101,7 @@ class UserClient(
         )
 
         client.patch(
-            "${API_ENDPOINT}/password",
+            "$API_ENDPOINT/password",
             JsonUtils.serialize(request)
         )
     }
