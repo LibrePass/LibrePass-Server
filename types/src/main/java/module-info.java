@@ -17,8 +17,7 @@ module dev.medzik.librepass.types {
     opens dev.medzik.librepass.types.api.user to com.google.gson;
 
     exports dev.medzik.librepass.types.cipher;
-    exports dev.medzik.librepass.types.cipher.data;
-
     opens dev.medzik.librepass.types.cipher to com.google.gson;
+    exports dev.medzik.librepass.types.cipher.data;
     opens dev.medzik.librepass.types.cipher.data to com.google.gson;
 }

@@ -7,20 +7,17 @@ import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Service
 
 /**
- * Service for sending emails.
+ * Service for sending email messages.
  */
 @Service
-class EmailService {
-    @Autowired
-    private lateinit var emailSender: JavaMailSender
-
+class EmailService @Autowired constructor(
+    private val emailSender: JavaMailSender,
     @Value("\${smtp.mail.address}")
-    private lateinit var senderAddress: String
-
+    private val senderAddress: String,
     @Value("\${server.api.domain}")
-    private lateinit var apiDomain: String
-
-    // get email template
+    private val apiDomain: String
+) {
+    // get email templates
     private val emailVerificationTemplate = this::class.java.getResource("/templates/email-verification.html")?.readText()
         ?: throw Exception("Could not read `email verification` email template")
     private val passwordHintTemplate = this::class.java.getResource("/templates/password-hint.html")?.readText()
