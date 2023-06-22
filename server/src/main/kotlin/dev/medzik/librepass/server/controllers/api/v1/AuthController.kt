@@ -25,10 +25,13 @@ import java.util.concurrent.ConcurrentHashMap
 // The server's key pair is used for authentication using a shared key.
 //
 // It is not required that the key pair be the same all the time, so it
-// is generated when the server is started and each time it is restarted
+// is generated when the server is started and each time it is restarted,
 // the key is different.
 val ServerKeyPair = Curve25519.generateKeyPair()!!
 
+/**
+ * AuthController handles the authentication process.
+ */
 @RestController
 @RequestMapping("/api/v1/auth")
 class AuthController @Autowired constructor(

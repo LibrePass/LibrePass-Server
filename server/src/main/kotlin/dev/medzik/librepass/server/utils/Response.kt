@@ -11,18 +11,18 @@ import org.springframework.http.ResponseEntity
 typealias Response = ResponseEntity<Any>
 
 /**
- * ResponseHandler is a helper class to generate responses.
+ * ResponseHandler is a helper class for generating responses.
  */
 object ResponseHandler {
     /**
-     * generateResponse generates a response with the given status.
+     * Generates a response with the given status.
      * The response body is an empty map.
      */
     fun generateResponse(status: HttpStatus) =
         createResponse(HashMap<String, Any>(), status)
 
     /**
-     * generateResponse generates a response with the given data that is serialized to JSON.
+     * Generates a response with the given data that is serialized to JSON.
      * @param data data to serialize
      * @param status status of the response
      * @return The response
@@ -31,15 +31,16 @@ object ResponseHandler {
         createResponse(data, status)
 
     /**
-     * generateErrorResponse generates an error response with the given error and status.
+     * Generates an error response with the given error and status.
      * @param error error message
      * @param status status of the response
      * @return The response
      */
     fun generateErrorResponse(error: String, status: HttpStatus): Response {
-        val map = HashMap<String, Any>()
-        map["error"] = error
-        map["status"] = status.value()
+        val map = mapOf(
+            "error" to error,
+            "status" to status.value()
+        )
 
         return createResponse(map, status)
     }
@@ -52,12 +53,15 @@ object ResponseHandler {
         .body(data)
 }
 
+/**
+ * ResponseSuccess is a helper class for generating successful responses.
+ */
 object ResponseSuccess {
     val OK = ResponseHandler.generateResponse(HttpStatus.OK)
 }
 
 /**
- * Utility function to create a error response with the given error and status.
+ * ResponseHandler is a helper class for generating error responses.
  */
 object ResponseError {
     private fun generateErrorResponse(error: String, status: HttpStatus): Response =

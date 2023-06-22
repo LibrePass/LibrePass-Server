@@ -14,8 +14,8 @@ import java.util.*
 
 /**
  * Annotation for getting authorized user from request.
- * If user is not authorized, then null will be passed.
- * If user is authorized, then [UserTable] will be passed.
+ * If a user is not authorized, then null will be returned.
+ * If a user is authorized, then [UserTable] will be returned.
  * @see AuthorizedUserArgumentResolver
  */
 @Retention(AnnotationRetention.RUNTIME)
@@ -26,7 +26,6 @@ annotation class AuthorizedUser
 class AuthorizedUserArgumentResolver @Autowired constructor(
     private val authComponent: AuthComponent,
     private val userRepository: UserRepository
-
 ) : HandlerMethodArgumentResolver {
     override fun supportsParameter(parameter: MethodParameter): Boolean {
         return parameter.hasParameterAnnotation(AuthorizedUser::class.java)
@@ -57,12 +56,12 @@ class AuthorizedUserArgumentResolver @Autowired constructor(
             .orElse(null)
             ?: return null
 
-        // check if user changed password after token was issued
+        // check if user changed password after the token was issued
         if (user.lastPasswordChange > tokenClaims.issuedAt) {
             return null
         }
 
-        // return user table from database
+        // return user table from the database
         return user
     }
 }

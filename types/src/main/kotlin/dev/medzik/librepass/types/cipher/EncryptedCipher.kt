@@ -71,6 +71,7 @@ data class EncryptedCipher(
         /**
          * Creates a new [EncryptedCipher] object from the JSON string.
          */
+        @JvmStatic
         fun from(cipher: String): EncryptedCipher =
             Gson().fromJson(cipher, EncryptedCipher::class.java)
     }
@@ -85,6 +86,6 @@ data class EncryptedCipher(
     /**
      * Converts the cipher to a JSON string.
      */
-    fun toJson() =
+    fun toJson(): String =
         Gson().toJson(this)
 }

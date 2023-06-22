@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 
 /**
- * Handle database errors.
+ * Handler for database errors.
  */
 @ControllerAdvice
 class DatabaseErrorHandler {

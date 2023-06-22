@@ -5,9 +5,6 @@ import dev.medzik.libcrypto.Curve25519
 import dev.medzik.libcrypto.Curve25519KeyPair
 import dev.medzik.librepass.types.api.auth.UserArgon2idParameters
 
-/**
- * Cryptography utilities. Used for password hashing.
- */
 object Cryptography {
     @JvmStatic
     val DefaultArgon2idParameters = UserArgon2idParameters(
@@ -18,7 +15,7 @@ object Cryptography {
     )
 
     /**
-     * Compute secret key for user key pair.
+     * Compute secret key for a user key pair.
      */
     @JvmStatic
     fun computeSecretKey(keyPair: Curve25519KeyPair): String {
@@ -26,7 +23,8 @@ object Cryptography {
     }
 
     /**
-     * Compute secret key from private and public keys. Used for AES encryption.
+     * Compute shared key from private and public keys.
+     * Used for AES encryption.
      */
     @JvmStatic
     fun computeSharedKey(privateKey: String, publicKey: String): String {
@@ -74,7 +72,7 @@ object Cryptography {
     }
 
     /**
-     * Generate key pair from private key.
+     * Generate a key pair from private key.
      * @param privateKey private key
      */
     @JvmStatic
@@ -83,7 +81,7 @@ object Cryptography {
     }
 
     /**
-     * Generate key pair from private key.
+     * Generate a key pair from private key.
      * @param privateKey private key (password hash)
      */
     @JvmStatic
