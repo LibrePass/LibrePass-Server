@@ -13,6 +13,6 @@ object JsonUtils {
     /**
      * Deserialize JSON string to object.
      */
-    fun <T> deserialize(data: String): T =
+    inline fun <reified T> deserialize(data: String): T =
         Gson().fromJson(data, object : TypeToken<T>() {}.type)
 }
