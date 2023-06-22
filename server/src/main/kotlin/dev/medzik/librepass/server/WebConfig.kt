@@ -26,6 +26,7 @@ class WebConfig @Autowired constructor(
     // CORS configuration
     @Value("\${server.cors.allowedOrigins}")
     private lateinit var allowedOrigins: String
+
     override fun addCorsMappings(registry: CorsRegistry) {
         val allowedOrigin = allowedOrigins.split(",").toTypedArray()
 
