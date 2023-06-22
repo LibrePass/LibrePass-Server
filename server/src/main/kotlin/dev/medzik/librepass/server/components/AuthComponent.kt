@@ -12,10 +12,16 @@ import java.security.PrivateKey
 import java.security.PublicKey
 import java.util.*
 
+/**
+ * TokenType represents token types with expiration time.
+ */
 enum class TokenType(val expirationTime: Long) {
     API_KEY(90 * 24 * 60 * 60 * 1000L), // 90 days
 }
 
+/**
+ * TokenClaims represents claims in the jsonwebtoken.
+ */
 enum class TokenClaims(val key: String) {
     TYPE("typ"),
     USER_ID("sub"),

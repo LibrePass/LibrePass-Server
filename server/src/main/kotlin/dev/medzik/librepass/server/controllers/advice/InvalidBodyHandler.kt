@@ -6,6 +6,9 @@ import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 
+/**
+ * Handler for invalid body parameters.
+ */
 @ControllerAdvice
 class InvalidBodyHandler {
     @ExceptionHandler(HttpMessageNotReadableException::class)
