@@ -1,5 +1,6 @@
 package dev.medzik.librepass.server.components
 
+import dev.medzik.librepass.server.controllers.advice.AuthorizedUserException
 import dev.medzik.librepass.server.database.UserRepository
 import dev.medzik.librepass.server.database.UserTable
 import jakarta.servlet.http.HttpServletRequest
@@ -14,8 +15,6 @@ import java.util.*
 
 /**
  * Annotation for getting authorized user from request.
- * If a user is not authorized, then null will be returned.
- * If a user is authorized, then [UserTable] will be returned.
  * @see AuthorizedUserArgumentResolver
  */
 @Retention(AnnotationRetention.RUNTIME)
@@ -36,32 +35,28 @@ class AuthorizedUserArgumentResolver @Autowired constructor(
         mavContainer: ModelAndViewContainer?,
         webRequest: NativeWebRequest,
         binderFactory: WebDataBinderFactory?
-    ): UserTable? {
+    ): UserTable {
         val request = webRequest.getNativeRequest(HttpServletRequest::class.java)
-            ?: return null
+            ?: throw Exception("Failed to get native HttpServletRequest")
 
         val authorizationHeader = request.getHeader("Authorization")
-            ?: return null
+            ?: throw AuthorizedUserException()
         val token = authorizationHeader.removePrefix("Bearer ")
 
-        // parse token
         val tokenClaims = authComponent.parseToken(TokenType.API_KEY, token)
-            ?: return null
-        // get user id from token
+            ?: throw AuthorizedUserException()
         val userID = tokenClaims[TokenClaims.USER_ID.key] as String
 
         // get user from database
         val user = userRepository
             .findById(UUID.fromString(userID))
             .orElse(null)
-            ?: return null
+            ?: throw AuthorizedUserException()
 
         // check if user changed password after the token was issued
-        if (user.lastPasswordChange > tokenClaims.issuedAt) {
-            return null
-        }
+        if (user.lastPasswordChange > tokenClaims.issuedAt)
+            throw AuthorizedUserException()
 
-        // return user table from the database
         return user
     }
 }

@@ -22,11 +22,9 @@ class CollectionController @Autowired constructor(
 ) {
     @PutMapping
     fun insertCollection(
-        @AuthorizedUser user: UserTable?,
+        @AuthorizedUser user: UserTable,
         @RequestBody collection: CreateCollectionRequest
     ): Response {
-        if (user == null) return ResponseError.Unauthorized
-
         collectionRepository.save(
             CollectionTable(
                 id = collection.id,
@@ -42,9 +40,7 @@ class CollectionController @Autowired constructor(
     }
 
     @GetMapping
-    fun getAllCollections(@AuthorizedUser user: UserTable?): Response {
-        if (user == null) return ResponseError.Unauthorized
-
+    fun getAllCollections(@AuthorizedUser user: UserTable): Response {
         val collections = collectionRepository.findAllByOwner(user.id)
 
         val cipherCollections = collections.map {
@@ -63,11 +59,9 @@ class CollectionController @Autowired constructor(
 
     @GetMapping("/{id}")
     fun getCollection(
-        @AuthorizedUser user: UserTable?,
+        @AuthorizedUser user: UserTable,
         @PathVariable id: UUID
     ): Response {
-        if (user == null) return ResponseError.Unauthorized
-
         val collection = collectionRepository.findByIdAndOwner(id, user.id)
             ?: return ResponseError.NotFound
 
@@ -82,12 +76,10 @@ class CollectionController @Autowired constructor(
 
     @PatchMapping("/{id}")
     fun updateCollection(
-        @AuthorizedUser user: UserTable?,
+        @AuthorizedUser user: UserTable,
         @PathVariable id: UUID,
         @RequestBody collection: CreateCollectionRequest
     ): Response {
-        if (user == null) return ResponseError.Unauthorized
-
         collectionRepository.save(
             CollectionTable(
                 id = id,
@@ -104,11 +96,9 @@ class CollectionController @Autowired constructor(
 
     @DeleteMapping("/{id}")
     fun deleteCollection(
-        @AuthorizedUser user: UserTable?,
+        @AuthorizedUser user: UserTable,
         @PathVariable id: UUID
     ): Response {
-        if (user == null) return ResponseError.Unauthorized
-
         val collection = collectionRepository.findByIdAndOwner(id, user.id)
             ?: return ResponseError.NotFound
 

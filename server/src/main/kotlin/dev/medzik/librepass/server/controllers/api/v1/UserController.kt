@@ -22,13 +22,10 @@ class UserController @Autowired constructor(
 ) {
     @PatchMapping("/password")
     fun changePassword(
-        @AuthorizedUser user: UserTable?,
+        @AuthorizedUser user: UserTable,
         @RequestBody body: ChangePasswordRequest
     ): Response {
-        if (user == null)
-            return ResponseError.Unauthorized
-
-        // compute shared key with new public key
+        // compute shared key with a new public key
         val sharedKey = Curve25519.computeSharedSecret(ServerKeyPair.privateKey, body.newPublicKey)
 
         // validate shared key
@@ -64,7 +61,7 @@ class UserController @Autowired constructor(
                 version = body.version,
                 // Curve25519 public key
                 publicKey = body.newPublicKey,
-                // set last password change date to now
+                // set the last password change date to now
                 lastPasswordChange = Date()
             )
         )
