@@ -23,12 +23,9 @@ class CipherController @Autowired constructor(
 ) {
     @PutMapping
     fun insertCipher(
-        @AuthorizedUser user: UserTable?,
+        @AuthorizedUser user: UserTable,
         @RequestBody encryptedCipher: EncryptedCipher
     ): Response {
-        if (user == null)
-            return ResponseError.Unauthorized
-
         return try {
             val cipher = cipherRepository.save(CipherTable(encryptedCipher))
 
@@ -42,10 +39,7 @@ class CipherController @Autowired constructor(
     }
 
     @GetMapping
-    fun getAllCiphers(@AuthorizedUser user: UserTable?): Response {
-        if (user == null)
-            return ResponseError.Unauthorized
-
+    fun getAllCiphers(@AuthorizedUser user: UserTable): Response {
         // get all ciphers owned by user
         val ciphers = cipherRepository.getAll(owner = user.id)
 
@@ -58,12 +52,9 @@ class CipherController @Autowired constructor(
 
     @GetMapping("/sync")
     fun syncCiphers(
-        @AuthorizedUser user: UserTable?,
+        @AuthorizedUser user: UserTable,
         @RequestParam("lastSync") lastSyncUnixTimestamp: Long
     ): Response {
-        if (user == null)
-            return ResponseError.Unauthorized
-
         // convert timestamp to date
         val lastSyncDate = Date(lastSyncUnixTimestamp * 1000)
 
@@ -87,12 +78,9 @@ class CipherController @Autowired constructor(
 
     @GetMapping("/{id}")
     fun getCipher(
-        @AuthorizedUser user: UserTable?,
+        @AuthorizedUser user: UserTable,
         @PathVariable id: UUID
     ): Response {
-        if (user == null)
-            return ResponseError.Unauthorized
-
         // get cipher by id
         val cipher = cipherRepository.findById(id).orElse(null)
             ?: return ResponseError.NotFound
@@ -109,13 +97,10 @@ class CipherController @Autowired constructor(
 
     @PatchMapping("/{id}")
     fun updateCipher(
-        @AuthorizedUser user: UserTable?,
+        @AuthorizedUser user: UserTable,
         @PathVariable id: UUID,
         @RequestBody encryptedCipher: EncryptedCipher
     ): Response {
-        if (user == null)
-            return ResponseError.Unauthorized
-
         // get cipher table from encrypted cipher
         val cipher = CipherTable(encryptedCipher)
 
@@ -134,12 +119,9 @@ class CipherController @Autowired constructor(
 
     @DeleteMapping("/{id}")
     fun deleteCipher(
-        @AuthorizedUser user: UserTable?,
+        @AuthorizedUser user: UserTable,
         @PathVariable id: UUID
     ): Response {
-        if (user == null)
-            return ResponseError.Unauthorized
-
         // check if cipher exists and is owned by user (if not, return 404)
         if (!checkIfCipherExistsAndOwnedBy(id, user.id))
             return ResponseError.NotFound
