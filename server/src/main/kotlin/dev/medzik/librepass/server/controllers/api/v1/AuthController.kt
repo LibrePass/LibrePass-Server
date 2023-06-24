@@ -223,11 +223,11 @@ class AuthController @Autowired constructor(
         val user = userRepository.findById(UUID.fromString(userID)).orElse(null)
             ?: return ResponseError.InvalidBody
 
-        // check if code is valid
+        // check if the code is valid
         if (user.emailVerificationCode.toString() != verificationCode)
             return ResponseError.InvalidBody
 
-        // check if code is expired
+        // check if the code is expired
         if (user.emailVerificationCodeExpiresAt?.before(Date()) == true)
             return ResponseError.InvalidBody
 

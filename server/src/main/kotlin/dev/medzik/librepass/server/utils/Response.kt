@@ -79,5 +79,5 @@ object ResponseError {
     val DatabaseDuplicatedKey = generateErrorResponse("database_duplicated_key", HttpStatus.CONFLICT)
     val DatabaseError = generateErrorResponse("database_error", HttpStatus.INTERNAL_SERVER_ERROR)
 
-    val UnexpectedServerError = generateErrorResponse("unexcepted_server_error", HttpStatus.INTERNAL_SERVER_ERROR)
+    val UnexpectedServerError = generateErrorResponse("unexpected_server_error", HttpStatus.INTERNAL_SERVER_ERROR)
 }
