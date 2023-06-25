@@ -5,7 +5,7 @@ import dev.medzik.librepass.client.DEFAULT_API_URL
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
 import dev.medzik.librepass.client.utils.JsonUtils
-import dev.medzik.librepass.types.api.cipher.InsertResponse
+import dev.medzik.librepass.types.api.cipher.IdResponse
 import dev.medzik.librepass.types.api.collection.CipherCollection
 import dev.medzik.librepass.types.api.collection.CreateCollectionRequest
 import java.util.*
@@ -28,10 +28,10 @@ class CollectionClient(
     /**
      * Create a new collection.
      * @param name collection name
-     * @return [InsertResponse]
+     * @return [IdResponse]
      */
     @Throws(ClientException::class, ApiException::class)
-    fun createCollection(name: String): InsertResponse {
+    fun createCollection(name: String): IdResponse {
         val request = CreateCollectionRequest(name = name)
         val response = client.put(API_ENDPOINT, JsonUtils.serialize(request))
         return JsonUtils.deserialize(response)
@@ -72,10 +72,10 @@ class CollectionClient(
      * Update a collection.
      * @param id collection identifier
      * @param name collection name
-     * @return [InsertResponse]
+     * @return [IdResponse]
      */
     @Throws(ClientException::class, ApiException::class)
-    fun updateCollection(id: UUID, name: String): InsertResponse {
+    fun updateCollection(id: UUID, name: String): IdResponse {
         return updateCollection(id.toString(), name)
     }
 
@@ -83,10 +83,10 @@ class CollectionClient(
      * Update a collection.
      * @param id collection identifier
      * @param name collection name
-     * @return [InsertResponse]
+     * @return [IdResponse]
      */
     @Throws(ClientException::class, ApiException::class)
-    fun updateCollection(id: String, name: String): InsertResponse {
+    fun updateCollection(id: String, name: String): IdResponse {
         val request = CreateCollectionRequest(name = name)
         val response = client.patch("$API_ENDPOINT/$id", JsonUtils.serialize(request))
         return JsonUtils.deserialize(response)

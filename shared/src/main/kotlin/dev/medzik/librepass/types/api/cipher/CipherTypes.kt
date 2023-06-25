@@ -3,7 +3,7 @@ package dev.medzik.librepass.types.api.cipher
 import dev.medzik.librepass.types.cipher.EncryptedCipher
 import java.util.*
 
-data class InsertResponse(
+data class IdResponse(
     val id: UUID
 )
 
