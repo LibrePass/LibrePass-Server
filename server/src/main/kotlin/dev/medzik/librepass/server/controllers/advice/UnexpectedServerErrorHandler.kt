@@ -21,7 +21,6 @@ class UnexpectedServerErrorHandler {
     fun handleException(e: Exception): Response {
         val stackTraceStringWriter = StringWriter()
         e.printStackTrace(PrintWriter(stackTraceStringWriter))
-
         val stackTrace = stackTraceStringWriter.toString()
 
         logger.error("Unexpected exception: $stackTrace")
