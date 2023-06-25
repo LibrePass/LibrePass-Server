@@ -1,6 +1,5 @@
 package dev.medzik.librepass.server.controllers.advice
 
-import com.google.common.base.Throwables
 import dev.medzik.librepass.responses.ResponseError
 import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.toResponse
@@ -8,6 +7,8 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
+import java.io.PrintWriter
+import java.io.StringWriter
 
 /**
  * Handler for unexpected exceptions.
@@ -18,7 +19,10 @@ class UnexpectedServerErrorHandler {
 
     @ExceptionHandler(value = [Exception::class])
     fun handleException(e: Exception): Response {
-        val stackTrace = Throwables.getStackTraceAsString(e)
+        val stackTraceStringWriter = StringWriter()
+        e.printStackTrace(PrintWriter(stackTraceStringWriter))
+
+        val stackTrace = stackTraceStringWriter.toString()
 
         logger.error("Unexpected exception: $stackTrace")
 
