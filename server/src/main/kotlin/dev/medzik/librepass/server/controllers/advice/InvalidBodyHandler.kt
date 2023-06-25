@@ -1,7 +1,7 @@
 package dev.medzik.librepass.server.controllers.advice
 
-import dev.medzik.librepass.server.utils.Response
-import dev.medzik.librepass.server.utils.ResponseError
+import dev.medzik.librepass.responses.ResponseError
+import dev.medzik.librepass.server.utils.toResponse
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -12,7 +12,5 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 @ControllerAdvice
 class InvalidBodyHandler {
     @ExceptionHandler(HttpMessageNotReadableException::class)
-    fun handleInvalidRequestBody(): Response {
-        return ResponseError.InvalidBody
-    }
+    fun handleInvalidRequestBody() = ResponseError.INVALID_BODY.toResponse()
 }

@@ -122,10 +122,10 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- LibrePass API Types -->
+        <!-- LibrePass Shared -->
         <dependency>
             <groupId>dev.medzik.librepass</groupId>
-            <artifactId>types</artifactId>
+            <artifactId>shared</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

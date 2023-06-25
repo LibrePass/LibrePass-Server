@@ -1,6 +1,7 @@
 package dev.medzik.librepass.server.controllers.api.v1
 
 import dev.medzik.libcrypto.Curve25519
+import dev.medzik.librepass.responses.ResponseError
 import dev.medzik.librepass.server.components.AuthComponent
 import dev.medzik.librepass.server.components.RequestIP
 import dev.medzik.librepass.server.components.TokenType
@@ -74,14 +75,14 @@ class AuthController @Autowired constructor(
         @RequestBody request: RegisterRequest
     ): Response {
         if (rateLimitEnabled && !rateLimit.resolveBucket(ip).tryConsume(1))
-            return ResponseError.TooManyRequests
+            return ResponseError.TOO_MANY_REQUESTS.toResponse()
 
         // compute shared key
         val sharedKey = Curve25519.computeSharedSecret(ServerKeyPair.privateKey, request.publicKey)
 
         // validate shared key
         if (request.sharedKey != sharedKey)
-            return ResponseError.InvalidCredentials
+            return ResponseError.INVALID_CREDENTIALS.toResponse()
 
         val verificationToken = UUID.randomUUID()
 
@@ -129,15 +130,15 @@ class AuthController @Autowired constructor(
         @RequestParam("email") email: String
     ): Response {
         if (rateLimitEnabled && !rateLimit.resolveBucket(ip).tryConsume(1))
-            return ResponseError.TooManyRequests
+            return ResponseError.TOO_MANY_REQUESTS.toResponse()
 
         // check if email is empty
         if (email.isEmpty())
-            return ResponseError.InvalidCredentials
+            return ResponseError.INVALID_CREDENTIALS.toResponse()
 
         // get user from database
         val user = userRepository.findByEmail(email)
-            ?: return ResponseError.InvalidCredentials
+            ?: return ResponseError.INVALID_CREDENTIALS.toResponse()
 
         val argon2Parameters = UserArgon2idParameters(
             parallelism = user.parallelism,
@@ -164,22 +165,22 @@ class AuthController @Autowired constructor(
         @RequestBody request: LoginRequest
     ): Response {
         if (rateLimitEnabled && !rateLimit.resolveBucket(ip).tryConsume(1))
-            return ResponseError.TooManyRequests
+            return ResponseError.TOO_MANY_REQUESTS.toResponse()
 
         // get user from database
         val user = userRepository.findByEmail(request.email)
-            ?: return ResponseError.InvalidCredentials
+            ?: return ResponseError.INVALID_CREDENTIALS.toResponse()
 
         // check if email is verified
         if (emailVerificationRequired && !user.emailVerified)
-            return ResponseError.EmailNotVerified
+            return ResponseError.EMAIL_NOT_VERIFIED.toResponse()
 
         // compute shared key
         val sharedKey = Curve25519.computeSharedSecret(ServerKeyPair.privateKey, user.publicKey)
 
         // validate shared key
         if (request.sharedKey != sharedKey)
-            return ResponseError.InvalidCredentials
+            return ResponseError.INVALID_CREDENTIALS.toResponse()
 
         // prepare response
         val credentials = LoginResponse(
@@ -193,14 +194,17 @@ class AuthController @Autowired constructor(
     @GetMapping("/passwordHint")
     fun requestPasswordHint(
         @RequestIP ip: String,
-        @RequestParam("email") email: String
+        @RequestParam("email") email: String?
     ): Response {
         if (rateLimitEnabled && !rateLimit.resolveBucket(ip).tryConsume(1))
-            return ResponseError.TooManyRequests
+            return ResponseError.TOO_MANY_REQUESTS.toResponse()
+
+        if (email == null)
+            return ResponseError.INVALID_BODY.toResponse()
 
         // get user from database
         val user = userRepository.findByEmail(email)
-            ?: return ResponseError.InvalidCredentials
+            ?: return ResponseError.INVALID_CREDENTIALS.toResponse()
 
         try {
             emailService.sendPasswordHint(
@@ -211,7 +215,7 @@ class AuthController @Autowired constructor(
             logger.error("Failed to send password hint", e)
         }
 
-        return ResponseSuccess.OK
+        return ResponseHandler.generateResponse(HttpStatus.OK)
     }
 
     @GetMapping("/verifyEmail")
@@ -221,25 +225,25 @@ class AuthController @Autowired constructor(
     ): Response {
         // get user from database
         val user = userRepository.findById(UUID.fromString(userID)).orElse(null)
-            ?: return ResponseError.InvalidBody
+            ?: return ResponseError.INVALID_BODY.toResponse()
 
         // check if the code is valid
         if (user.emailVerificationCode.toString() != verificationCode)
-            return ResponseError.InvalidBody
+            return ResponseError.INVALID_BODY.toResponse()
 
         // check if the code is expired
         if (user.emailVerificationCodeExpiresAt?.before(Date()) == true)
-            return ResponseError.InvalidBody
+            return ResponseError.INVALID_BODY.toResponse()
 
         // check if user email is already verified
         if (user.emailVerified)
-            return ResponseError.InvalidBody
+            return ResponseError.INVALID_BODY.toResponse()
 
         // set email as verified
         userRepository.save(
             user.copy(emailVerified = true)
         )
 
-        return ResponseSuccess.OK
+        return ResponseHandler.generateResponse(HttpStatus.OK)
     }
 }

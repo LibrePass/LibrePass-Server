@@ -1,6 +1,7 @@
 package dev.medzik.librepass.server.controllers.api.v1
 
 import dev.medzik.libcrypto.Curve25519
+import dev.medzik.librepass.responses.ResponseError
 import dev.medzik.librepass.server.components.AuthorizedUser
 import dev.medzik.librepass.server.database.CipherRepository
 import dev.medzik.librepass.server.database.UserRepository
@@ -8,6 +9,7 @@ import dev.medzik.librepass.server.database.UserTable
 import dev.medzik.librepass.server.utils.*
 import dev.medzik.librepass.types.api.user.ChangePasswordRequest
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
@@ -30,7 +32,7 @@ class UserController @Autowired constructor(
 
         // validate shared key
         if (body.sharedKey != sharedKey)
-            return ResponseError.InvalidCredentials
+            return ResponseError.INVALID_CREDENTIALS.toResponse()
 
         // get all user cipher ids
         val cipherIds = cipherRepository.getAllIds(user.id)
@@ -39,7 +41,7 @@ class UserController @Autowired constructor(
         // by the way checks if they are owned by the user (because `cipherIds` is a list of user cipher ids)
         body.ciphers.forEach { cipherData ->
             if (!cipherIds.contains(cipherData.id))
-                return ResponseError.InvalidBody
+                return ResponseError.INVALID_BODY.toResponse()
         }
 
         // update ciphers data due to re-encryption with new password
@@ -66,6 +68,6 @@ class UserController @Autowired constructor(
             )
         )
 
-        return ResponseSuccess.OK
+        return ResponseHandler.generateResponse(HttpStatus.OK)
     }
 }
