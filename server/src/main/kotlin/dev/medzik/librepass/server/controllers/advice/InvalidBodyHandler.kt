@@ -13,4 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 class InvalidBodyHandler {
     @ExceptionHandler(HttpMessageNotReadableException::class)
     fun handleInvalidRequestBody() = ResponseError.INVALID_BODY.toResponse()
+
+    @ExceptionHandler(NullPointerException::class)
+    fun handleException() = ResponseError.INVALID_BODY.toResponse()
 }
