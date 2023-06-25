@@ -81,7 +81,7 @@ class AuthController @Autowired constructor(
             request.parallelism < 0 ||
             request.memory < 19 * 1024 ||
             request.iterations < 0 ||
-            request.version == 19
+            request.version != 19
         ) return ResponseError.INVALID_BODY.toResponse()
 
         val sharedKey = Curve25519.computeSharedSecret(ServerKeyPair.privateKey, request.publicKey)
