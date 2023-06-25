@@ -8,7 +8,7 @@ import dev.medzik.librepass.server.database.UserTable
 import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseHandler
 import dev.medzik.librepass.server.utils.toResponse
-import dev.medzik.librepass.types.api.cipher.InsertResponse
+import dev.medzik.librepass.types.api.cipher.IdResponse
 import dev.medzik.librepass.types.api.collection.CipherCollection
 import dev.medzik.librepass.types.api.collection.CreateCollectionRequest
 import org.springframework.beans.factory.annotation.Autowired
@@ -34,10 +34,7 @@ class CollectionController @Autowired constructor(
             )
         )
 
-        // prepare response
-        val response = InsertResponse(collection.id)
-
-        return ResponseHandler.generateResponse(response, HttpStatus.CREATED)
+        return ResponseHandler.generateResponse(IdResponse(collection.id), HttpStatus.CREATED)
     }
 
     @GetMapping
@@ -89,10 +86,7 @@ class CollectionController @Autowired constructor(
             )
         )
 
-        // prepare response
-        val response = InsertResponse(collection.id)
-
-        return ResponseHandler.generateResponse(response, HttpStatus.OK)
+        return ResponseHandler.generateResponse(IdResponse(collection.id), HttpStatus.OK)
     }
 
     @DeleteMapping("/{id}")
@@ -105,9 +99,6 @@ class CollectionController @Autowired constructor(
 
         collectionRepository.delete(collection)
 
-        // prepare response
-        val response = InsertResponse(collection.id)
-
-        return ResponseHandler.generateResponse(response, HttpStatus.OK)
+        return ResponseHandler.generateResponse(IdResponse(collection.id), HttpStatus.OK)
     }
 }
