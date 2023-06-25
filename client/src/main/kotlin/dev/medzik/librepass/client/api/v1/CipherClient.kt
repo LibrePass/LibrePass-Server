@@ -5,7 +5,7 @@ import dev.medzik.librepass.client.DEFAULT_API_URL
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
 import dev.medzik.librepass.client.utils.JsonUtils
-import dev.medzik.librepass.types.api.cipher.InsertResponse
+import dev.medzik.librepass.types.api.cipher.IdResponse
 import dev.medzik.librepass.types.api.cipher.SyncResponse
 import dev.medzik.librepass.types.cipher.Cipher
 import dev.medzik.librepass.types.cipher.EncryptedCipher
@@ -31,10 +31,10 @@ class CipherClient(
      * Inserts a new cipher.
      * @param cipher cipher to insert
      * @param secretKey secret key to use for encrypting the cipher
-     * @return [InsertResponse]
+     * @return [IdResponse]
      */
     @Throws(ClientException::class, ApiException::class)
-    fun insert(cipher: Cipher, secretKey: String): InsertResponse {
+    fun insert(cipher: Cipher, secretKey: String): IdResponse {
         return insert(
             EncryptedCipher(
                 cipher = cipher,
@@ -46,10 +46,10 @@ class CipherClient(
     /**
      * Inserts a new cipher.
      * @param cipher encrypted cipher to insert
-     * @return [InsertResponse]
+     * @return [IdResponse]
      */
     @Throws(ClientException::class, ApiException::class)
-    fun insert(cipher: EncryptedCipher): InsertResponse {
+    fun insert(cipher: EncryptedCipher): IdResponse {
         val response = client.put(API_ENDPOINT, cipher.toJson())
         return JsonUtils.deserialize(response)
     }
@@ -100,10 +100,10 @@ class CipherClient(
      * Updates a cipher.
      * @param cipher cipher to update
      * @param secretKey secret key to use for encrypting the cipher
-     * @return [InsertResponse]
+     * @return [IdResponse]
      */
     @Throws(ClientException::class, ApiException::class)
-    fun update(cipher: Cipher, secretKey: String): InsertResponse {
+    fun update(cipher: Cipher, secretKey: String): IdResponse {
         return update(
             EncryptedCipher(
                 cipher = cipher,
@@ -115,10 +115,10 @@ class CipherClient(
     /**
      * Updates a cipher.
      * @param cipher cipher to update
-     * @return [InsertResponse]
+     * @return [IdResponse]
      */
     @Throws(ClientException::class, ApiException::class)
-    fun update(cipher: EncryptedCipher): InsertResponse {
+    fun update(cipher: EncryptedCipher): IdResponse {
         val response = client.patch("$API_ENDPOINT/${cipher.id}", cipher.toJson())
         return JsonUtils.deserialize(response)
     }
@@ -144,7 +144,7 @@ class CipherClient(
     /**
      * Get website favicon.
      * @param domain website domain
-     * @return Favicon image as byte array (PNG) or 404 if not found.
+     * @return Favicon image as a byte array (PNG) or 404 if not found.
      */
     @Throws(ClientException::class, ApiException::class)
     fun getFavicon(domain: String): ByteArray {

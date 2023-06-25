@@ -7,8 +7,9 @@ import dev.medzik.librepass.server.database.CipherTable
 import dev.medzik.librepass.server.database.UserTable
 import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseHandler
+import dev.medzik.librepass.server.utils.Validator
 import dev.medzik.librepass.server.utils.toResponse
-import dev.medzik.librepass.types.api.cipher.InsertResponse
+import dev.medzik.librepass.types.api.cipher.IdResponse
 import dev.medzik.librepass.types.api.cipher.SyncResponse
 import dev.medzik.librepass.types.cipher.EncryptedCipher
 import org.springframework.beans.factory.annotation.Autowired
@@ -27,31 +28,26 @@ class CipherController @Autowired constructor(
         @AuthorizedUser user: UserTable,
         @RequestBody encryptedCipher: EncryptedCipher
     ): Response {
-        if (encryptedCipher.owner != user.id)
-            return ResponseError.INVALID_BODY.toResponse()
+        if (!Validator.hexValidator(encryptedCipher.protectedData) ||
+            encryptedCipher.owner != user.id
+        ) return ResponseError.INVALID_BODY.toResponse()
 
-        return try {
-            val cipher = cipherRepository.save(CipherTable(encryptedCipher))
+        val cipher = cipherRepository.save(CipherTable(encryptedCipher))
 
-            ResponseHandler.generateResponse(
-                data = InsertResponse(cipher.id),
-                status = HttpStatus.CREATED
-            )
-        } catch (e: Exception) {
-            ResponseError.INVALID_BODY.toResponse()
-        }
+        return ResponseHandler.generateResponse(
+            IdResponse(cipher.id),
+            HttpStatus.CREATED
+        )
     }
 
     @GetMapping
     fun getAllCiphers(@AuthorizedUser user: UserTable): Response {
-        // get all ciphers owned by user
         val ciphers = cipherRepository.getAll(owner = user.id)
 
-        return ResponseHandler.generateResponse(
-            // convert to encrypted ciphers
-            data = ciphers.map { it.toEncryptedCipher() },
-            status = HttpStatus.OK
-        )
+        // convert to encrypted ciphers
+        val response = ciphers.map { it.toEncryptedCipher() }
+
+        return ResponseHandler.generateResponse(response, HttpStatus.OK)
     }
 
     @GetMapping("/sync")
@@ -62,10 +58,8 @@ class CipherController @Autowired constructor(
         // convert timestamp to date
         val lastSyncDate = Date(lastSyncUnixTimestamp * 1000)
 
-        // get all ciphers owned by user
         val ciphers = cipherRepository.getAll(owner = user.id)
 
-        // prepare response
         val syncResponse = SyncResponse(
             // get ids of all ciphers
             ids = ciphers.map { it.id },
@@ -85,13 +79,10 @@ class CipherController @Autowired constructor(
         @AuthorizedUser user: UserTable,
         @PathVariable id: UUID
     ): Response {
-        // get cipher by id
-        val cipher = cipherRepository.findById(id).orElse(null)
-            ?: return ResponseError.NOT_FOUND.toResponse()
-
-        // check if cipher is owned by user (if not, return 404)
-        if (cipher.owner != user.id)
+        if (!checkIfCipherExistsAndOwnedBy(id, user.id))
             return ResponseError.NOT_FOUND.toResponse()
+
+        val cipher = cipherRepository.findById(id).get()
 
         // convert to encrypted cipher
         val encryptedCipher = cipher.toEncryptedCipher()
@@ -105,20 +96,12 @@ class CipherController @Autowired constructor(
         @PathVariable id: UUID,
         @RequestBody encryptedCipher: EncryptedCipher
     ): Response {
-        // get cipher table from encrypted cipher
-        val cipher = CipherTable(encryptedCipher)
-
-        // check if cipher exists and is owned by user (if not, return 404)
         if (!checkIfCipherExistsAndOwnedBy(id, user.id))
             return ResponseError.NOT_FOUND.toResponse()
 
-        // update cipher
-        cipherRepository.save(cipher)
+        cipherRepository.save(CipherTable(encryptedCipher))
 
-        // prepare response
-        val response = InsertResponse(cipher.id)
-
-        return ResponseHandler.generateResponse(response, HttpStatus.OK)
+        return ResponseHandler.generateResponse(IdResponse(id), HttpStatus.OK)
     }
 
     @DeleteMapping("/{id}")
@@ -126,17 +109,12 @@ class CipherController @Autowired constructor(
         @AuthorizedUser user: UserTable,
         @PathVariable id: UUID
     ): Response {
-        // check if cipher exists and is owned by user (if not, return 404)
         if (!checkIfCipherExistsAndOwnedBy(id, user.id))
             return ResponseError.NOT_FOUND.toResponse()
 
-        // delete cipher
         cipherRepository.deleteById(id)
 
-        // prepare response
-        val response = InsertResponse(id)
-
-        return ResponseHandler.generateResponse(response, HttpStatus.OK)
+        return ResponseHandler.generateResponse(IdResponse(id), HttpStatus.OK)
     }
 
     /**
