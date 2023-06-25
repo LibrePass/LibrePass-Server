@@ -9,9 +9,9 @@
         <version>0.1.0-SNAPSHOT-02</version>
     </parent>
 
-    <artifactId>types</artifactId>
-    <name>LibrePass Types</name>
-    <description>Shared Types classes for LibrePass</description>
+    <artifactId>shared</artifactId>
+    <name>LibrePass Shared</name>
+    <description>Shared classes for LibrePass</description>
 
     <build>
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>

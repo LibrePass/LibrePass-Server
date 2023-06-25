@@ -1,5 +1,5 @@
 module dev.medzik.librepass.client {
-    requires dev.medzik.librepass.types;
+    requires dev.medzik.librepass.shared;
     requires dev.medzik.libcrypto;
     requires okhttp3;
     requires com.google.gson;

@@ -1,12 +1,13 @@
 package dev.medzik.librepass.server.controllers.api.v1
 
+import dev.medzik.librepass.responses.ResponseError
 import dev.medzik.librepass.server.components.AuthorizedUser
 import dev.medzik.librepass.server.database.CipherRepository
 import dev.medzik.librepass.server.database.CipherTable
 import dev.medzik.librepass.server.database.UserTable
 import dev.medzik.librepass.server.utils.Response
-import dev.medzik.librepass.server.utils.ResponseError
 import dev.medzik.librepass.server.utils.ResponseHandler
+import dev.medzik.librepass.server.utils.toResponse
 import dev.medzik.librepass.types.api.cipher.InsertResponse
 import dev.medzik.librepass.types.api.cipher.SyncResponse
 import dev.medzik.librepass.types.cipher.EncryptedCipher
@@ -26,6 +27,9 @@ class CipherController @Autowired constructor(
         @AuthorizedUser user: UserTable,
         @RequestBody encryptedCipher: EncryptedCipher
     ): Response {
+        if (encryptedCipher.owner != user.id)
+            return ResponseError.INVALID_BODY.toResponse()
+
         return try {
             val cipher = cipherRepository.save(CipherTable(encryptedCipher))
 
@@ -34,7 +38,7 @@ class CipherController @Autowired constructor(
                 status = HttpStatus.CREATED
             )
         } catch (e: Exception) {
-            ResponseError.InvalidBody
+            ResponseError.INVALID_BODY.toResponse()
         }
     }
 
@@ -83,11 +87,11 @@ class CipherController @Autowired constructor(
     ): Response {
         // get cipher by id
         val cipher = cipherRepository.findById(id).orElse(null)
-            ?: return ResponseError.NotFound
+            ?: return ResponseError.NOT_FOUND.toResponse()
 
         // check if cipher is owned by user (if not, return 404)
         if (cipher.owner != user.id)
-            return ResponseError.NotFound
+            return ResponseError.NOT_FOUND.toResponse()
 
         // convert to encrypted cipher
         val encryptedCipher = cipher.toEncryptedCipher()
@@ -106,7 +110,7 @@ class CipherController @Autowired constructor(
 
         // check if cipher exists and is owned by user (if not, return 404)
         if (!checkIfCipherExistsAndOwnedBy(id, user.id))
-            return ResponseError.NotFound
+            return ResponseError.NOT_FOUND.toResponse()
 
         // update cipher
         cipherRepository.save(cipher)
@@ -124,7 +128,7 @@ class CipherController @Autowired constructor(
     ): Response {
         // check if cipher exists and is owned by user (if not, return 404)
         if (!checkIfCipherExistsAndOwnedBy(id, user.id))
-            return ResponseError.NotFound
+            return ResponseError.NOT_FOUND.toResponse()
 
         // delete cipher
         cipherRepository.deleteById(id)
@@ -164,7 +168,7 @@ class CipherController @Autowired constructor(
         return try {
             restTemplate.exchange(uri, HttpMethod.GET, entity, ByteArray::class.java)
         } catch (e: Exception) {
-            ResponseError.NotFound
+            ResponseError.NOT_FOUND.toResponse()
         }
     }
 }

@@ -1,8 +1,9 @@
 package dev.medzik.librepass.server.controllers.advice
 
 import com.google.common.base.Throwables
+import dev.medzik.librepass.responses.ResponseError
 import dev.medzik.librepass.server.utils.Response
-import dev.medzik.librepass.server.utils.ResponseError
+import dev.medzik.librepass.server.utils.toResponse
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.ControllerAdvice
@@ -21,6 +22,6 @@ class UnexpectedServerErrorHandler {
 
         logger.error("Unexpected exception: $stackTrace")
 
-        return ResponseError.UnexpectedServerError
+        return ResponseError.UNEXPECTED_SERVER_ERROR.toResponse()
     }
 }
