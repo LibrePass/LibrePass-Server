@@ -11,7 +11,7 @@ class ApiExceptionTest {
     @Test
     fun `test invalid body`() {
         try {
-            client.get("/api/v1/auth/register")
+            client.post("/api/v1/auth/register", "{}")
 
             throw Exception("This should cause an exception!")
         } catch (e: ApiException) {
