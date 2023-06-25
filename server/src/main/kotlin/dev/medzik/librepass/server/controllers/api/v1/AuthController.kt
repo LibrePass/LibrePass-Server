@@ -1,6 +1,7 @@
 package dev.medzik.librepass.server.controllers.api.v1
 
 import dev.medzik.libcrypto.Curve25519
+import dev.medzik.libcrypto.Curve25519KeyPair
 import dev.medzik.librepass.responses.ResponseError
 import dev.medzik.librepass.server.components.AuthComponent
 import dev.medzik.librepass.server.components.RequestIP
@@ -28,11 +29,8 @@ import java.util.concurrent.ConcurrentHashMap
 // It is not required that the key pair be the same all the time, so it
 // is generated when the server is started and each time it is restarted,
 // the key is different.
-val ServerKeyPair = Curve25519.generateKeyPair()!!
+val ServerKeyPair: Curve25519KeyPair = Curve25519.generateKeyPair()
 
-/**
- * AuthController handles the authentication process.
- */
 @RestController
 @RequestMapping("/api/v1/auth")
 class AuthController @Autowired constructor(
@@ -77,10 +75,16 @@ class AuthController @Autowired constructor(
         if (rateLimitEnabled && !rateLimit.resolveBucket(ip).tryConsume(1))
             return ResponseError.TOO_MANY_REQUESTS.toResponse()
 
-        // compute shared key
-        val sharedKey = Curve25519.computeSharedSecret(ServerKeyPair.privateKey, request.publicKey)
+        if (!Validator.emailValidator(request.email) ||
+            !Validator.hexValidator(request.sharedKey, 32) ||
+            !Validator.hexValidator(request.publicKey, 32) ||
+            request.parallelism < 0 ||
+            request.memory < 19 * 1024 ||
+            request.iterations < 0 ||
+            request.version == 19
+        ) return ResponseError.INVALID_BODY.toResponse()
 
-        // validate shared key
+        val sharedKey = Curve25519.computeSharedSecret(ServerKeyPair.privateKey, request.publicKey)
         if (request.sharedKey != sharedKey)
             return ResponseError.INVALID_CREDENTIALS.toResponse()
 
@@ -132,11 +136,9 @@ class AuthController @Autowired constructor(
         if (rateLimitEnabled && !rateLimit.resolveBucket(ip).tryConsume(1))
             return ResponseError.TOO_MANY_REQUESTS.toResponse()
 
-        // check if email is empty
         if (email.isEmpty())
             return ResponseError.INVALID_CREDENTIALS.toResponse()
 
-        // get user from database
         val user = userRepository.findByEmail(email)
             ?: return ResponseError.INVALID_CREDENTIALS.toResponse()
 
@@ -167,7 +169,6 @@ class AuthController @Autowired constructor(
         if (rateLimitEnabled && !rateLimit.resolveBucket(ip).tryConsume(1))
             return ResponseError.TOO_MANY_REQUESTS.toResponse()
 
-        // get user from database
         val user = userRepository.findByEmail(request.email)
             ?: return ResponseError.INVALID_CREDENTIALS.toResponse()
 
@@ -175,14 +176,10 @@ class AuthController @Autowired constructor(
         if (emailVerificationRequired && !user.emailVerified)
             return ResponseError.EMAIL_NOT_VERIFIED.toResponse()
 
-        // compute shared key
         val sharedKey = Curve25519.computeSharedSecret(ServerKeyPair.privateKey, user.publicKey)
-
-        // validate shared key
         if (request.sharedKey != sharedKey)
             return ResponseError.INVALID_CREDENTIALS.toResponse()
 
-        // prepare response
         val credentials = LoginResponse(
             userId = user.id,
             apiKey = authComponent.generateToken(TokenType.API_KEY, user.id)
@@ -202,7 +199,6 @@ class AuthController @Autowired constructor(
         if (email == null)
             return ResponseError.INVALID_BODY.toResponse()
 
-        // get user from database
         val user = userRepository.findByEmail(email)
             ?: return ResponseError.INVALID_CREDENTIALS.toResponse()
 
@@ -213,6 +209,8 @@ class AuthController @Autowired constructor(
             )
         } catch (e: Exception) {
             logger.error("Failed to send password hint", e)
+
+            return ResponseError.UNEXPECTED_SERVER_ERROR.toResponse()
         }
 
         return ResponseHandler.generateResponse(HttpStatus.OK)
@@ -223,7 +221,6 @@ class AuthController @Autowired constructor(
         @RequestParam("user") userID: String,
         @RequestParam("code") verificationCode: String
     ): Response {
-        // get user from database
         val user = userRepository.findById(UUID.fromString(userID)).orElse(null)
             ?: return ResponseError.INVALID_BODY.toResponse()
 

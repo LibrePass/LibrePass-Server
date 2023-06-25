@@ -13,9 +13,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
-/**
- * UserController handles user-related requests that require authentication.
- */
 @RestController
 @RequestMapping("/api/v1/user")
 class UserController @Autowired constructor(
@@ -27,10 +24,8 @@ class UserController @Autowired constructor(
         @AuthorizedUser user: UserTable,
         @RequestBody body: ChangePasswordRequest
     ): Response {
-        // compute shared key with a new public key
+        // validate shared key with a new public key
         val sharedKey = Curve25519.computeSharedSecret(ServerKeyPair.privateKey, body.newPublicKey)
-
-        // validate shared key
         if (body.sharedKey != sharedKey)
             return ResponseError.INVALID_CREDENTIALS.toResponse()
 
