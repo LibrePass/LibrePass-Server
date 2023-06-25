@@ -1,12 +1,13 @@
 package dev.medzik.librepass.server.controllers.api.v1
 
+import dev.medzik.librepass.responses.ResponseError
 import dev.medzik.librepass.server.components.AuthorizedUser
 import dev.medzik.librepass.server.database.CollectionRepository
 import dev.medzik.librepass.server.database.CollectionTable
 import dev.medzik.librepass.server.database.UserTable
 import dev.medzik.librepass.server.utils.Response
-import dev.medzik.librepass.server.utils.ResponseError
 import dev.medzik.librepass.server.utils.ResponseHandler
+import dev.medzik.librepass.server.utils.toResponse
 import dev.medzik.librepass.types.api.cipher.InsertResponse
 import dev.medzik.librepass.types.api.collection.CipherCollection
 import dev.medzik.librepass.types.api.collection.CreateCollectionRequest
@@ -63,7 +64,7 @@ class CollectionController @Autowired constructor(
         @PathVariable id: UUID
     ): Response {
         val collection = collectionRepository.findByIdAndOwner(id, user.id)
-            ?: return ResponseError.NotFound
+            ?: return ResponseError.NOT_FOUND.toResponse()
 
         val cipherCollection = CipherCollection(
             id = collection.id,
@@ -100,7 +101,7 @@ class CollectionController @Autowired constructor(
         @PathVariable id: UUID
     ): Response {
         val collection = collectionRepository.findByIdAndOwner(id, user.id)
-            ?: return ResponseError.NotFound
+            ?: return ResponseError.NOT_FOUND.toResponse()
 
         collectionRepository.delete(collection)
 
