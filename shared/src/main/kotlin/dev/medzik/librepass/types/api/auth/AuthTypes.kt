@@ -44,9 +44,9 @@ data class LoginRequest(
     val sharedKey: String
 )
 
-data class TwoFactorRequest(val code: Int)
+// data class TwoFactorRequest(val code: Int)
 
-data class RefreshRequest(val refreshToken: String)
+// data class RefreshRequest(val refreshToken: String)
 
 data class UserCredentialsResponse(
     val userId: UUID,
