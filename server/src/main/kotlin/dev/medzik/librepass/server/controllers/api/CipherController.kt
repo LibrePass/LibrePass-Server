@@ -1,4 +1,4 @@
-package dev.medzik.librepass.server.controllers.api.v1
+package dev.medzik.librepass.server.controllers.api
 
 import dev.medzik.librepass.responses.ResponseError
 import dev.medzik.librepass.server.components.AuthorizedUser
@@ -19,7 +19,7 @@ import org.springframework.web.client.RestTemplate
 import java.util.*
 
 @RestController
-@RequestMapping("/api/v1/cipher")
+@RequestMapping("/api/cipher")
 class CipherController @Autowired constructor(
     private val cipherRepository: CipherRepository
 ) {

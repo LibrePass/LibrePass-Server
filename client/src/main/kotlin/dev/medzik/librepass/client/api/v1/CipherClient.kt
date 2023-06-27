@@ -22,7 +22,7 @@ class CipherClient(
     apiUrl: String = DEFAULT_API_URL
 ) {
     companion object {
-        private const val API_ENDPOINT = "/api/v1/cipher"
+        private const val API_ENDPOINT = "/api/cipher"
     }
 
     private val client = Client(apiUrl, apiKey)
