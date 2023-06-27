@@ -18,7 +18,7 @@ object ResponseHandler {
     fun generateResponse(status: HttpStatus) =
         createResponse(HashMap<String, Any>(), status.value())
 
-    fun generateResponse(data: Any, status: HttpStatus) =
+    fun generateResponse(data: Any, status: HttpStatus = HttpStatus.OK) =
         createResponse(data, status.value())
 
     fun generateErrorResponse(error: String, status: Int): Response {

@@ -2,6 +2,7 @@ package dev.medzik.librepass.client.api.v1
 
 import dev.medzik.libcrypto.Argon2Hash
 import dev.medzik.libcrypto.Curve25519
+import dev.medzik.libcrypto.Curve25519KeyPair
 import dev.medzik.librepass.client.Client
 import dev.medzik.librepass.client.DEFAULT_API_URL
 import dev.medzik.librepass.client.errors.ApiException
@@ -11,6 +12,7 @@ import dev.medzik.librepass.client.utils.Cryptography.computeSecretKey
 import dev.medzik.librepass.client.utils.Cryptography.computeSharedKey
 import dev.medzik.librepass.client.utils.JsonUtils
 import dev.medzik.librepass.types.api.auth.*
+import java.util.*
 
 /**
  * Auth Client for the LibrePass API. This client is used to register and login users.
@@ -18,39 +20,20 @@ import dev.medzik.librepass.types.api.auth.*
  */
 class AuthClient(apiUrl: String = DEFAULT_API_URL) {
     companion object {
-        private const val API_ENDPOINT = "/api/v1/auth"
+        private const val API_ENDPOINT = "/api/auth"
     }
 
     private val client = Client(apiUrl)
 
-    /**
-     * Get the public key of the server.
-     */
-    @Throws(ClientException::class, ApiException::class)
-    fun getServerPublicKey(): String {
-        val response = client.get("$API_ENDPOINT/serverPublicKey")
-        return JsonUtils.deserialize<ServerPublicKey>(response).publicKey
-    }
-
-    /**
-     * Register a new user.
-     * @param email user email address
-     * @param password user password
-     * @param passwordHint hint for the password (optional)
-     */
     @Throws(ClientException::class, ApiException::class)
     fun register(email: String, password: String, passwordHint: String? = null) {
-        // compute password hash
-        val passwordHash = computePasswordHash(password, email)
+        val serverPreLogin = preLogin("")
 
-        // compute Curve25519 public key using base password hash as private key
+        val passwordHash = computePasswordHash(password, email, serverPreLogin.toArgon2())
         val keyPair = Curve25519.fromPrivateKey(passwordHash.toHexHash())
 
-        // get server public key for shared key computation
-        val serverPublicKey = getServerPublicKey()
-
         // compute shared key
-        val sharedKey = computeSharedKey(keyPair.privateKey, serverPublicKey)
+        val sharedKey = computeSharedKey(keyPair.privateKey, serverPreLogin.serverPublicKey)
 
         val request = RegisterRequest(
             email = email,
@@ -68,49 +51,30 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
         client.post("$API_ENDPOINT/register", JsonUtils.serialize(request))
     }
 
-    /**
-     * Get the argon2id parameters of a user (for login).
-     * @param email user email
-     * @return [UserArgon2idParameters]
-     */
     @Throws(ClientException::class, ApiException::class)
-    fun getUserArgon2idParameters(email: String): UserArgon2idParameters {
-        val response = client.get("$API_ENDPOINT/userArgon2Parameters?email=$email")
+    fun preLogin(email: String): PreLoginResponse {
+        val response = client.get("$API_ENDPOINT/preLogin?email=$email")
         return JsonUtils.deserialize(response)
     }
 
-    /**
-     * Login a user.
-     * @param email user email
-     * @param password user password
-     * @return [UserCredentials]
-     */
     @Throws(ClientException::class, ApiException::class)
     fun login(email: String, password: String): UserCredentials {
-        val basePassword = computePasswordHash(
+        val preLoginData = preLogin(email)
+
+        val passwordHash = computePasswordHash(
             password = password,
             email = email,
-            parameters = getUserArgon2idParameters(email)
+            argon2Function = preLoginData.toArgon2()
         )
 
-        return login(email, basePassword)
+        return login(email, passwordHash, preLoginData)
     }
 
-    /**
-     * Login a user.
-     * @param email user email
-     * @param passwordHash hashed password
-     * @return [UserCredentials]
-     */
     @Throws(ClientException::class, ApiException::class)
-    fun login(email: String, passwordHash: Argon2Hash): UserCredentials {
-        // compute Curve25519 public key using base password hash as private key
+    fun login(email: String, passwordHash: Argon2Hash, preLogin: PreLoginResponse? = null): UserCredentials {
+        val serverPublicKey = preLogin?.serverPublicKey ?: preLogin(email).serverPublicKey
+
         val keyPair = Curve25519.fromPrivateKey(passwordHash.toHexHash())
-
-        // get server public key for shared key computation
-        val serverPublicKey = getServerPublicKey()
-
-        // compute shared key
         val sharedKey = computeSharedKey(keyPair.privateKey, serverPublicKey)
 
         val request = LoginRequest(
@@ -118,24 +82,26 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
             sharedKey = sharedKey,
         )
 
-        val responseBody = client.post("$API_ENDPOINT/login", JsonUtils.serialize(request))
-        val response = JsonUtils.deserialize<LoginResponse>(responseBody)
+        val responseBody = client.post("$API_ENDPOINT/oauth?grantType=login", JsonUtils.serialize(request))
+        val response = JsonUtils.deserialize<UserCredentialsResponse>(responseBody)
 
         return UserCredentials(
             userId = response.userId,
             apiKey = response.apiKey,
-            privateKey = keyPair.privateKey,
-            publicKey = keyPair.publicKey,
+            keyPair = keyPair,
             secretKey = computeSecretKey(keyPair)
         )
     }
 
-    /**
-     * Request password hint.
-     * @param email user email
-     */
     @Throws(ClientException::class, ApiException::class)
     fun requestPasswordHint(email: String) {
         client.get("$API_ENDPOINT/passwordHint?email=$email")
     }
 }
+
+data class UserCredentials(
+    val userId: UUID,
+    val apiKey: String,
+    val keyPair: Curve25519KeyPair,
+    val secretKey: String
+)

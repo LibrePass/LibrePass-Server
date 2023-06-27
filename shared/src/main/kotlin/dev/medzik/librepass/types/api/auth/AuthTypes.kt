@@ -20,16 +20,14 @@ data class RegisterRequest(
     val publicKey: String
 )
 
-data class UserArgon2idParameters(
+data class PreLoginResponse(
     val parallelism: Int,
     val memory: Int,
     val iterations: Int,
-    val version: Int
+    val version: Int,
+    val serverPublicKey: String
 ) {
-    /**
-     * Convert to [Argon2] instance.
-     */
-    fun toHashingFunction(): Argon2 {
+    fun toArgon2(): Argon2 {
         return Argon2(
             256 / 8, // 256 bits
             parallelism,
@@ -41,24 +39,21 @@ data class UserArgon2idParameters(
     }
 }
 
-data class ServerPublicKey(
-    val publicKey: String
-)
-
 data class LoginRequest(
     val email: String,
     val sharedKey: String
 )
 
-data class LoginResponse(
+data class TwoFactorRequest(val code: Int)
+
+data class RefreshRequest(val refreshToken: String)
+
+data class UserCredentialsResponse(
     val userId: UUID,
     val apiKey: String
 )
 
-data class UserCredentials(
-    val userId: UUID,
-    val apiKey: String,
-    val publicKey: String,
-    val privateKey: String,
-    val secretKey: String
-)
+// data class LoginResponse2FA(
+//    val twoFactorRequired: Boolean,
+//    val twoFactorToken: String? = null,
+// )
