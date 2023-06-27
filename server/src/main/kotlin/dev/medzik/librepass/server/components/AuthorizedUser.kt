@@ -1,11 +1,14 @@
 package dev.medzik.librepass.server.components
 
 import dev.medzik.librepass.server.controllers.advice.AuthorizedUserException
+import dev.medzik.librepass.server.database.TokenRepository
 import dev.medzik.librepass.server.database.UserRepository
 import dev.medzik.librepass.server.database.UserTable
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.MethodParameter
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.support.WebDataBinderFactory
 import org.springframework.web.context.request.NativeWebRequest
@@ -23,8 +26,9 @@ annotation class AuthorizedUser
 
 @Component
 class AuthorizedUserArgumentResolver @Autowired constructor(
-    private val authComponent: AuthComponent,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val tokenRepository: TokenRepository,
+    @Value("\${http.ip.header}") private val ipHeader: String
 ) : HandlerMethodArgumentResolver {
     override fun supportsParameter(parameter: MethodParameter): Boolean {
         return parameter.hasParameterAnnotation(AuthorizedUser::class.java)
@@ -43,20 +47,45 @@ class AuthorizedUserArgumentResolver @Autowired constructor(
             ?: throw AuthorizedUserException()
         val token = authorizationHeader.removePrefix("Bearer ")
 
-        val tokenClaims = authComponent.parseToken(TokenType.API_KEY, token)
+        val tokenTable = tokenRepository.findByIdOrNull(token)
             ?: throw AuthorizedUserException()
-        val userID = tokenClaims[TokenClaims.USER_ID.key] as String
 
-        // get user from database
         val user = userRepository
-            .findById(UUID.fromString(userID))
+            .findById(tokenTable.owner)
             .orElse(null)
             ?: throw AuthorizedUserException()
 
-        // check if user changed password after the token was issued
-        if (user.lastPasswordChange > tokenClaims.issuedAt)
+        // TODO: Expire inactive tokens after some time.
+
+        // check if user changed password after the token was created
+        if (user.lastPasswordChange > tokenTable.created)
             throw AuthorizedUserException()
 
+        val ip = if (ipHeader == "remoteAddr")
+            request.remoteAddr
+        else request.getHeader(ipHeader)
+            ?: request.remoteAddr
+
+        // check if the IP address has been changed
+        // or if 5 minutes elapsed since the date of last use
+        val currentDate = Date()
+        if (tokenTable.lastIp != ip ||
+            checkIfElapsed(tokenTable.lastUsed, currentDate, 5)
+        ) {
+            tokenRepository.save(
+                tokenTable.copy(
+                    lastIp = ip,
+                    lastUsed = currentDate
+                )
+            )
+        }
+
         return user
+    }
+
+    private fun checkIfElapsed(start: Date, end: Date, minutes: Int): Boolean {
+        val elapsedMilliseconds = end.time - start.time
+        val elapsedMinutes = elapsedMilliseconds / (60 * 1000)
+        return elapsedMinutes >= minutes
     }
 }

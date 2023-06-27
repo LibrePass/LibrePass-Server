@@ -1,4 +1,4 @@
-package dev.medzik.librepass.server.controllers.api.v1
+package dev.medzik.librepass.server.controllers.api
 
 import dev.medzik.librepass.responses.ResponseError
 import dev.medzik.librepass.server.components.AuthorizedUser
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
-@RequestMapping("/api/v1/collection")
+@RequestMapping("/api/collection")
 class CollectionController @Autowired constructor(
     private val collectionRepository: CollectionRepository
 ) {

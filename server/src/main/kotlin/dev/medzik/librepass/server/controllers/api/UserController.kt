@@ -1,8 +1,9 @@
-package dev.medzik.librepass.server.controllers.api.v1
+package dev.medzik.librepass.server.controllers.api
 
 import dev.medzik.libcrypto.Curve25519
 import dev.medzik.librepass.responses.ResponseError
 import dev.medzik.librepass.server.components.AuthorizedUser
+import dev.medzik.librepass.server.controllers.api.ServerKeyPair
 import dev.medzik.librepass.server.database.CipherRepository
 import dev.medzik.librepass.server.database.UserRepository
 import dev.medzik.librepass.server.database.UserTable
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
-@RequestMapping("/api/v1/user")
+@RequestMapping("/api/user")
 class UserController @Autowired constructor(
     private val userRepository: UserRepository,
     private val cipherRepository: CipherRepository

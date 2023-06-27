@@ -16,7 +16,7 @@ data class UserTable(
     @Column(unique = true, columnDefinition = "TEXT")
     val email: String,
     val emailVerified: Boolean = false,
-    val emailVerificationCode: UUID? = null,
+    val emailVerificationCode: String? = null,
     val emailVerificationCodeExpiresAt: Date? = null,
 
     @Column(columnDefinition = "TEXT")
@@ -31,7 +31,6 @@ data class UserTable(
     val version: Int,
 
     // Curve25519 public key
-    @Column(columnDefinition = "TEXT")
     val publicKey: String,
 
     @CreatedDate
