@@ -7,7 +7,7 @@ module dev.medzik.librepass.client {
 
     // export API Client
     exports dev.medzik.librepass.client;
-    exports dev.medzik.librepass.client.api.v1;
+    exports dev.medzik.librepass.client.api;
     exports dev.medzik.librepass.client.errors;
     exports dev.medzik.librepass.client.utils;
 }

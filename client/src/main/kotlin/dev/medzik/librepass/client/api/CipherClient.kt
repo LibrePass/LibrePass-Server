@@ -1,4 +1,4 @@
-package dev.medzik.librepass.client.api.v1
+package dev.medzik.librepass.client.api
 
 import dev.medzik.librepass.client.Client
 import dev.medzik.librepass.client.DEFAULT_API_URL

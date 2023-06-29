@@ -1,4 +1,4 @@
-package dev.medzik.librepass.client.api.v1
+package dev.medzik.librepass.client.api
 
 import dev.medzik.libcrypto.AES
 import dev.medzik.libcrypto.Argon2
