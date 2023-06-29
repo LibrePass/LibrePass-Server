@@ -1,4 +1,4 @@
-package dev.medzik.librepass.client.api.v1
+package dev.medzik.librepass.client.api
 
 import dev.medzik.libcrypto.Argon2Hash
 import dev.medzik.libcrypto.Curve25519
@@ -18,6 +18,7 @@ import java.util.*
  * Auth Client for the LibrePass API. This client is used to register and login users.
  * @param apiUrl api url address (optional)
  */
+@Suppress("unused")
 class AuthClient(apiUrl: String = DEFAULT_API_URL) {
     companion object {
         private const val API_ENDPOINT = "/api/auth"
