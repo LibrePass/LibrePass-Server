@@ -67,7 +67,7 @@ class UserClientTests {
 
         insertTestCipher()
 
-        checkCipher("test")
+        checkCipher(secretKey)
 
         userClient.changePassword("test", "test2")
 
