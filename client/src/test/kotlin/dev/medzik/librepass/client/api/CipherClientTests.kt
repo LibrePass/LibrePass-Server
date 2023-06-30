@@ -1,4 +1,4 @@
-package dev.medzik.librepass.client.api.v1
+package dev.medzik.librepass.client.api
 
 import dev.medzik.librepass.types.cipher.Cipher
 import dev.medzik.librepass.types.cipher.CipherType

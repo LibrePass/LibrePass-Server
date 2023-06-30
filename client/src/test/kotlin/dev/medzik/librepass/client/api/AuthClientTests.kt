@@ -1,4 +1,4 @@
-package dev.medzik.librepass.client.api.v1
+package dev.medzik.librepass.client.api
 
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
