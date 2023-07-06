@@ -142,13 +142,9 @@ class CipherClient(
     }
 
     /**
-     * Get website favicon.
+     * Get url with website favicon.
      * @param domain website domain
-     * @return Favicon image as a byte array (PNG) or 404 if not found.
+     * @return URL of the website favicon.
      */
-    @Throws(ClientException::class, ApiException::class)
-    fun getFavicon(domain: String): ByteArray {
-        val response = client.get("$API_ENDPOINT/icon?domain=$domain")
-        return response.toByteArray()
-    }
+    fun getFavicon(domain: String) = "$API_ENDPOINT/icon?domain=$domain"
 }
