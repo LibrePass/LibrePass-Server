@@ -37,7 +37,7 @@ class UserClient(
      * @param oldPassword old password
      * @param newPassword new password
      * @param newPasswordHint hint for the new password
-     * @param parameters argon2id parameters of the new password
+     * @param argon2Function argon2 function for hashing the new password
      */
     @Throws(ClientException::class, ApiException::class)
     fun changePassword(
