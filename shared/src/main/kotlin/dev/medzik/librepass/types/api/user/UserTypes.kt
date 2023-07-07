@@ -10,7 +10,6 @@ data class ChangePasswordRequest(
     val parallelism: Int,
     val memory: Int,
     val iterations: Int,
-    val version: Int,
     // Update ciphers data due to password change
     val ciphers: List<ChangePasswordCipherData>
 )

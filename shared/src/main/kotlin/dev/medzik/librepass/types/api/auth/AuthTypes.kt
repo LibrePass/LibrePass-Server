@@ -1,7 +1,6 @@
 package dev.medzik.librepass.types.api.auth
 
 import dev.medzik.libcrypto.Argon2
-import dev.medzik.libcrypto.Argon2Type
 import java.util.*
 
 data class RegisterRequest(
@@ -14,7 +13,6 @@ data class RegisterRequest(
     val parallelism: Int,
     val memory: Int,
     val iterations: Int,
-    val version: Int,
 
     // Curve25519 public key
     val publicKey: String
@@ -24,7 +22,6 @@ data class PreLoginResponse(
     val parallelism: Int,
     val memory: Int,
     val iterations: Int,
-    val version: Int,
     val serverPublicKey: String
 ) {
     fun toArgon2(): Argon2 {
@@ -32,9 +29,7 @@ data class PreLoginResponse(
             256 / 8, // 256 bits
             parallelism,
             memory,
-            iterations,
-            Argon2Type.ID,
-            version
+            iterations
         )
     }
 }
