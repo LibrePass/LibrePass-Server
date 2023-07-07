@@ -3,7 +3,6 @@ package dev.medzik.librepass.server.controllers.api
 import dev.medzik.libcrypto.Curve25519
 import dev.medzik.librepass.responses.ResponseError
 import dev.medzik.librepass.server.components.AuthorizedUser
-import dev.medzik.librepass.server.controllers.api.ServerKeyPair
 import dev.medzik.librepass.server.database.CipherRepository
 import dev.medzik.librepass.server.database.UserRepository
 import dev.medzik.librepass.server.database.UserTable
@@ -56,7 +55,6 @@ class UserController @Autowired constructor(
                 parallelism = body.parallelism,
                 memory = body.memory,
                 iterations = body.iterations,
-                version = body.version,
                 // Curve25519 public key
                 publicKey = body.newPublicKey,
                 // set the last password change date to now
