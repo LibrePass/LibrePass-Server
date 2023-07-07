@@ -23,6 +23,13 @@ class CipherClient(
 ) {
     companion object {
         private const val API_ENDPOINT = "/api/cipher"
+
+        /**
+         * Get the favicon URL.
+         * @param domain website domain
+         * @return Favicon image URL
+         */
+        fun getFavicon(domain: String) = "$API_ENDPOINT/icon?domain=$domain"
     }
 
     private val client = Client(apiUrl, apiKey)
@@ -140,11 +147,4 @@ class CipherClient(
     fun delete(id: String) {
         client.delete("$API_ENDPOINT/$id")
     }
-
-    /**
-     * Get url with website favicon.
-     * @param domain website domain
-     * @return URL of the website favicon.
-     */
-    fun getFavicon(domain: String) = "$API_ENDPOINT/icon?domain=$domain"
 }

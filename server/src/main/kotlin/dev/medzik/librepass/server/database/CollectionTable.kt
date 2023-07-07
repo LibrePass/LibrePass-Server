@@ -9,7 +9,7 @@ import java.util.*
 @Entity
 @EntityListeners(AuditingEntityListener::class)
 @Table(name = "collections")
-class CollectionTable(
+data class CollectionTable(
     @Id
     val id: UUID = UUID.randomUUID(),
 
