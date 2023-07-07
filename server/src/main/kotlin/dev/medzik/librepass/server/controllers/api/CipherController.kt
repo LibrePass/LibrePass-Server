@@ -99,11 +99,7 @@ class CipherController @Autowired constructor(
         if (!checkIfCipherExistsAndOwnedBy(id, user.id))
             return ResponseError.NOT_FOUND.toResponse()
 
-        cipherRepository.save(
-            CipherTable(
-                encryptedCipher.copy(lastModified = Date())
-            )
-        )
+        cipherRepository.save(CipherTable(encryptedCipher))
 
         return ResponseHandler.generateResponse(IdResponse(id), HttpStatus.OK)
     }
