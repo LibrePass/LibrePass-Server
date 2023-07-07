@@ -133,7 +133,10 @@ class AuthController @Autowired constructor(
         @RequestIP ip: String,
         @RequestParam("email") email: String?
     ): Response {
-        if (rateLimitEnabled && !rateLimit.resolveBucket(ip).tryConsume(1))
+        if (!consumeRateLimit(ip))
+            return ResponseError.TOO_MANY_REQUESTS.toResponse()
+
+        if (email != null && !consumeRateLimit(email))
             return ResponseError.TOO_MANY_REQUESTS.toResponse()
 
         if (email.isNullOrEmpty())
@@ -171,7 +174,7 @@ class AuthController @Autowired constructor(
         @RequestParam("grantType") grantType: String,
         @RequestBody request: String
     ): Response {
-        if (rateLimitEnabled && !rateLimit.resolveBucket(ip).tryConsume(1))
+        if (!consumeRateLimit(ip))
             return ResponseError.TOO_MANY_REQUESTS.toResponse()
 
         when (grantType) {
@@ -197,7 +200,10 @@ class AuthController @Autowired constructor(
     }
 
     private fun oauthLogin(ip: String, request: LoginRequest): Response {
-        val user = userRepository.findByEmail(request.email)
+        if (!consumeRateLimit(request.email.lowercase()))
+            return ResponseError.TOO_MANY_REQUESTS.toResponse()
+
+        val user = userRepository.findByEmail(request.email.lowercase())
             ?: return ResponseError.INVALID_CREDENTIALS.toResponse()
 
         if (emailVerificationRequired && !user.emailVerified)
@@ -231,11 +237,11 @@ class AuthController @Autowired constructor(
         @RequestIP ip: String,
         @RequestParam("email") email: String?
     ): Response {
-        if (rateLimitEnabled && !rateLimit.resolveBucket(ip).tryConsume(1))
-            return ResponseError.TOO_MANY_REQUESTS.toResponse()
-
         if (email == null)
             return ResponseError.INVALID_BODY.toResponse()
+
+        if (!consumeRateLimit(ip) || !consumeRateLimit(email))
+            return ResponseError.TOO_MANY_REQUESTS.toResponse()
 
         val user = userRepository.findByEmail(email)
             ?: return ResponseError.INVALID_CREDENTIALS.toResponse()
@@ -280,5 +286,12 @@ class AuthController @Autowired constructor(
         )
 
         return ResponseHandler.generateResponse(HttpStatus.OK)
+    }
+
+    private fun consumeRateLimit(key: String): Boolean {
+        if (!rateLimitEnabled)
+            return true
+
+        return rateLimit.resolveBucket(key).tryConsume(1)
     }
 }
