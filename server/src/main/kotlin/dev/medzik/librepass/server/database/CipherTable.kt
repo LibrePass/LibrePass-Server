@@ -27,8 +27,10 @@ data class CipherTable(
     val version: Int = 1,
 
     @CreatedDate
+    @Temporal(TemporalType.TIMESTAMP)
     val created: Date = Date(),
     @LastModifiedDate
+    @Temporal(TemporalType.TIMESTAMP)
     val lastModified: Date = Date()
 ) {
     constructor(cipher: EncryptedCipher) : this(
