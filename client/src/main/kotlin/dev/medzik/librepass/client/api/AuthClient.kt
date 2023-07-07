@@ -44,7 +44,6 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
             parallelism = passwordHash.parallelism,
             memory = passwordHash.memory,
             iterations = passwordHash.iterations,
-            version = passwordHash.version,
             // Curve25519 keypair
             publicKey = keyPair.publicKey
         )

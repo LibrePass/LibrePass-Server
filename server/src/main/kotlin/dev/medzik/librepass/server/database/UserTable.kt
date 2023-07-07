@@ -28,7 +28,6 @@ data class UserTable(
     val parallelism: Int,
     val memory: Int,
     val iterations: Int,
-    val version: Int,
 
     // Curve25519 public key
     val publicKey: String,

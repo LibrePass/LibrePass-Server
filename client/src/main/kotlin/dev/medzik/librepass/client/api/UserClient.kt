@@ -96,7 +96,6 @@ class UserClient(
             parallelism = newPasswordHash.parallelism,
             memory = newPasswordHash.memory,
             iterations = newPasswordHash.iterations,
-            version = newPasswordHash.version,
             // Curve25519 public key
             newPublicKey = newKeyPair.publicKey,
             // ciphers data re-encrypted with new password
