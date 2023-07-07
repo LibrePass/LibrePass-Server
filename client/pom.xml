@@ -6,7 +6,7 @@
     <parent>
         <groupId>dev.medzik.librepass</groupId>
         <artifactId>core</artifactId>
-        <version>0.1.0-SNAPSHOT-03</version>
+        <version>0.1.0-SNAPSHOT-04</version>
     </parent>
 
     <artifactId>client</artifactId>
