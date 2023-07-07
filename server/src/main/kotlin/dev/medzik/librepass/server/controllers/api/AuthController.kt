@@ -82,8 +82,7 @@ class AuthController @Autowired constructor(
             !Validator.hexValidator(request.publicKey, 32) ||
             request.parallelism < 0 ||
             request.memory < 19 * 1024 ||
-            request.iterations < 0 ||
-            request.version != 19
+            request.iterations < 0
         ) return ResponseError.INVALID_BODY.toResponse()
 
         val sharedKey = Curve25519.computeSharedSecret(ServerKeyPair.privateKey, request.publicKey)
@@ -100,7 +99,6 @@ class AuthController @Autowired constructor(
                 parallelism = request.parallelism,
                 memory = request.memory,
                 iterations = request.iterations,
-                version = request.version,
                 // Curve25519 key pair
                 publicKey = request.publicKey,
                 // Email verification token
@@ -146,7 +144,6 @@ class AuthController @Autowired constructor(
                     parallelism = 3,
                     memory = 65536, // 64MB
                     iterations = 4,
-                    version = 19,
                     // Server Curve25519 public key
                     serverPublicKey = ServerKeyPair.publicKey
                 ),
@@ -161,7 +158,6 @@ class AuthController @Autowired constructor(
                 parallelism = user.parallelism,
                 memory = user.memory,
                 iterations = user.iterations,
-                version = user.version,
                 serverPublicKey = ServerKeyPair.publicKey
             ),
             HttpStatus.OK
