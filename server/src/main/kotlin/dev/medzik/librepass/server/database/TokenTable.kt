@@ -9,7 +9,7 @@ import java.util.*
 
 @Entity
 @EntityListeners(AuditingEntityListener::class)
-@Table(name = "tokenTable")
+@Table
 data class TokenTable(
     @Id
     val token: String = generateToken(),
