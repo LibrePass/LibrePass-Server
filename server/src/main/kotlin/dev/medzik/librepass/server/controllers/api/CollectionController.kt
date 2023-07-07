@@ -45,7 +45,9 @@ class CollectionController @Autowired constructor(
             CipherCollection(
                 id = it.id,
                 owner = it.owner,
-                name = it.name
+                name = it.name,
+                created = it.created,
+                lastModified = it.lastModified
             )
         }
 
@@ -66,7 +68,9 @@ class CollectionController @Autowired constructor(
         val cipherCollection = CipherCollection(
             id = collection.id,
             owner = collection.owner,
-            name = collection.name
+            name = collection.name,
+            created = collection.created,
+            lastModified = collection.lastModified
         )
 
         return ResponseHandler.generateResponse(cipherCollection, HttpStatus.OK)
