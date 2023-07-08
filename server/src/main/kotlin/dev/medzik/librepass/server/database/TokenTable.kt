@@ -3,7 +3,7 @@ package dev.medzik.librepass.server.database
 import dev.medzik.libcrypto.Salt
 import jakarta.persistence.*
 import org.apache.commons.codec.binary.Hex
-import org.springframework.data.annotation.CreatedDate
+import org.hibernate.annotations.CreationTimestamp
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.util.*
 
@@ -17,7 +17,7 @@ data class TokenTable(
 
     val lastIp: String,
 
-    @CreatedDate
+    @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     val created: Date = Date(),
     @Temporal(TemporalType.TIMESTAMP)
