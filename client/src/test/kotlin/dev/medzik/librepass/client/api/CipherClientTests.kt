@@ -105,12 +105,18 @@ class CipherClientTests {
 
         val cipher = cipherClient.get(cipherId)
         assertEquals(0, cipher.type)
+        val beforeUpdate = cipherClient.get(cipherId)
+
+        // wait 1 second to make the date different
+        Thread.sleep(1000)
 
         val newCipher = cipher.copy(type = 1)
         cipherClient.update(newCipher)
 
         val updatedCipher = cipherClient.get(cipherId)
         assertEquals(1, updatedCipher.type)
+        assertEquals(beforeUpdate.created, updatedCipher.created)
+        assertNotEquals(beforeUpdate.lastModified, updatedCipher.lastModified)
     }
 
     @Test

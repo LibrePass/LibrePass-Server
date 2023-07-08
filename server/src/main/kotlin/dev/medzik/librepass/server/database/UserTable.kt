@@ -1,8 +1,8 @@
 package dev.medzik.librepass.server.database
 
 import jakarta.persistence.*
-import org.springframework.data.annotation.CreatedDate
-import org.springframework.data.annotation.LastModifiedDate
+import org.hibernate.annotations.CreationTimestamp
+import org.hibernate.annotations.UpdateTimestamp
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.util.*
 
@@ -32,10 +32,10 @@ data class UserTable(
     // Curve25519 public key
     val publicKey: String,
 
-    @CreatedDate
+    @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     val created: Date = Date(),
-    @LastModifiedDate
+    @UpdateTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    val lastModified: Date = Date(),
+    val lastModified: Date = Date()
 )
