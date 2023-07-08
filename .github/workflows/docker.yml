@@ -42,7 +42,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push by digest (if not PR)
+      - name: Build and push by digest
         id: build
         uses: docker/build-push-action@v4
         with:
