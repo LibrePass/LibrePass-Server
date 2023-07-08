@@ -2,13 +2,11 @@ package dev.medzik.librepass.server.database
 
 import dev.medzik.librepass.types.cipher.EncryptedCipher
 import jakarta.persistence.*
-import org.springframework.data.annotation.CreatedDate
-import org.springframework.data.annotation.LastModifiedDate
-import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import org.hibernate.annotations.CreationTimestamp
+import org.hibernate.annotations.UpdateTimestamp
 import java.util.*
 
 @Entity
-@EntityListeners(AuditingEntityListener::class)
 @Table
 data class CipherTable(
     @Id
@@ -26,10 +24,10 @@ data class CipherTable(
 
     val version: Int = 1,
 
-    @CreatedDate
+    @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     val created: Date = Date(),
-    @LastModifiedDate
+    @UpdateTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     val lastModified: Date = Date()
 ) {
