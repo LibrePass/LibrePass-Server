@@ -3,11 +3,9 @@ package dev.medzik.librepass.server.database
 import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
-import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.util.*
 
 @Entity
-@EntityListeners(AuditingEntityListener::class)
 @Table
 data class UserTable(
     @Id

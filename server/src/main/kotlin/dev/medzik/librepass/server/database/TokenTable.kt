@@ -4,11 +4,9 @@ import dev.medzik.libcrypto.Salt
 import jakarta.persistence.*
 import org.apache.commons.codec.binary.Hex
 import org.hibernate.annotations.CreationTimestamp
-import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import java.util.*
 
 @Entity
-@EntityListeners(AuditingEntityListener::class)
 @Table
 data class TokenTable(
     @Id
