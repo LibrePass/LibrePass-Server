@@ -4,7 +4,7 @@ WORKDIR /workspace/app
 
 COPY . .
 
-RUN --mount=type=cache,target=/root/.m2 ./mvnw install -DskipTests -Dgpg.skip=true
+RUN ./mvnw install -DskipTests -Dgpg.skip=true
 RUN rm -r server/target/server-*-sources.jar
 RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../../server/target/*.jar)
 
