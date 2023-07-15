@@ -43,7 +43,7 @@ class EmailService @Autowired constructor(
      * Email the given address with the given code.
      */
     fun sendEmailVerification(to: String, user: String, code: String) {
-        val url = "https://$apiDomain/api/v1/auth/verifyEmail?user=$user&code=$code"
+        val url = "https://$apiDomain/api/auth/verifyEmail?user=$user&code=$code"
 
         val subject = "Activate your LibrePass account"
         val body = emailVerificationTemplate
