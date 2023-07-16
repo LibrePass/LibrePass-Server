@@ -4,11 +4,13 @@ import dev.medzik.librepass.server.controllers.advice.AuthorizedUserException
 import dev.medzik.librepass.server.database.TokenRepository
 import dev.medzik.librepass.server.database.UserRepository
 import dev.medzik.librepass.server.database.UserTable
+import dev.medzik.librepass.server.utils.checkIfElapsed
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.MethodParameter
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.support.WebDataBinderFactory
 import org.springframework.web.context.request.NativeWebRequest
@@ -83,9 +85,16 @@ class AuthorizedUserArgumentResolver @Autowired constructor(
         return user
     }
 
-    private fun checkIfElapsed(start: Date, end: Date, minutes: Int): Boolean {
-        val elapsedMilliseconds = end.time - start.time
-        val elapsedMinutes = elapsedMilliseconds / (60 * 1000)
-        return elapsedMinutes >= minutes
+    /**
+     * Delete expired tokens every 30 minutes.
+     */
+    @Scheduled(cron = "0 */30 * ? * *")
+    fun deleteExpiredTokens() {
+        val currentDate = Date()
+        val date30DaysAgo = Date(currentDate.time - 1000L * 60 * 60 * 24 * 30)
+
+        tokenRepository.findAllByLastUsedBefore(date30DaysAgo).forEach { token ->
+            tokenRepository.delete(token)
+        }
     }
 }
