@@ -7,16 +7,6 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      postgres_db:
-        image: postgres:latest
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: librepass
-        ports:
-          - 5432:5432
-        # needed because the postgres container does not provide a healthcheck
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
       smtp_server:
         image: namshi/smtp
         ports:
@@ -45,11 +35,9 @@ jobs:
           SSL_ENABLED: false
           SSL_KEYSTORE: none
           SSL_KEYSTORE_PASSWORD: none
-          POSTGRES_HOST: localhost
-          POSTGRES_PORT: 5432
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: librepass
+          DATABASE_URI: jdbc:h2:mem:db;DB_CLOSE_DELAY=-1
+          DATABASE_USER: sa
+          DATABASE_PASSWORD: sa
           MAIL_SMTP: localhost
           MAIL_SMTP_PORT: 1025
           MAIL_SMTP_AUTH: false
@@ -67,11 +55,9 @@ jobs:
           SSL_ENABLED: false
           SSL_KEYSTORE: none
           SSL_KEYSTORE_PASSWORD: none
-          POSTGRES_HOST: localhost
-          POSTGRES_PORT: 5432
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: librepass
+          DATABASE_URI: jdbc:h2:mem:db;DB_CLOSE_DELAY=-1
+          DATABASE_USER: sa
+          DATABASE_PASSWORD: sa
           MAIL_SMTP: localhost
           MAIL_SMTP_PORT: 1025
           MAIL_SMTP_AUTH: false
