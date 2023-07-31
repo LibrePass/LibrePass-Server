@@ -47,7 +47,7 @@
         <maven.compiler.target>9</maven.compiler.target>
 
         <kotlin.version>1.9.0</kotlin.version>
-        <coroutines.version>1.7.2</coroutines.version>
+        <coroutines.version>1.7.3</coroutines.version>
 
         <junit.jupiter.version>5.9.3</junit.jupiter.version>
 
