@@ -4,7 +4,7 @@ import dev.medzik.libcrypto.Argon2Hash
 import dev.medzik.libcrypto.Curve25519
 import dev.medzik.libcrypto.Curve25519KeyPair
 import dev.medzik.librepass.client.Client
-import dev.medzik.librepass.client.DEFAULT_API_URL
+import dev.medzik.librepass.client.Server
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
 import dev.medzik.librepass.client.utils.Cryptography.computePasswordHash
@@ -19,7 +19,7 @@ import java.util.*
  * @param apiUrl api url address (optional)
  */
 @Suppress("unused")
-class AuthClient(apiUrl: String = DEFAULT_API_URL) {
+class AuthClient(apiUrl: String = Server.PRODUCTION) {
     companion object {
         private const val API_ENDPOINT = "/api/auth"
     }

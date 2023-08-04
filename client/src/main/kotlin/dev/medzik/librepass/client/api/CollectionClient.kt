@@ -1,7 +1,7 @@
 package dev.medzik.librepass.client.api
 
 import dev.medzik.librepass.client.Client
-import dev.medzik.librepass.client.DEFAULT_API_URL
+import dev.medzik.librepass.client.Server
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
 import dev.medzik.librepass.client.utils.JsonUtils
@@ -17,7 +17,7 @@ import java.util.*
  */
 class CollectionClient(
     apiKey: String,
-    apiUrl: String = DEFAULT_API_URL
+    apiUrl: String = Server.PRODUCTION
 ) {
     companion object {
         private const val API_ENDPOINT = "/api/collection"
