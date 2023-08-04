@@ -88,9 +88,20 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
         return UserCredentials(
             userId = response.userId,
             apiKey = response.apiKey,
+            apiKeyVerified = response.verified,
             keyPair = keyPair,
             secretKey = computeSecretKey(keyPair)
         )
+    }
+
+    @Throws(ClientException::class, ApiException::class)
+    fun loginTwoFactor(apiKey: String, code: String) {
+        val request = TwoFactorRequest(
+            apiKey = apiKey,
+            code = code
+        )
+
+        client.post("$API_ENDPOINT/oauth?grantType=2fa", JsonUtils.serialize(request))
     }
 
     @Throws(ClientException::class, ApiException::class)
@@ -102,6 +113,7 @@ class AuthClient(apiUrl: String = DEFAULT_API_URL) {
 data class UserCredentials(
     val userId: UUID,
     val apiKey: String,
+    val apiKeyVerified: Boolean,
     val keyPair: Curve25519KeyPair,
     val secretKey: String
 )
