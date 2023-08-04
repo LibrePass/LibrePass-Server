@@ -9,6 +9,7 @@ import dev.medzik.librepass.responses.ResponseError
 import dev.medzik.librepass.server.components.RequestIP
 import dev.medzik.librepass.server.controllers.advice.AuthorizedUserException
 import dev.medzik.librepass.server.controllers.advice.InvalidTwoFactorCodeException
+import dev.medzik.librepass.server.controllers.advice.RateLimitException
 import dev.medzik.librepass.server.database.TokenRepository
 import dev.medzik.librepass.server.database.TokenTable
 import dev.medzik.librepass.server.database.UserRepository
@@ -78,8 +79,7 @@ class AuthController @Autowired constructor(
         @RequestIP ip: String,
         @RequestBody request: RegisterRequest
     ): Response {
-        if (rateLimitEnabled && !rateLimit.resolveBucket(ip).tryConsume(1))
-            return ResponseError.TOO_MANY_REQUESTS.toResponse()
+        consumeRateLimit(ip)
 
         if (!Validator.emailValidator(request.email) ||
             !Validator.hexValidator(request.sharedKey, 32) ||
@@ -135,11 +135,7 @@ class AuthController @Autowired constructor(
         @RequestIP ip: String,
         @RequestParam("email") email: String?
     ): Response {
-        if (!consumeRateLimit(ip))
-            return ResponseError.TOO_MANY_REQUESTS.toResponse()
-
-        if (email != null && !consumeRateLimit(email))
-            return ResponseError.TOO_MANY_REQUESTS.toResponse()
+        consumeRateLimit(ip)
 
         if (email.isNullOrEmpty())
             return ResponseHandler.generateResponse(
@@ -174,8 +170,7 @@ class AuthController @Autowired constructor(
         @RequestParam("grantType") grantType: String,
         @RequestBody request: String
     ): Response {
-        if (!consumeRateLimit(ip))
-            return ResponseError.TOO_MANY_REQUESTS.toResponse()
+        consumeRateLimit(ip)
 
         when (grantType) {
             "login" -> {
@@ -191,7 +186,6 @@ class AuthController @Autowired constructor(
             "2fa" -> {
                 try {
                     return oauth2FA(
-                        ip = ip,
                         request = Gson().fromJson(request, TwoFactorRequest::class.java)
                     )
                 } catch (e: JsonSyntaxException) {
@@ -204,8 +198,7 @@ class AuthController @Autowired constructor(
     }
 
     private fun oauthLogin(ip: String, request: LoginRequest): Response {
-        if (!consumeRateLimit(request.email.lowercase()))
-            return ResponseError.TOO_MANY_REQUESTS.toResponse()
+        consumeRateLimit(request.email.lowercase())
 
         val user = userRepository.findByEmail(request.email.lowercase())
             ?: return ResponseError.INVALID_CREDENTIALS.toResponse()
@@ -235,9 +228,8 @@ class AuthController @Autowired constructor(
         )
     }
 
-    private fun oauth2FA(ip: String, request: TwoFactorRequest): Response {
-        if (!consumeRateLimit(ip) || !consumeRateLimit(request.apiKey))
-            return ResponseError.TOO_MANY_REQUESTS.toResponse()
+    private fun oauth2FA(request: TwoFactorRequest): Response {
+        consumeRateLimit(request.apiKey)
 
         val token = tokenRepository.findByIdOrNull(request.apiKey)
             ?: throw AuthorizedUserException()
@@ -248,8 +240,7 @@ class AuthController @Autowired constructor(
         val user = userRepository.findByIdOrNull(token.owner)
             ?: throw UnsupportedOperationException()
 
-        if (!consumeRateLimit(user.email))
-            return ResponseError.TOO_MANY_REQUESTS.toResponse()
+        consumeRateLimit(user.email)
 
         if (request.code != TOTP.getTOTPCode(user.twoFactorSecret) &&
             request.code != user.twoFactorRecoveryCode
@@ -268,8 +259,8 @@ class AuthController @Autowired constructor(
         if (email == null)
             return ResponseError.INVALID_BODY.toResponse()
 
-        if (!consumeRateLimit(ip) || !consumeRateLimit(email))
-            return ResponseError.TOO_MANY_REQUESTS.toResponse()
+        consumeRateLimit(ip)
+        consumeRateLimit(email)
 
         val user = userRepository.findByEmail(email)
             ?: return ResponseError.INVALID_CREDENTIALS.toResponse()
@@ -290,9 +281,13 @@ class AuthController @Autowired constructor(
 
     @GetMapping("/verifyEmail")
     fun verifyEmail(
+        @RequestIP ip: String,
         @RequestParam("user") userID: String,
         @RequestParam("code") verificationCode: String
     ): Response {
+        consumeRateLimit(ip)
+        consumeRateLimit(userID)
+
         val user = userRepository.findById(UUID.fromString(userID)).orElse(null)
             ?: return ResponseError.INVALID_BODY.toResponse()
 
@@ -316,10 +311,10 @@ class AuthController @Autowired constructor(
         return ResponseHandler.generateResponse(HttpStatus.OK)
     }
 
-    private fun consumeRateLimit(key: String): Boolean {
-        if (!rateLimitEnabled)
-            return true
+    private fun consumeRateLimit(key: String) {
+        if (!rateLimitEnabled) return
 
-        return rateLimit.resolveBucket(key).tryConsume(1)
+        if (!rateLimit.resolveBucket(key).tryConsume(1))
+            throw RateLimitException()
     }
 }
