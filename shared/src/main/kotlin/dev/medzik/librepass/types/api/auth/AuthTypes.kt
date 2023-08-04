@@ -39,16 +39,13 @@ data class LoginRequest(
     val sharedKey: String
 )
 
-// data class TwoFactorRequest(val code: Int)
-
-// data class RefreshRequest(val refreshToken: String)
+data class TwoFactorRequest(
+    val apiKey: String,
+    val code: String
+)
 
 data class UserCredentialsResponse(
     val userId: UUID,
-    val apiKey: String
+    val apiKey: String,
+    val verified: Boolean
 )
-
-// data class LoginResponse2FA(
-//    val twoFactorRequired: Boolean,
-//    val twoFactorToken: String? = null,
-// )

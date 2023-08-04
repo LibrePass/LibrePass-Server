@@ -7,14 +7,17 @@ import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 
 class AuthorizedUserException : Exception()
+class InvalidTwoFactorCodeException : Exception()
 
-/**
- * Handler for @AuthorizedUser annotation.
- */
 @ControllerAdvice
-class AuthorizedUserErrorHandler {
+class CustomExceptions {
     @ExceptionHandler(value = [AuthorizedUserException::class])
-    fun handleException(): Response {
+    fun authorizedUserException(): Response {
         return ResponseError.UNAUTHORIZED.toResponse()
+    }
+
+    @ExceptionHandler(value = [InvalidTwoFactorCodeException::class])
+    fun invalidTwoFactorCodeException(): Response {
+        return ResponseError.INVALID_CREDENTIALS.toResponse()
     }
 }

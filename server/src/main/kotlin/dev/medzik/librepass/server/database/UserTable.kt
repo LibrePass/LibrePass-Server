@@ -22,6 +22,11 @@ data class UserTable(
     @Temporal(TemporalType.TIMESTAMP)
     val lastPasswordChange: Date = Date(),
 
+    // 2FA
+    val twoFactorEnabled: Boolean = false,
+    val twoFactorSecret: String? = null,
+    val twoFactorRecoveryCode: String? = null,
+
     // Argon2id parameters
     val parallelism: Int,
     val memory: Int,

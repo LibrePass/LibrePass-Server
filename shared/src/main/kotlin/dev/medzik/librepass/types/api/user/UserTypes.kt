@@ -18,3 +18,13 @@ data class ChangePasswordCipherData(
     val id: UUID,
     val data: String
 )
+
+data class SetupTwoFactorRequest(
+    val sharedKey: String,
+    val secret: String,
+    val code: String
+)
+
+data class SetupTwoFactorResponse(
+    val recoveryCode: String
+)
