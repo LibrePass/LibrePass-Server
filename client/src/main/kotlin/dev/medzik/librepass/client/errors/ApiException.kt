@@ -9,8 +9,8 @@ class ApiException(
     val status: Number,
     val error: String
 ) : Exception() {
-    override val message: String
-        get() = "HTTP $status: $error"
+    override val message: String = "HTTP $status: $error"
 
-    fun getResponseError(): ResponseError = ResponseError.valueOf(error)
+    @Suppress("UNUSED")
+    val responseError = ResponseError.valueOf(error)
 }

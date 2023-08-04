@@ -14,6 +14,8 @@ import dev.medzik.librepass.client.utils.Cryptography.computeSharedKey
 import dev.medzik.librepass.client.utils.JsonUtils
 import dev.medzik.librepass.types.api.user.ChangePasswordCipherData
 import dev.medzik.librepass.types.api.user.ChangePasswordRequest
+import dev.medzik.librepass.types.api.user.SetupTwoFactorRequest
+import dev.medzik.librepass.types.api.user.SetupTwoFactorResponse
 
 /**
  * User Client for the LibrePass API. This client is used to manage user.
@@ -106,5 +108,37 @@ class UserClient(
             "$API_ENDPOINT/password",
             JsonUtils.serialize(request)
         )
+    }
+
+    @Throws(ClientException::class, ApiException::class)
+    fun setupTwoFactor(
+        email: String,
+        password: String,
+        secret: String,
+        code: String
+    ): SetupTwoFactorResponse {
+        val preLogin = AuthClient(apiUrl).preLogin(email)
+
+        val passwordHash = computePasswordHash(
+            email = email,
+            password = password,
+            argon2Function = preLogin.toArgon2()
+        )
+
+        val keyPair = Curve25519.fromPrivateKey(passwordHash.toHexHash())
+        val serverPublicKey = preLogin.serverPublicKey
+        val sharedKey = computeSharedKey(keyPair.privateKey, serverPublicKey)
+
+        val request = SetupTwoFactorRequest(
+            sharedKey = sharedKey,
+            secret = secret,
+            code = code
+        )
+
+        val response = client.post(
+            "$API_ENDPOINT/setup/2fa",
+            JsonUtils.serialize(request)
+        )
+        return JsonUtils.deserialize(response)
     }
 }

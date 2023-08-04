@@ -2,6 +2,8 @@ module dev.medzik.librepass.shared {
     requires dev.medzik.libcrypto;
     requires com.google.gson;
     requires kotlin.stdlib;
+    requires org.apache.commons.codec;
+    requires totp;
 
     exports dev.medzik.librepass.responses;
 
@@ -13,6 +15,8 @@ module dev.medzik.librepass.shared {
     exports dev.medzik.librepass.types.api.user;
     exports dev.medzik.librepass.types.cipher;
     exports dev.medzik.librepass.types.cipher.data;
+
+    exports dev.medzik.librepass.utils;
 
     opens dev.medzik.librepass.types.api to com.google.gson;
     opens dev.medzik.librepass.types.api.auth to com.google.gson;

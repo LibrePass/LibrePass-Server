@@ -12,6 +12,7 @@ data class TokenTable(
     @Id
     val token: String = generateToken(),
     val owner: UUID,
+    val confirmed: Boolean,
 
     val lastIp: String,
 

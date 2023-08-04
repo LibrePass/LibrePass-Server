@@ -1,13 +1,19 @@
 package dev.medzik.librepass.server.controllers.api
 
 import dev.medzik.libcrypto.Curve25519
+import dev.medzik.libcrypto.Salt
 import dev.medzik.librepass.responses.ResponseError
 import dev.medzik.librepass.server.components.AuthorizedUser
+import dev.medzik.librepass.server.controllers.advice.InvalidTwoFactorCodeException
 import dev.medzik.librepass.server.database.CipherRepository
 import dev.medzik.librepass.server.database.UserRepository
 import dev.medzik.librepass.server.database.UserTable
 import dev.medzik.librepass.server.utils.*
 import dev.medzik.librepass.types.api.user.ChangePasswordRequest
+import dev.medzik.librepass.types.api.user.SetupTwoFactorRequest
+import dev.medzik.librepass.types.api.user.SetupTwoFactorResponse
+import dev.medzik.librepass.utils.TOTP
+import org.apache.commons.codec.binary.Hex
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -63,5 +69,32 @@ class UserController @Autowired constructor(
         )
 
         return ResponseHandler.generateResponse(HttpStatus.OK)
+    }
+
+    @PostMapping("/setup/2fa")
+    fun setupTwoFactor(
+        @AuthorizedUser user: UserTable,
+        @RequestBody body: SetupTwoFactorRequest
+    ): Response {
+        // validate shared key with a new public key
+        val sharedKey = Curve25519.computeSharedSecret(ServerKeyPair.privateKey, user.publicKey)
+        if (body.sharedKey != sharedKey)
+            return ResponseError.INVALID_CREDENTIALS.toResponse()
+
+        if (body.code != TOTP.getTOTPCode(body.secret))
+            throw InvalidTwoFactorCodeException()
+
+        val recoveryCode = Hex.encodeHexString(Salt.generate(32))
+
+        userRepository.save(
+            user.copy(
+                twoFactorEnabled = true,
+                twoFactorSecret = body.secret,
+                twoFactorRecoveryCode = recoveryCode
+            )
+        )
+
+        val response = SetupTwoFactorResponse(recoveryCode = recoveryCode)
+        return ResponseHandler.generateResponse(response, HttpStatus.OK)
     }
 }

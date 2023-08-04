@@ -86,6 +86,13 @@
             <version>2.10.1</version>
         </dependency>
 
+        <!-- Two-Factor Authentication -->
+        <dependency>
+            <groupId>de.taimos</groupId>
+            <artifactId>totp</artifactId>
+            <version>1.0</version>
+        </dependency>
+
         <!-- Tests -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>

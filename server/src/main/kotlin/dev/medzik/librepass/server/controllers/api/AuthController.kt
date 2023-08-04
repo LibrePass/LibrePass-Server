@@ -7,6 +7,8 @@ import dev.medzik.libcrypto.Curve25519KeyPair
 import dev.medzik.libcrypto.Salt
 import dev.medzik.librepass.responses.ResponseError
 import dev.medzik.librepass.server.components.RequestIP
+import dev.medzik.librepass.server.controllers.advice.AuthorizedUserException
+import dev.medzik.librepass.server.controllers.advice.InvalidTwoFactorCodeException
 import dev.medzik.librepass.server.database.TokenRepository
 import dev.medzik.librepass.server.database.TokenTable
 import dev.medzik.librepass.server.database.UserRepository
@@ -17,6 +19,7 @@ import dev.medzik.librepass.server.utils.ResponseHandler
 import dev.medzik.librepass.server.utils.Validator
 import dev.medzik.librepass.server.utils.toResponse
 import dev.medzik.librepass.types.api.auth.*
+import dev.medzik.librepass.utils.TOTP
 import io.github.bucket4j.Bandwidth
 import io.github.bucket4j.Bucket
 import io.github.bucket4j.Refill
@@ -27,6 +30,7 @@ import org.apache.commons.codec.binary.Hex
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import java.time.Duration
@@ -184,12 +188,16 @@ class AuthController @Autowired constructor(
                     ResponseError.INVALID_CREDENTIALS.toResponse()
                 }
             }
-//            "2fa" -> {
-//                return if (request is TwoFactorRequest)
-//                    oauth2FA(request)
-//                else
-//                    ResponseError.INVALID_BODY.toResponse()
-//            }
+            "2fa" -> {
+                try {
+                    return oauth2FA(
+                        ip = ip,
+                        request = Gson().fromJson(request, TwoFactorRequest::class.java)
+                    )
+                } catch (e: JsonSyntaxException) {
+                    ResponseError.INVALID_CREDENTIALS.toResponse()
+                }
+            }
         }
 
         return ResponseError.INVALID_BODY.toResponse()
@@ -212,21 +220,45 @@ class AuthController @Autowired constructor(
         val apiToken = tokenRepository.save(
             TokenTable(
                 owner = user.id,
-                lastIp = ip
+                lastIp = ip,
+                // Allow use of an api key only if two-factor authentication has been successful
+                confirmed = !user.twoFactorEnabled
             )
         )
 
         return ResponseHandler.generateResponse(
             UserCredentialsResponse(
                 userId = user.id,
-                apiKey = apiToken.token
+                apiKey = apiToken.token,
+                verified = apiToken.confirmed
             )
         )
     }
 
-//    private fun oauth2FA(request: TwoFactorRequest): Response {
-//        return ResponseHandler.generateResponse(HttpStatus.NOT_IMPLEMENTED)
-//    }
+    private fun oauth2FA(ip: String, request: TwoFactorRequest): Response {
+        if (!consumeRateLimit(ip) || !consumeRateLimit(request.apiKey))
+            return ResponseError.TOO_MANY_REQUESTS.toResponse()
+
+        val token = tokenRepository.findByIdOrNull(request.apiKey)
+            ?: throw AuthorizedUserException()
+
+        if (token.confirmed)
+            return ResponseHandler.generateResponse(HttpStatus.OK)
+
+        val user = userRepository.findByIdOrNull(token.owner)
+            ?: throw UnsupportedOperationException()
+
+        if (!consumeRateLimit(user.email))
+            return ResponseError.TOO_MANY_REQUESTS.toResponse()
+
+        if (request.code != TOTP.getTOTPCode(user.twoFactorSecret) &&
+            request.code != user.twoFactorRecoveryCode
+        ) throw InvalidTwoFactorCodeException()
+
+        tokenRepository.save(token.copy(confirmed = true))
+
+        return ResponseHandler.generateResponse(HttpStatus.OK)
+    }
 
     @GetMapping("/passwordHint")
     fun requestPasswordHint(
