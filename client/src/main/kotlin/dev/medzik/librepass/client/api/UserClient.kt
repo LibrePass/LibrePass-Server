@@ -4,7 +4,7 @@ import dev.medzik.libcrypto.AES
 import dev.medzik.libcrypto.Argon2
 import dev.medzik.libcrypto.Curve25519
 import dev.medzik.librepass.client.Client
-import dev.medzik.librepass.client.DEFAULT_API_URL
+import dev.medzik.librepass.client.Server
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
 import dev.medzik.librepass.client.utils.Cryptography.computePasswordHash
@@ -26,7 +26,7 @@ import dev.medzik.librepass.types.api.user.SetupTwoFactorResponse
 class UserClient(
     private val email: String,
     private val apiKey: String,
-    private val apiUrl: String = DEFAULT_API_URL
+    private val apiUrl: String = Server.PRODUCTION
 ) {
     companion object {
         private const val API_ENDPOINT = "/api/user"

@@ -10,7 +10,21 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
 
-const val DEFAULT_API_URL = "https://librepass-api.medzik.dev"
+/**
+ * LibrePass API Servers
+ */
+object Server {
+    /**
+     * Production server instance.
+     */
+    const val PRODUCTION = "https://api.librepass.medzik.dev"
+
+    /**
+     * Test server instance. The database from this instance can be deleted at any time!
+     */
+    @Suppress("UNUSED")
+    const val TEST = "https://api.test.librepass.medzik.dev"
+}
 
 /**
  * HTTP Client for sending requests to the API.
