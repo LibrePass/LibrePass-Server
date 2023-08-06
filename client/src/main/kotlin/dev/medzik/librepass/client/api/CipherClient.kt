@@ -26,10 +26,14 @@ class CipherClient(
 
         /**
          * Get the favicon URL.
+         * @param apiUrl LibrePass API URL to use (default [Server.PRODUCTION]
          * @param domain website domain
          * @return Favicon image URL
          */
-        fun getFavicon(domain: String) = "$API_ENDPOINT/icon?domain=$domain"
+        fun getFavicon(
+            apiUrl: String = Server.PRODUCTION,
+            domain: String
+        ) = "$apiUrl/$API_ENDPOINT/icon?domain=$domain"
     }
 
     private val client = Client(apiUrl, apiKey)
