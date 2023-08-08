@@ -33,7 +33,7 @@ class CipherClient(
         fun getFavicon(
             apiUrl: String = Server.PRODUCTION,
             domain: String
-        ) = "$apiUrl/$API_ENDPOINT/icon?domain=$domain"
+        ) = "$apiUrl$API_ENDPOINT/icon?domain=$domain"
     }
 
     private val client = Client(apiUrl, apiKey)
