@@ -97,7 +97,7 @@ class AuthController @Autowired constructor(
 
         val user = userRepository.save(
             UserTable(
-                email = request.email,
+                email = request.email.lowercase(),
                 passwordHint = request.passwordHint,
                 // Argon2id parameters
                 parallelism = request.parallelism,
@@ -150,7 +150,7 @@ class AuthController @Autowired constructor(
                 HttpStatus.OK
             )
 
-        val user = userRepository.findByEmail(email)
+        val user = userRepository.findByEmail(email.lowercase())
             ?: return ResponseError.INVALID_CREDENTIALS.toResponse()
 
         return ResponseHandler.generateResponse(
