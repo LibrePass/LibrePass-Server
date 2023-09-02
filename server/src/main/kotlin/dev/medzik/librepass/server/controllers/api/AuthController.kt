@@ -291,6 +291,10 @@ class AuthController @Autowired constructor(
         val user = userRepository.findById(UUID.fromString(userID)).orElse(null)
             ?: return ResponseError.INVALID_BODY.toResponse()
 
+        // check if user email is already verified
+        if (user.emailVerified)
+            return ResponseError.EMAIL_ALREADY_VERIFIED.toResponse()
+
         // check if the code is valid
         if (user.emailVerificationCode.toString() != verificationCode)
             return ResponseError.INVALID_BODY.toResponse()
@@ -299,13 +303,12 @@ class AuthController @Autowired constructor(
         if (user.emailVerificationCodeExpiresAt?.before(Date()) == true)
             return ResponseError.INVALID_BODY.toResponse()
 
-        // check if user email is already verified
-        if (user.emailVerified)
-            return ResponseError.INVALID_BODY.toResponse()
-
         // set email as verified
         userRepository.save(
-            user.copy(emailVerified = true)
+            user.copy(
+                emailVerified = true,
+                emailVerificationCode = null
+            )
         )
 
         return ResponseHandler.generateResponse(HttpStatus.OK)
