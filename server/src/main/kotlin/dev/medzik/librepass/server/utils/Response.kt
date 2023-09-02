@@ -3,6 +3,7 @@ package dev.medzik.librepass.server.utils
 import dev.medzik.librepass.responses.ResponseError
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import java.net.URI
 
 /**
  * Response is a typealias for ResponseEntity<Any>.
@@ -29,6 +30,13 @@ object ResponseHandler {
 
         return createResponse(map, status)
     }
+
+    fun redirectResponse(
+        url: String
+    ): Response = ResponseEntity
+        .status(HttpStatus.FOUND)
+        .location(URI.create(url))
+        .build()
 
     private fun createResponse(
         data: Any,
