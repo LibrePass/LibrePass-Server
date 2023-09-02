@@ -68,7 +68,9 @@ class AuthController @Autowired constructor(
     @Value("\${server.api.rateLimit.enabled}")
     private val rateLimitEnabled: Boolean,
     @Value("\${email.verification.required}")
-    private val emailVerificationRequired: Boolean
+    private val emailVerificationRequired: Boolean,
+    @Value("\${web.url}")
+    private val webUrl: String
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val rateLimit = AuthRateLimitConfig()
@@ -293,7 +295,7 @@ class AuthController @Autowired constructor(
 
         // check if user email is already verified
         if (user.emailVerified)
-            return ResponseError.EMAIL_ALREADY_VERIFIED.toResponse()
+            return ResponseHandler.redirectResponse("$webUrl/verification/email")
 
         // check if the code is valid
         if (user.emailVerificationCode.toString() != verificationCode)
@@ -311,7 +313,7 @@ class AuthController @Autowired constructor(
             )
         )
 
-        return ResponseHandler.generateResponse(HttpStatus.OK)
+        return ResponseHandler.redirectResponse("$webUrl/verification/email")
     }
 
     private fun consumeRateLimit(key: String) {
