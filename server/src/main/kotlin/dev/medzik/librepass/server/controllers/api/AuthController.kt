@@ -247,7 +247,7 @@ class AuthController @Autowired constructor(
 
         consumeRateLimit(user.email)
 
-        if (TOTP.validate(user.twoFactorSecret, request.code) &&
+        if (!TOTP.validate(user.twoFactorSecret, request.code) &&
             request.code != user.twoFactorRecoveryCode
         ) throw InvalidTwoFactorCodeException()
 
