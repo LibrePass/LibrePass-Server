@@ -242,9 +242,12 @@ class AuthController @Autowired constructor(
         val user = userRepository.findByIdOrNull(token.owner)
             ?: throw UnsupportedOperationException()
 
+        if (user.twoFactorSecret == null)
+            return ResponseHandler.generateResponse(HttpStatus.OK)
+
         consumeRateLimit(user.email)
 
-        if (request.code != TOTP.getTOTPCode(user.twoFactorSecret) &&
+        if (TOTP.validate(user.twoFactorSecret, request.code) &&
             request.code != user.twoFactorRecoveryCode
         ) throw InvalidTwoFactorCodeException()
 

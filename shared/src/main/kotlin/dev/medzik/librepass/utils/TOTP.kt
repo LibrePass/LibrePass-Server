@@ -20,4 +20,11 @@ object TOTP {
         val hexKey = Hex.encodeHexString(bytes)
         return TOTPimpl.getOTP(hexKey)
     }
+
+    fun validate(secretKey: String, otpCode: String): Boolean {
+        val base32 = Base32()
+        val bytes = base32.decode(secretKey)
+        val hexKey = Hex.encodeHexString(bytes)
+        return TOTPimpl.validate(hexKey, otpCode)
+    }
 }
