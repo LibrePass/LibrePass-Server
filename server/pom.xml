@@ -19,7 +19,6 @@
 
         <spring-boot.version>3.1.3</spring-boot.version>
         <spring-dotenv.version>4.0.0</spring-dotenv.version>
-        <bucket4j.version>8.4.0</bucket4j.version>
     </properties>
 
     <dependencyManagement>
@@ -77,7 +76,7 @@
         <dependency>
             <groupId>com.bucket4j</groupId>
             <artifactId>bucket4j-core</artifactId>
-            <version>${bucket4j.version}</version>
+            <version>8.4.0</version>
         </dependency>
 
         <!-- Kotlin coroutines -->
