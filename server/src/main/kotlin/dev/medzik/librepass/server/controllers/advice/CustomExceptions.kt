@@ -5,9 +5,9 @@ import dev.medzik.librepass.server.utils.toResponse
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 
-class AuthorizedUserException : Exception()
-class InvalidTwoFactorCodeException : Exception()
-class RateLimitException : Exception()
+class AuthorizedUserException : RuntimeException()
+class InvalidTwoFactorCodeException : RuntimeException()
+class RateLimitException : RuntimeException()
 
 @ControllerAdvice
 class CustomExceptions {
