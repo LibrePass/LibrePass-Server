@@ -27,7 +27,7 @@ jobs:
         run: |
           ./mvnw clean package -DskipTests
           rm -r server/target/server-*-sources.jar
-          java -jar server/target/server-*.jar &
+          java -jar server/target/server-*.jar --trace &
         env:
           API_DOMAIN: example.com
           PORT: 8080
