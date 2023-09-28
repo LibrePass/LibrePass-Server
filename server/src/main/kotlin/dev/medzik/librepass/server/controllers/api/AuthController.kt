@@ -148,7 +148,7 @@ class AuthController @Autowired constructor(
                     memory = 65536, // 64MB
                     iterations = 4,
                     // Server Curve25519 public key
-                    serverPublicKey = String(ServerPublicKey)
+                    serverPublicKey = ServerPublicKey.toHexString()
                 ),
                 HttpStatus.OK
             )
@@ -162,7 +162,7 @@ class AuthController @Autowired constructor(
                 memory = user.memory,
                 iterations = user.iterations,
                 // Server Curve25519 public key
-                serverPublicKey = String(ServerPublicKey)
+                serverPublicKey = ServerPublicKey.toHexString()
             ),
             HttpStatus.OK
         )
