@@ -15,7 +15,7 @@ class CustomExceptions {
     fun authorizedUserException() = ResponseError.UNAUTHORIZED.toResponse()
 
     @ExceptionHandler(value = [InvalidTwoFactorCodeException::class])
-    fun invalidTwoFactorCodeException() = ResponseError.INVALID_CREDENTIALS.toResponse()
+    fun invalidTwoFactorCodeException() = ResponseError.INVALID_2FA_CODE.toResponse()
 
     @ExceptionHandler(value = [RateLimitException::class])
     fun rateLimitException() = ResponseError.TOO_MANY_REQUESTS.toResponse()
