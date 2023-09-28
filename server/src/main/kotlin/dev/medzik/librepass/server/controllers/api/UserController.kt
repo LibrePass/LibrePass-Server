@@ -1,19 +1,22 @@
 package dev.medzik.librepass.server.controllers.api
 
-import dev.medzik.libcrypto.Curve25519
-import dev.medzik.libcrypto.Salt
+import dev.medzik.libcrypto.Random
+import dev.medzik.libcrypto.X25519
 import dev.medzik.librepass.responses.ResponseError
 import dev.medzik.librepass.server.components.AuthorizedUser
 import dev.medzik.librepass.server.controllers.advice.InvalidTwoFactorCodeException
 import dev.medzik.librepass.server.database.CipherRepository
 import dev.medzik.librepass.server.database.UserRepository
 import dev.medzik.librepass.server.database.UserTable
-import dev.medzik.librepass.server.utils.*
+import dev.medzik.librepass.server.utils.Response
+import dev.medzik.librepass.server.utils.ResponseHandler
+import dev.medzik.librepass.server.utils.toResponse
 import dev.medzik.librepass.types.api.user.ChangePasswordRequest
 import dev.medzik.librepass.types.api.user.SetupTwoFactorRequest
 import dev.medzik.librepass.types.api.user.SetupTwoFactorResponse
 import dev.medzik.librepass.utils.TOTP
-import org.apache.commons.codec.binary.Hex
+import dev.medzik.librepass.utils.fromHexString
+import dev.medzik.librepass.utils.toHexString
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -30,9 +33,14 @@ class UserController @Autowired constructor(
         @AuthorizedUser user: UserTable,
         @RequestBody body: ChangePasswordRequest
     ): Response {
+        // validate shared key with an old public key
+        val oldSharedKey = X25519.computeSharedSecret(ServerPrivateKey, user.publicKey.fromHexString())
+        if (!body.oldSharedKey.fromHexString().contentEquals(oldSharedKey))
+            return ResponseError.INVALID_CREDENTIALS.toResponse()
+
         // validate shared key with a new public key
-        val sharedKey = Curve25519.computeSharedSecret(ServerKeyPair.privateKey, body.newPublicKey)
-        if (body.sharedKey != sharedKey)
+        val newSharedKey = X25519.computeSharedSecret(ServerPrivateKey, body.newPublicKey.fromHexString())
+        if (!body.newSharedKey.fromHexString().contentEquals(newSharedKey))
             return ResponseError.INVALID_CREDENTIALS.toResponse()
 
         // get all user cipher ids
@@ -77,14 +85,14 @@ class UserController @Autowired constructor(
         @RequestBody body: SetupTwoFactorRequest
     ): Response {
         // validate shared key with a new public key
-        val sharedKey = Curve25519.computeSharedSecret(ServerKeyPair.privateKey, user.publicKey)
-        if (body.sharedKey != sharedKey)
+        val sharedKey = X25519.computeSharedSecret(ServerPrivateKey, user.publicKey.fromHexString())
+        if (!body.sharedKey.fromHexString().contentEquals(sharedKey))
             return ResponseError.INVALID_CREDENTIALS.toResponse()
 
         if (body.code != TOTP.getTOTPCode(body.secret))
             throw InvalidTwoFactorCodeException()
 
-        val recoveryCode = Hex.encodeHexString(Salt.generate(32))
+        val recoveryCode = Random.randBytes(32).toHexString()
 
         userRepository.save(
             user.copy(

@@ -2,16 +2,13 @@ package dev.medzik.librepass.client.utils
 
 import dev.medzik.libcrypto.Argon2
 import dev.medzik.libcrypto.Argon2Hash
-import dev.medzik.libcrypto.Curve25519
-import dev.medzik.libcrypto.Curve25519KeyPair
+import dev.medzik.libcrypto.X25519
 
 object Cryptography {
-    /**
-     * Compute secret key for a user key pair.
-     */
+    /** Compute secret key for a user key pair. */
     @JvmStatic
-    fun computeSecretKey(keyPair: Curve25519KeyPair): String {
-        return computeSharedKey(keyPair.privateKey, keyPair.publicKey)
+    fun computeSecretKey(privateKey: ByteArray): ByteArray {
+        return computeSharedKey(privateKey, X25519.publicFromPrivate(privateKey))
     }
 
     /**
@@ -19,13 +16,11 @@ object Cryptography {
      * Used for AES encryption.
      */
     @JvmStatic
-    fun computeSharedKey(privateKey: String, publicKey: String): String {
-        return Curve25519.computeSharedSecret(privateKey, publicKey)
+    fun computeSharedKey(privateKey: ByteArray, publicKey: ByteArray): ByteArray {
+        return X25519.computeSharedSecret(privateKey, publicKey)
     }
 
-    /**
-     * Compute password hash.
-     */
+    /** Compute password hash. */
     @JvmStatic
     fun computePasswordHash(
         password: String,
@@ -36,37 +31,10 @@ object Cryptography {
             .hash(password, email.toByteArray())
     }
 
-    /**
-     * Compute secret key from password.
-     */
+    /** Compute secret key from password. */
     @JvmStatic
-    fun computeSecretKeyFromPassword(email: String, password: String, argon2Function: Argon2): String {
+    fun computeSecretKeyFromPassword(email: String, password: String, argon2Function: Argon2): ByteArray {
         val passwordHash = computePasswordHash(password, email, argon2Function)
-        return computeSecretKeyFromPassword(passwordHash)
-    }
-
-    /**
-     * Compute secret key from password hash.
-     */
-    @JvmStatic
-    fun computeSecretKeyFromPassword(passwordHash: Argon2Hash): String {
-        val keyPair = generateKeyPairFromPrivate(passwordHash)
-        return computeSecretKey(keyPair)
-    }
-
-    /**
-     * Generate a key pair from private key.
-     */
-    @JvmStatic
-    fun generateKeyPairFromPrivate(privateKey: String): Curve25519KeyPair {
-        return Curve25519.fromPrivateKey(privateKey)
-    }
-
-    /**
-     * Generate a key pair from private key.
-     */
-    @JvmStatic
-    fun generateKeyPairFromPrivate(passwordHash: Argon2Hash): Curve25519KeyPair {
-        return generateKeyPairFromPrivate(passwordHash.toHexHash())
+        return computeSecretKey(passwordHash.hash)
     }
 }
