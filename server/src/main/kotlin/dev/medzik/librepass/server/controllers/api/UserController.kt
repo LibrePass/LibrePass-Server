@@ -86,7 +86,7 @@ class UserController @Autowired constructor(
     ): Response {
         // validate shared key with a new public key
         val sharedKey = X25519.computeSharedSecret(ServerPrivateKey, user.publicKey.fromHexString())
-        if (body.sharedKey.fromHexString().contentEquals(sharedKey))
+        if (!body.sharedKey.fromHexString().contentEquals(sharedKey))
             return ResponseError.INVALID_CREDENTIALS.toResponse()
 
         if (body.code != TOTP.getTOTPCode(body.secret))
