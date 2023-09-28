@@ -4,7 +4,6 @@ module dev.medzik.librepass.client {
     requires okhttp3;
     requires com.google.gson;
     requires kotlin.stdlib;
-    requires org.apache.commons.codec;
 
     // export API Client
     exports dev.medzik.librepass.client;
