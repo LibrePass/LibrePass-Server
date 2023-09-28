@@ -2,9 +2,8 @@ package dev.medzik.librepass.server.controllers.api
 
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
-import dev.medzik.libcrypto.Curve25519
-import dev.medzik.libcrypto.Curve25519KeyPair
-import dev.medzik.libcrypto.Salt
+import dev.medzik.libcrypto.Random
+import dev.medzik.libcrypto.X25519
 import dev.medzik.librepass.responses.ResponseError
 import dev.medzik.librepass.server.components.RequestIP
 import dev.medzik.librepass.server.controllers.advice.AuthorizedUserException
@@ -21,13 +20,14 @@ import dev.medzik.librepass.server.utils.Validator
 import dev.medzik.librepass.server.utils.toResponse
 import dev.medzik.librepass.types.api.auth.*
 import dev.medzik.librepass.utils.TOTP
+import dev.medzik.librepass.utils.fromHexString
+import dev.medzik.librepass.utils.toHexString
 import io.github.bucket4j.Bandwidth
 import io.github.bucket4j.Bucket
 import io.github.bucket4j.Refill
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.apache.commons.codec.binary.Hex
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -43,7 +43,8 @@ import java.util.concurrent.ConcurrentHashMap
 // It is not required that the key pair be the same all the time, so it
 // is generated when the server is started and each time it is restarted,
 // the key is different.
-val ServerKeyPair: Curve25519KeyPair = Curve25519.generateKeyPair()
+val ServerPrivateKey: ByteArray = X25519.generatePrivateKey()
+val ServerPublicKey: ByteArray = X25519.publicFromPrivate(ServerPrivateKey)
 
 class AuthRateLimitConfig {
     private var cache: Map<String, Bucket> = ConcurrentHashMap()
@@ -91,11 +92,11 @@ class AuthController @Autowired constructor(
             request.iterations < 0
         ) return ResponseError.INVALID_BODY.toResponse()
 
-        val sharedKey = Curve25519.computeSharedSecret(ServerKeyPair.privateKey, request.publicKey)
-        if (request.sharedKey != sharedKey)
+        val sharedKey = X25519.computeSharedSecret(ServerPrivateKey, request.publicKey.fromHexString())
+        if (!request.sharedKey.fromHexString().contentEquals(sharedKey))
             return ResponseError.INVALID_CREDENTIALS.toResponse()
 
-        val verificationToken = Hex.encodeHexString(Salt.generate(16))
+        val verificationToken = Random.randBytes(16).toHexString()
 
         val user = userRepository.save(
             UserTable(
@@ -147,7 +148,7 @@ class AuthController @Autowired constructor(
                     memory = 65536, // 64MB
                     iterations = 4,
                     // Server Curve25519 public key
-                    serverPublicKey = ServerKeyPair.publicKey
+                    serverPublicKey = String(ServerPublicKey)
                 ),
                 HttpStatus.OK
             )
@@ -160,7 +161,8 @@ class AuthController @Autowired constructor(
                 parallelism = user.parallelism,
                 memory = user.memory,
                 iterations = user.iterations,
-                serverPublicKey = ServerKeyPair.publicKey
+                // Server Curve25519 public key
+                serverPublicKey = String(ServerPublicKey)
             ),
             HttpStatus.OK
         )
@@ -208,8 +210,8 @@ class AuthController @Autowired constructor(
         if (emailVerificationRequired && !user.emailVerified)
             return ResponseError.EMAIL_NOT_VERIFIED.toResponse()
 
-        val sharedKey = Curve25519.computeSharedSecret(ServerKeyPair.privateKey, user.publicKey)
-        if (request.sharedKey != sharedKey)
+        val sharedKey = X25519.computeSharedSecret(ServerPrivateKey, user.publicKey.fromHexString())
+        if (!request.sharedKey.fromHexString().contentEquals(sharedKey))
             return ResponseError.INVALID_CREDENTIALS.toResponse()
 
         val apiToken = tokenRepository.save(

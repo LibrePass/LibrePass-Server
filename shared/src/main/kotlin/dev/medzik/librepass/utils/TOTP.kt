@@ -1,7 +1,6 @@
 package dev.medzik.librepass.utils
 
 import org.apache.commons.codec.binary.Base32
-import org.apache.commons.codec.binary.Hex
 import java.security.SecureRandom
 import de.taimos.totp.TOTP as TOTPimpl
 
@@ -17,14 +16,14 @@ object TOTP {
     fun getTOTPCode(secretKey: String?): String {
         val base32 = Base32()
         val bytes = base32.decode(secretKey)
-        val hexKey = Hex.encodeHexString(bytes)
+        val hexKey = bytes.toHexString()
         return TOTPimpl.getOTP(hexKey)
     }
 
     fun validate(secretKey: String, otpCode: String): Boolean {
         val base32 = Base32()
         val bytes = base32.decode(secretKey)
-        val hexKey = Hex.encodeHexString(bytes)
+        val hexKey = bytes.toHexString()
         return TOTPimpl.validate(hexKey, otpCode)
     }
 }

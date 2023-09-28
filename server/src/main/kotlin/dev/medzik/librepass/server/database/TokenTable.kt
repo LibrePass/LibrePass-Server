@@ -1,8 +1,8 @@
 package dev.medzik.librepass.server.database
 
-import dev.medzik.libcrypto.Salt
+import dev.medzik.libcrypto.Random
+import dev.medzik.librepass.utils.toHexString
 import jakarta.persistence.*
-import org.apache.commons.codec.binary.Hex
 import org.hibernate.annotations.CreationTimestamp
 import java.util.*
 
@@ -23,6 +23,6 @@ data class TokenTable(
     val lastUsed: Date = Date()
 ) {
     companion object {
-        fun generateToken() = "lp_" + Hex.encodeHexString(Salt.generate(32))
+        fun generateToken() = "lp_" + Random.randBytes(32).toHexString()
     }
 }
