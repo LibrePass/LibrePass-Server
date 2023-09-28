@@ -2,8 +2,9 @@ package dev.medzik.librepass.types.cipher
 
 import com.google.gson.Gson
 import com.google.gson.annotations.JsonAdapter
-import dev.medzik.libcrypto.AES
+import dev.medzik.libcrypto.Aes
 import dev.medzik.librepass.types.adapters.DateAdapter
+import dev.medzik.librepass.utils.fromHexString
 import java.util.*
 
 /**
@@ -48,16 +49,16 @@ data class EncryptedCipher(
         id = cipher.id,
         owner = cipher.owner,
         type = cipher.type.ordinal,
-        protectedData = AES.encrypt(
-            AES.GCM,
-            secretKey,
+        protectedData = Aes.encrypt(
+            Aes.GCM,
+            secretKey.fromHexString(),
             Gson().toJson(
                 when (cipher.type) {
                     CipherType.Login -> cipher.loginData
                     CipherType.Card -> cipher.cardData
                     CipherType.SecureNote -> cipher.secureNoteData
                 }
-            )!!
+            ).toByteArray()
         ),
         collection = cipher.collection,
         favorite = cipher.favorite,
@@ -68,24 +69,16 @@ data class EncryptedCipher(
     )
 
     companion object {
-        /**
-         * Creates a new [EncryptedCipher] object from the JSON string.
-         */
+        /** Creates a new [EncryptedCipher] object from the JSON string. */
         @JvmStatic
-        fun from(cipher: String): EncryptedCipher =
-            Gson().fromJson(cipher, EncryptedCipher::class.java)
+        fun from(cipher: String): EncryptedCipher = Gson().fromJson(cipher, EncryptedCipher::class.java)
     }
 
-    /**
-     * Decrypts the cipher data.
-     * @return JSON string of the decrypted cipher data.
-     */
-    fun decryptData(secretKey: String) =
-        AES.decrypt(AES.GCM, secretKey, this.protectedData)!!
+    /** Decrypts the cipher data. */
+    fun decryptData(secretKey: String): String {
+        return String(Aes.decrypt(Aes.GCM, secretKey.fromHexString(), this.protectedData))
+    }
 
-    /**
-     * Converts the cipher to a JSON string.
-     */
-    fun toJson(): String =
-        Gson().toJson(this)
+    /** Converts the cipher to a JSON string. */
+    fun toJson(): String = Gson().toJson(this)
 }

@@ -3,9 +3,10 @@ package dev.medzik.librepass.types.api.user
 import java.util.*
 
 data class ChangePasswordRequest(
+    val oldSharedKey: String,
     val newPasswordHint: String?,
     val newPublicKey: String,
-    val sharedKey: String,
+    val newSharedKey: String,
     // New Argon2 parameters
     val parallelism: Int,
     val memory: Int,

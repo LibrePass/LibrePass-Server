@@ -3,6 +3,7 @@ package dev.medzik.librepass.responses
 enum class ResponseError(val statusCode: HttpStatus) {
     INVALID_BODY(HttpStatus.BAD_REQUEST),
     INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED),
+    INVALID_2FA_CODE(HttpStatus.UNAUTHORIZED),
     RE_LOGIN_REQUIRED(HttpStatus.UNAUTHORIZED),
     EMAIL_NOT_VERIFIED(HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED),
