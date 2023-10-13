@@ -22,9 +22,8 @@ import dev.medzik.librepass.types.api.auth.*
 import dev.medzik.librepass.utils.TOTP
 import dev.medzik.librepass.utils.fromHexString
 import dev.medzik.librepass.utils.toHexString
-import io.github.bucket4j.Bandwidth
+import io.github.bucket4j.BandwidthBuilder.BandwidthBuilderCapacityStage
 import io.github.bucket4j.Bucket
-import io.github.bucket4j.Refill
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -55,7 +54,7 @@ class AuthRateLimitConfig {
 
     private fun newBucket(): Bucket {
         return Bucket.builder()
-            .addLimit(Bandwidth.classic(20, Refill.intervally(10, Duration.ofMinutes(1))))
+            .addLimit { limit: BandwidthBuilderCapacityStage -> limit.capacity(20).refillGreedy(10, Duration.ofMinutes(1)) }
             .build()
     }
 }
