@@ -3,7 +3,7 @@ module dev.medzik.librepass.shared {
     requires com.google.gson;
     requires kotlin.stdlib;
     requires org.apache.commons.codec;
-    requires totp;
+    requires otp.java;
 
     exports dev.medzik.librepass.responses;
 
