@@ -21,7 +21,8 @@ object TOTP {
 
     fun validate(secret: String, otpCode: String): Boolean {
         val totpGenerator = initializeTOTPGenerator(secret)
-        return totpGenerator.verify(otpCode)
+        // Check the current code and the previous two and the next two.
+        return totpGenerator.verify(otpCode, 2)
     }
 
     private fun initializeTOTPGenerator(secret: String): TOTPGenerator {
