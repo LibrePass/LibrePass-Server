@@ -16,7 +16,10 @@ object Cryptography {
      * Used for AES encryption.
      */
     @JvmStatic
-    fun computeSharedKey(privateKey: ByteArray, publicKey: ByteArray): ByteArray {
+    fun computeSharedKey(
+        privateKey: ByteArray,
+        publicKey: ByteArray
+    ): ByteArray {
         return X25519.computeSharedSecret(privateKey, publicKey)
     }
 
@@ -33,7 +36,11 @@ object Cryptography {
 
     /** Compute secret key from password. */
     @JvmStatic
-    fun computeSecretKeyFromPassword(email: String, password: String, argon2Function: Argon2): ByteArray {
+    fun computeSecretKeyFromPassword(
+        email: String,
+        password: String,
+        argon2Function: Argon2
+    ): ByteArray {
         val passwordHash = computePasswordHash(password, email, argon2Function)
         return computeSecretKey(passwordHash.hash)
     }

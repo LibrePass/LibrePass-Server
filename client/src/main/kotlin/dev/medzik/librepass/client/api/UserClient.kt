@@ -53,24 +53,27 @@ class UserClient(
         val oldPreLogin = AuthClient(apiUrl).preLogin(email)
 
         // compute old secret key
-        val oldSecretKey = computeSecretKeyFromPassword(
-            email = email,
-            password = oldPassword,
-            argon2Function = oldPreLogin.toArgon2()
-        )
+        val oldSecretKey =
+            computeSecretKeyFromPassword(
+                email = email,
+                password = oldPassword,
+                argon2Function = oldPreLogin.toArgon2()
+            )
 
-        val oldPasswordHash = computePasswordHash(
-            email = email,
-            password = oldPassword,
-            argon2Function = oldPreLogin.toArgon2()
-        )
+        val oldPasswordHash =
+            computePasswordHash(
+                email = email,
+                password = oldPassword,
+                argon2Function = oldPreLogin.toArgon2()
+            )
 
         // compute new password hashes
-        val newPasswordHash = computePasswordHash(
-            email = email,
-            password = newPassword,
-            argon2Function = argon2Function
-        )
+        val newPasswordHash =
+            computePasswordHash(
+                email = email,
+                password = newPassword,
+                argon2Function = argon2Function
+            )
 
         val newPublicKey = X25519.publicFromPrivate(newPasswordHash.hash)
 
@@ -96,25 +99,27 @@ class UserClient(
             // encrypt cipher data with a new secret key
             val newData = Aes.encrypt(Aes.GCM, newSecretKey, oldData)
 
-            ciphers += ChangePasswordCipherData(
-                id = cipher.id,
-                data = newData
-            )
+            ciphers +=
+                ChangePasswordCipherData(
+                    id = cipher.id,
+                    data = newData
+                )
         }
 
-        val request = ChangePasswordRequest(
-            oldSharedKey = oldSharedKey.toHexString(),
-            newPasswordHint = newPasswordHint,
-            newSharedKey = newSharedKey.toHexString(),
-            // Argon2id parameters
-            parallelism = newPasswordHash.parallelism,
-            memory = newPasswordHash.memory,
-            iterations = newPasswordHash.iterations,
-            // Curve25519 public key
-            newPublicKey = newPublicKey.toHexString(),
-            // ciphers data re-encrypted with new password
-            ciphers = ciphers
-        )
+        val request =
+            ChangePasswordRequest(
+                oldSharedKey = oldSharedKey.toHexString(),
+                newPasswordHint = newPasswordHint,
+                newSharedKey = newSharedKey.toHexString(),
+                // Argon2id parameters
+                parallelism = newPasswordHash.parallelism,
+                memory = newPasswordHash.memory,
+                iterations = newPasswordHash.iterations,
+                // Curve25519 public key
+                newPublicKey = newPublicKey.toHexString(),
+                // ciphers data re-encrypted with new password
+                ciphers = ciphers
+            )
 
         client.patch(
             "$API_ENDPOINT/password",
@@ -131,25 +136,28 @@ class UserClient(
     ): SetupTwoFactorResponse {
         val preLogin = AuthClient(apiUrl).preLogin(email)
 
-        val passwordHash = computePasswordHash(
-            email = email,
-            password = password,
-            argon2Function = preLogin.toArgon2()
-        )
+        val passwordHash =
+            computePasswordHash(
+                email = email,
+                password = password,
+                argon2Function = preLogin.toArgon2()
+            )
 
         val serverPublicKey = preLogin.serverPublicKey.fromHexString()
         val sharedKey = computeSharedKey(passwordHash.hash, serverPublicKey)
 
-        val request = SetupTwoFactorRequest(
-            sharedKey = sharedKey.toHexString(),
-            secret = secret,
-            code = code
-        )
+        val request =
+            SetupTwoFactorRequest(
+                sharedKey = sharedKey.toHexString(),
+                secret = secret,
+                code = code
+            )
 
-        val response = client.post(
-            "$API_ENDPOINT/setup/2fa",
-            JsonUtils.serialize(request)
-        )
+        val response =
+            client.post(
+                "$API_ENDPOINT/setup/2fa",
+                JsonUtils.serialize(request)
+            )
         return JsonUtils.deserialize(response)
     }
 }

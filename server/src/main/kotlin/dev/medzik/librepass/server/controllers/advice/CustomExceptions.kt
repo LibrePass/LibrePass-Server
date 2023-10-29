@@ -6,7 +6,9 @@ import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 
 class AuthorizedUserException : RuntimeException()
+
 class InvalidTwoFactorCodeException : RuntimeException()
+
 class RateLimitException : RuntimeException()
 
 @ControllerAdvice

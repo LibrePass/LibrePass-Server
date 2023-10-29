@@ -18,7 +18,9 @@ interface CipherRepository : CrudRepository<CipherTable, UUID> {
      * @return A list of all ciphers owned by the user.
      */
     @Query("SELECT p FROM #{#entityName} p WHERE p.owner = :owner ORDER BY p.lastModified DESC")
-    fun getAll(@Param("owner") owner: UUID): List<CipherTable>
+    fun getAll(
+        @Param("owner") owner: UUID
+    ): List<CipherTable>
 
     /**
      * Check if a cipher exists and is owned by the user.
@@ -27,7 +29,10 @@ interface CipherRepository : CrudRepository<CipherTable, UUID> {
      * @return True if the cipher exists and is owned by the user, false otherwise.
      */
     @Query("SELECT EXISTS(SELECT 1 FROM #{#entityName} p WHERE p.id = :id AND p.owner = :owner)")
-    fun checkIfCipherExistsAndOwnedBy(@Param("id") id: UUID, @Param("owner") owner: UUID): Boolean
+    fun checkIfCipherExistsAndOwnedBy(
+        @Param("id") id: UUID,
+        @Param("owner") owner: UUID
+    ): Boolean
 
     /**
      * Get all user cipher ids.
@@ -35,7 +40,9 @@ interface CipherRepository : CrudRepository<CipherTable, UUID> {
      * @return A list of all user cipher ids.
      */
     @Query("SELECT p.id FROM #{#entityName} p WHERE p.owner = :owner")
-    fun getAllIds(@Param("owner") owner: UUID): List<UUID>
+    fun getAllIds(
+        @Param("owner") owner: UUID
+    ): List<UUID>
 
     /**
      * Update cipher data.
@@ -45,5 +52,8 @@ interface CipherRepository : CrudRepository<CipherTable, UUID> {
     @Transactional
     @Modifying
     @Query("UPDATE #{#entityName} p SET p.data = :data WHERE p.id = :id")
-    fun updateData(@Param("id") id: UUID, @Param("data") data: String)
+    fun updateData(
+        @Param("id") id: UUID,
+        @Param("data") data: String
+    )
 }

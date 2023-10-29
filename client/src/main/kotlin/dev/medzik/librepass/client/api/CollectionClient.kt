@@ -75,7 +75,10 @@ class CollectionClient(
      * @return [IdResponse]
      */
     @Throws(ClientException::class, ApiException::class)
-    fun updateCollection(id: UUID, name: String): IdResponse {
+    fun updateCollection(
+        id: UUID,
+        name: String
+    ): IdResponse {
         return updateCollection(id.toString(), name)
     }
 
@@ -86,7 +89,10 @@ class CollectionClient(
      * @return [IdResponse]
      */
     @Throws(ClientException::class, ApiException::class)
-    fun updateCollection(id: String, name: String): IdResponse {
+    fun updateCollection(
+        id: String,
+        name: String
+    ): IdResponse {
         val request = CreateCollectionRequest(name = name)
         val response = client.patch("$API_ENDPOINT/$id", JsonUtils.serialize(request))
         return JsonUtils.deserialize(response)

@@ -16,33 +16,37 @@ class CipherTests {
     private val secretKey = "1234567890123456789012345678901212345678901234567890123456789012"
 
     // example cipher
-    private val cipher = Cipher(
-        id = UUID.randomUUID(),
-        owner = UUID.randomUUID(),
-        type = CipherType.Login,
-        loginData = CipherLoginData(
-            name = "Example",
-            username = "librepass@example.com",
-            password = "SomeSecretPassword123!",
-            passwordHistory = listOf(
-                PasswordHistory(
-                    password = "very secret password",
-                    // current date without milliseconds (because it is broken when comparing dates)
-                    lastUsed = Date(System.currentTimeMillis() / 1000 * 1000)
-                )
-            ),
-            fields = listOf(
-                CipherField(
-                    name = "test",
-                    type = CipherFieldType.Text,
-                    value = "test"
-                )
-            )
-        ),
-        collection = UUID.randomUUID(),
-        favorite = true,
-        rePrompt = true
-    )
+    private val cipher =
+        Cipher(
+            id = UUID.randomUUID(),
+            owner = UUID.randomUUID(),
+            type = CipherType.Login,
+            loginData =
+                CipherLoginData(
+                    name = "Example",
+                    username = "librepass@example.com",
+                    password = "SomeSecretPassword123!",
+                    passwordHistory =
+                        listOf(
+                            PasswordHistory(
+                                password = "very secret password",
+                                // current date without milliseconds (because it is broken when comparing dates)
+                                lastUsed = Date(System.currentTimeMillis() / 1000 * 1000)
+                            )
+                        ),
+                    fields =
+                        listOf(
+                            CipherField(
+                                name = "test",
+                                type = CipherFieldType.Text,
+                                value = "test"
+                            )
+                        )
+                ),
+            collection = UUID.randomUUID(),
+            favorite = true,
+            rePrompt = true
+        )
 
     @Test
     fun `encrypt cipher`() {

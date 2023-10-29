@@ -10,10 +10,8 @@ import java.util.*
 data class CollectionTable(
     @Id
     val id: UUID = UUID.randomUUID(),
-
     val owner: UUID,
     val name: String,
-
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     val created: Date = Date(),

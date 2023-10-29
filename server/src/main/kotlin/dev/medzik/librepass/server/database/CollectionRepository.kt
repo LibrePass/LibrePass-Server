@@ -14,7 +14,10 @@ interface CollectionRepository : CrudRepository<CollectionTable, UUID> {
      * @param owner user identifier
      * @return The collection with the given ID and owner, or null if it doesn't exist.
      */
-    fun findByIdAndOwner(id: UUID, owner: UUID): CollectionTable?
+    fun findByIdAndOwner(
+        id: UUID,
+        owner: UUID
+    ): CollectionTable?
 
     /**
      * Find all collections owned by the given user.

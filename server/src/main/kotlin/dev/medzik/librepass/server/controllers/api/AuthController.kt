@@ -61,269 +61,285 @@ class AuthRateLimitConfig {
 
 @RestController
 @RequestMapping("/api/auth")
-class AuthController @Autowired constructor(
-    private val userRepository: UserRepository,
-    private val tokenRepository: TokenRepository,
-    private val emailService: EmailService,
-    @Value("\${server.api.rateLimit.enabled}")
-    private val rateLimitEnabled: Boolean,
-    @Value("\${email.verification.required}")
-    private val emailVerificationRequired: Boolean,
-    @Value("\${web.url}")
-    private val webUrl: String
-) {
-    private val logger = LoggerFactory.getLogger(this::class.java)
-    private val rateLimit = AuthRateLimitConfig()
-    private val coroutineScope = CoroutineScope(Dispatchers.IO)
+class AuthController
+    @Autowired
+    constructor(
+        private val userRepository: UserRepository,
+        private val tokenRepository: TokenRepository,
+        private val emailService: EmailService,
+        @Value("\${server.api.rateLimit.enabled}")
+        private val rateLimitEnabled: Boolean,
+        @Value("\${email.verification.required}")
+        private val emailVerificationRequired: Boolean,
+        @Value("\${web.url}")
+        private val webUrl: String
+    ) {
+        private val logger = LoggerFactory.getLogger(this::class.java)
+        private val rateLimit = AuthRateLimitConfig()
+        private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
-    @PostMapping("/register")
-    fun register(
-        @RequestIP ip: String,
-        @RequestBody request: RegisterRequest
-    ): Response {
-        consumeRateLimit(ip)
+        @PostMapping("/register")
+        fun register(
+            @RequestIP ip: String,
+            @RequestBody request: RegisterRequest
+        ): Response {
+            consumeRateLimit(ip)
 
-        if (!Validator.emailValidator(request.email) ||
-            !Validator.hexValidator(request.sharedKey, 32) ||
-            !Validator.hexValidator(request.publicKey, 32) ||
-            request.parallelism < 0 ||
-            request.memory < 19 * 1024 ||
-            request.iterations < 0
-        ) return ResponseError.INVALID_BODY.toResponse()
-
-        val sharedKey = X25519.computeSharedSecret(ServerPrivateKey, request.publicKey.fromHexString())
-        if (!request.sharedKey.fromHexString().contentEquals(sharedKey))
-            return ResponseError.INVALID_CREDENTIALS.toResponse()
-
-        val verificationToken = Random.randBytes(16).toHexString()
-
-        val user = userRepository.save(
-            UserTable(
-                email = request.email.lowercase(),
-                passwordHint = request.passwordHint,
-                // Argon2id parameters
-                parallelism = request.parallelism,
-                memory = request.memory,
-                iterations = request.iterations,
-                // Curve25519 key pair
-                publicKey = request.publicKey,
-                // Email verification token
-                emailVerificationCode = verificationToken,
-                emailVerificationCodeExpiresAt = Date.from(
-                    Calendar.getInstance().apply {
-                        add(Calendar.HOUR, 24)
-                    }.toInstant()
-                )
+            if (!Validator.emailValidator(request.email) ||
+                !Validator.hexValidator(request.sharedKey, 32) ||
+                !Validator.hexValidator(request.publicKey, 32) ||
+                request.parallelism < 0 ||
+                request.memory < 19 * 1024 ||
+                request.iterations < 0
             )
-        )
+                return ResponseError.INVALID_BODY.toResponse()
 
-        coroutineScope.launch {
-            try {
-                emailService.sendEmailVerification(
-                    to = request.email,
-                    user = user.id.toString(),
-                    code = user.emailVerificationCode.toString()
+            val sharedKey = X25519.computeSharedSecret(ServerPrivateKey, request.publicKey.fromHexString())
+            if (!request.sharedKey.fromHexString().contentEquals(sharedKey))
+                return ResponseError.INVALID_CREDENTIALS.toResponse()
+
+            val verificationToken = Random.randBytes(16).toHexString()
+
+            val user =
+                userRepository.save(
+                    UserTable(
+                        email = request.email.lowercase(),
+                        passwordHint = request.passwordHint,
+                        // Argon2id parameters
+                        parallelism = request.parallelism,
+                        memory = request.memory,
+                        iterations = request.iterations,
+                        // Curve25519 key pair
+                        publicKey = request.publicKey,
+                        // Email verification token
+                        emailVerificationCode = verificationToken,
+                        emailVerificationCodeExpiresAt =
+                            Date.from(
+                                Calendar.getInstance().apply {
+                                    add(Calendar.HOUR, 24)
+                                }.toInstant()
+                            )
+                    )
                 )
-            } catch (e: Throwable) {
-                logger.error("Error sending email verification", e)
+
+            coroutineScope.launch {
+                try {
+                    emailService.sendEmailVerification(
+                        to = request.email,
+                        user = user.id.toString(),
+                        code = user.emailVerificationCode.toString()
+                    )
+                } catch (e: Throwable) {
+                    logger.error("Error sending email verification", e)
+                }
             }
+
+            return ResponseHandler.generateResponse(HttpStatus.CREATED)
         }
 
-        return ResponseHandler.generateResponse(HttpStatus.CREATED)
-    }
+        @GetMapping("/preLogin")
+        fun preLogin(
+            @RequestIP ip: String,
+            @RequestParam("email") email: String?
+        ): Response {
+            consumeRateLimit(ip)
 
-    @GetMapping("/preLogin")
-    fun preLogin(
-        @RequestIP ip: String,
-        @RequestParam("email") email: String?
-    ): Response {
-        consumeRateLimit(ip)
+            if (email.isNullOrEmpty())
+                return ResponseHandler.generateResponse(
+                    PreLoginResponse(
+                        // Default argon2id parameters
+                        parallelism = 3,
+                        memory = 65536, // 64MB
+                        iterations = 4,
+                        // Server Curve25519 public key
+                        serverPublicKey = ServerPublicKey.toHexString()
+                    ),
+                    HttpStatus.OK
+                )
 
-        if (email.isNullOrEmpty())
+            val user =
+                userRepository.findByEmail(email.lowercase())
+                    ?: return ResponseError.INVALID_CREDENTIALS.toResponse()
+
             return ResponseHandler.generateResponse(
                 PreLoginResponse(
-                    // Default argon2id parameters
-                    parallelism = 3,
-                    memory = 65536, // 64MB
-                    iterations = 4,
+                    parallelism = user.parallelism,
+                    memory = user.memory,
+                    iterations = user.iterations,
                     // Server Curve25519 public key
                     serverPublicKey = ServerPublicKey.toHexString()
                 ),
                 HttpStatus.OK
             )
-
-        val user = userRepository.findByEmail(email.lowercase())
-            ?: return ResponseError.INVALID_CREDENTIALS.toResponse()
-
-        return ResponseHandler.generateResponse(
-            PreLoginResponse(
-                parallelism = user.parallelism,
-                memory = user.memory,
-                iterations = user.iterations,
-                // Server Curve25519 public key
-                serverPublicKey = ServerPublicKey.toHexString()
-            ),
-            HttpStatus.OK
-        )
-    }
-
-    @PostMapping("/oauth")
-    fun auth(
-        @RequestIP ip: String,
-        @RequestParam("grantType") grantType: String,
-        @RequestBody request: String
-    ): Response {
-        consumeRateLimit(ip)
-
-        when (grantType) {
-            "login" -> {
-                try {
-                    return oauthLogin(
-                        ip = ip,
-                        request = Gson().fromJson(request, LoginRequest::class.java)
-                    )
-                } catch (e: JsonSyntaxException) {
-                    ResponseError.INVALID_CREDENTIALS.toResponse()
-                }
-            }
-            "2fa" -> {
-                try {
-                    return oauth2FA(
-                        request = Gson().fromJson(request, TwoFactorRequest::class.java)
-                    )
-                } catch (e: JsonSyntaxException) {
-                    ResponseError.INVALID_CREDENTIALS.toResponse()
-                }
-            }
         }
 
-        return ResponseError.INVALID_BODY.toResponse()
-    }
+        @PostMapping("/oauth")
+        fun auth(
+            @RequestIP ip: String,
+            @RequestParam("grantType") grantType: String,
+            @RequestBody request: String
+        ): Response {
+            consumeRateLimit(ip)
 
-    private fun oauthLogin(ip: String, request: LoginRequest): Response {
-        consumeRateLimit(request.email.lowercase())
+            when (grantType) {
+                "login" -> {
+                    try {
+                        return oauthLogin(
+                            ip = ip,
+                            request = Gson().fromJson(request, LoginRequest::class.java)
+                        )
+                    } catch (e: JsonSyntaxException) {
+                        ResponseError.INVALID_CREDENTIALS.toResponse()
+                    }
+                }
+                "2fa" -> {
+                    try {
+                        return oauth2FA(
+                            request = Gson().fromJson(request, TwoFactorRequest::class.java)
+                        )
+                    } catch (e: JsonSyntaxException) {
+                        ResponseError.INVALID_CREDENTIALS.toResponse()
+                    }
+                }
+            }
 
-        val user = userRepository.findByEmail(request.email.lowercase())
-            ?: return ResponseError.INVALID_CREDENTIALS.toResponse()
-
-        if (emailVerificationRequired && !user.emailVerified)
-            return ResponseError.EMAIL_NOT_VERIFIED.toResponse()
-
-        val sharedKey = X25519.computeSharedSecret(ServerPrivateKey, user.publicKey.fromHexString())
-        if (!request.sharedKey.fromHexString().contentEquals(sharedKey))
-            return ResponseError.INVALID_CREDENTIALS.toResponse()
-
-        val apiToken = tokenRepository.save(
-            TokenTable(
-                owner = user.id,
-                lastIp = ip,
-                // Allow use of an api key only if two-factor authentication has been successful
-                confirmed = !user.twoFactorEnabled
-            )
-        )
-
-        return ResponseHandler.generateResponse(
-            UserCredentialsResponse(
-                userId = user.id,
-                apiKey = apiToken.token,
-                verified = apiToken.confirmed
-            )
-        )
-    }
-
-    private fun oauth2FA(request: TwoFactorRequest): Response {
-        consumeRateLimit(request.apiKey)
-
-        val token = tokenRepository.findByIdOrNull(request.apiKey)
-            ?: throw AuthorizedUserException()
-
-        if (token.confirmed)
-            return ResponseHandler.generateResponse(HttpStatus.OK)
-
-        val user = userRepository.findByIdOrNull(token.owner)
-            ?: throw UnsupportedOperationException()
-
-        if (user.twoFactorSecret == null)
-            return ResponseHandler.generateResponse(HttpStatus.OK)
-
-        consumeRateLimit(user.email)
-
-        if (!TOTP.validate(user.twoFactorSecret, request.code) &&
-            request.code != user.twoFactorRecoveryCode
-        ) throw InvalidTwoFactorCodeException()
-
-        tokenRepository.save(token.copy(confirmed = true))
-
-        return ResponseHandler.generateResponse(HttpStatus.OK)
-    }
-
-    @GetMapping("/passwordHint")
-    fun requestPasswordHint(
-        @RequestIP ip: String,
-        @RequestParam("email") email: String?
-    ): Response {
-        if (email == null)
             return ResponseError.INVALID_BODY.toResponse()
-
-        consumeRateLimit(ip)
-        consumeRateLimit(email)
-
-        val user = userRepository.findByEmail(email)
-            ?: return ResponseError.INVALID_CREDENTIALS.toResponse()
-
-        try {
-            emailService.sendPasswordHint(
-                to = user.email,
-                hint = user.passwordHint
-            )
-        } catch (e: Exception) {
-            logger.error("Failed to send password hint", e)
-
-            return ResponseError.UNEXPECTED_SERVER_ERROR.toResponse()
         }
 
-        return ResponseHandler.generateResponse(HttpStatus.OK)
-    }
+        private fun oauthLogin(
+            ip: String,
+            request: LoginRequest
+        ): Response {
+            consumeRateLimit(request.email.lowercase())
 
-    @GetMapping("/verifyEmail")
-    fun verifyEmail(
-        @RequestIP ip: String,
-        @RequestParam("user") userID: String,
-        @RequestParam("code") verificationCode: String
-    ): Response {
-        consumeRateLimit(ip)
-        consumeRateLimit(userID)
+            val user =
+                userRepository.findByEmail(request.email.lowercase())
+                    ?: return ResponseError.INVALID_CREDENTIALS.toResponse()
 
-        val user = userRepository.findById(UUID.fromString(userID)).orElse(null)
-            ?: return ResponseError.INVALID_BODY.toResponse()
+            if (emailVerificationRequired && !user.emailVerified)
+                return ResponseError.EMAIL_NOT_VERIFIED.toResponse()
 
-        // check if user email is already verified
-        if (user.emailVerified)
+            val sharedKey = X25519.computeSharedSecret(ServerPrivateKey, user.publicKey.fromHexString())
+            if (!request.sharedKey.fromHexString().contentEquals(sharedKey))
+                return ResponseError.INVALID_CREDENTIALS.toResponse()
+
+            val apiToken =
+                tokenRepository.save(
+                    TokenTable(
+                        owner = user.id,
+                        lastIp = ip,
+                        // Allow use of an api key only if two-factor authentication has been successful
+                        confirmed = !user.twoFactorEnabled
+                    )
+                )
+
+            return ResponseHandler.generateResponse(
+                UserCredentialsResponse(
+                    userId = user.id,
+                    apiKey = apiToken.token,
+                    verified = apiToken.confirmed
+                )
+            )
+        }
+
+        private fun oauth2FA(request: TwoFactorRequest): Response {
+            consumeRateLimit(request.apiKey)
+
+            val token =
+                tokenRepository.findByIdOrNull(request.apiKey)
+                    ?: throw AuthorizedUserException()
+
+            if (token.confirmed)
+                return ResponseHandler.generateResponse(HttpStatus.OK)
+
+            val user =
+                userRepository.findByIdOrNull(token.owner)
+                    ?: throw UnsupportedOperationException()
+
+            if (user.twoFactorSecret == null)
+                return ResponseHandler.generateResponse(HttpStatus.OK)
+
+            consumeRateLimit(user.email)
+
+            if (!TOTP.validate(user.twoFactorSecret, request.code) &&
+                request.code != user.twoFactorRecoveryCode
+            )
+                throw InvalidTwoFactorCodeException()
+
+            tokenRepository.save(token.copy(confirmed = true))
+
+            return ResponseHandler.generateResponse(HttpStatus.OK)
+        }
+
+        @GetMapping("/passwordHint")
+        fun requestPasswordHint(
+            @RequestIP ip: String,
+            @RequestParam("email") email: String?
+        ): Response {
+            if (email == null)
+                return ResponseError.INVALID_BODY.toResponse()
+
+            consumeRateLimit(ip)
+            consumeRateLimit(email)
+
+            val user =
+                userRepository.findByEmail(email)
+                    ?: return ResponseError.INVALID_CREDENTIALS.toResponse()
+
+            try {
+                emailService.sendPasswordHint(
+                    to = user.email,
+                    hint = user.passwordHint
+                )
+            } catch (e: Exception) {
+                logger.error("Failed to send password hint", e)
+
+                return ResponseError.UNEXPECTED_SERVER_ERROR.toResponse()
+            }
+
+            return ResponseHandler.generateResponse(HttpStatus.OK)
+        }
+
+        @GetMapping("/verifyEmail")
+        fun verifyEmail(
+            @RequestIP ip: String,
+            @RequestParam("user") userID: String,
+            @RequestParam("code") verificationCode: String
+        ): Response {
+            consumeRateLimit(ip)
+            consumeRateLimit(userID)
+
+            val user =
+                userRepository.findById(UUID.fromString(userID)).orElse(null)
+                    ?: return ResponseError.INVALID_BODY.toResponse()
+
+            // check if user email is already verified
+            if (user.emailVerified)
+                return ResponseHandler.redirectResponse("$webUrl/verification/email")
+
+            // check if the code is valid
+            if (user.emailVerificationCode.toString() != verificationCode)
+                return ResponseError.INVALID_BODY.toResponse()
+
+            // check if the code is expired
+            if (user.emailVerificationCodeExpiresAt?.before(Date()) == true)
+                return ResponseError.INVALID_BODY.toResponse()
+
+            // set email as verified
+            userRepository.save(
+                user.copy(
+                    emailVerified = true,
+                    emailVerificationCode = null
+                )
+            )
+
             return ResponseHandler.redirectResponse("$webUrl/verification/email")
+        }
 
-        // check if the code is valid
-        if (user.emailVerificationCode.toString() != verificationCode)
-            return ResponseError.INVALID_BODY.toResponse()
+        private fun consumeRateLimit(key: String) {
+            if (!rateLimitEnabled) return
 
-        // check if the code is expired
-        if (user.emailVerificationCodeExpiresAt?.before(Date()) == true)
-            return ResponseError.INVALID_BODY.toResponse()
-
-        // set email as verified
-        userRepository.save(
-            user.copy(
-                emailVerified = true,
-                emailVerificationCode = null
-            )
-        )
-
-        return ResponseHandler.redirectResponse("$webUrl/verification/email")
+            if (!rateLimit.resolveBucket(key).tryConsume(1))
+                throw RateLimitException()
+        }
     }
-
-    private fun consumeRateLimit(key: String) {
-        if (!rateLimitEnabled) return
-
-        if (!rateLimit.resolveBucket(key).tryConsume(1))
-            throw RateLimitException()
-    }
-}

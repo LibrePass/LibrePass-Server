@@ -16,34 +16,39 @@ typealias Response = ResponseEntity<Any>
  * ResponseHandler is a helper class for generating responses.
  */
 object ResponseHandler {
-    fun generateResponse(status: HttpStatus) =
-        createResponse(HashMap<String, Any>(), status.value())
+    fun generateResponse(status: HttpStatus) = createResponse(HashMap<String, Any>(), status.value())
 
-    fun generateResponse(data: Any, status: HttpStatus = HttpStatus.OK) =
-        createResponse(data, status.value())
+    fun generateResponse(
+        data: Any,
+        status: HttpStatus = HttpStatus.OK
+    ) = createResponse(data, status.value())
 
-    fun generateErrorResponse(error: String, status: Int): Response {
-        val map = mapOf(
-            "error" to error,
-            "status" to status
-        )
+    fun generateErrorResponse(
+        error: String,
+        status: Int
+    ): Response {
+        val map =
+            mapOf(
+                "error" to error,
+                "status" to status
+            )
 
         return createResponse(map, status)
     }
 
-    fun redirectResponse(
-        url: String
-    ): Response = ResponseEntity
-        .status(HttpStatus.FOUND)
-        .location(URI.create(url))
-        .build()
+    fun redirectResponse(url: String): Response =
+        ResponseEntity
+            .status(HttpStatus.FOUND)
+            .location(URI.create(url))
+            .build()
 
     private fun createResponse(
         data: Any,
         status: Int
-    ): Response = ResponseEntity
-        .status(status)
-        .body(data)
+    ): Response =
+        ResponseEntity
+            .status(status)
+            .body(data)
 }
 
 fun ResponseError.toResponse() = ResponseHandler.generateErrorResponse(this.name, this.statusCode.code)

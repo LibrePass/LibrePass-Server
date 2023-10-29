@@ -42,16 +42,18 @@ class UserClientTests {
 
     @Test
     fun changePassword() {
-        val testCipher = Cipher(
-            id = UUID.randomUUID(),
-            owner = userId,
-            type = CipherType.Login,
-            loginData = CipherLoginData(
-                name = "test",
-                username = "test",
-                password = "test"
+        val testCipher =
+            Cipher(
+                id = UUID.randomUUID(),
+                owner = userId,
+                type = CipherType.Login,
+                loginData =
+                    CipherLoginData(
+                        name = "test",
+                        username = "test",
+                        password = "test"
+                    )
             )
-        )
 
         fun insertTestCipher() {
             cipherClient.insert(EncryptedCipher(testCipher, secretKey))
