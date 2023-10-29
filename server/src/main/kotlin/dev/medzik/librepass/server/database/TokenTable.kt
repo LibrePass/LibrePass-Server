@@ -13,9 +13,7 @@ data class TokenTable(
     val token: String = generateToken(),
     val owner: UUID,
     val confirmed: Boolean,
-
     val lastIp: String,
-
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     val created: Date = Date(),

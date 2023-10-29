@@ -6,14 +6,11 @@ import java.util.*
 data class RegisterRequest(
     val email: String,
     val passwordHint: String? = null,
-
     val sharedKey: String,
-
     // Argon2id parameters
     val parallelism: Int,
     val memory: Int,
     val iterations: Int,
-
     // Curve25519 public key
     val publicKey: String
 )

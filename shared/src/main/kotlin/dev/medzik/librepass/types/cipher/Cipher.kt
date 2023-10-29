@@ -91,6 +91,7 @@ data class Cipher(
         ): T? =
             if (type.ordinal == encryptedCipher.type)
                 Gson().fromJson(encryptedCipher.decryptData(secretKey), T::class.java)
-            else null
+            else
+                null
     }
 }

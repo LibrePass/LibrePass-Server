@@ -19,7 +19,10 @@ object TOTP {
         return totpGenerator.now()
     }
 
-    fun validate(secret: String, otpCode: String): Boolean {
+    fun validate(
+        secret: String,
+        otpCode: String
+    ): Boolean {
         val totpGenerator = initializeTOTPGenerator(secret)
         // Check the current code and the previous two and the next two.
         return totpGenerator.verify(otpCode, 2)
@@ -29,12 +32,13 @@ object TOTP {
         val base32 = Base32()
         val bytes = base32.decode(secret)
 
-        val totp = TOTPGenerator.Builder(bytes)
-            .withHOTPGenerator { builder: HOTPGenerator.Builder ->
-                builder.withPasswordLength(6)
-                builder.withAlgorithm(HMACAlgorithm.SHA1) // SHA256 and SHA512 are also supported
-            }
-            .withPeriod(Duration.ofSeconds(30))
+        val totp =
+            TOTPGenerator.Builder(bytes)
+                .withHOTPGenerator { builder: HOTPGenerator.Builder ->
+                    builder.withPasswordLength(6)
+                    builder.withAlgorithm(HMACAlgorithm.SHA1) // SHA256 and SHA512 are also supported
+                }
+                .withPeriod(Duration.ofSeconds(30))
 
         return totp.build()
     }

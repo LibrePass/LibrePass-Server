@@ -28,7 +28,11 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
     private val client = Client(apiUrl)
 
     @Throws(ClientException::class, ApiException::class)
-    fun register(email: String, password: String, passwordHint: String? = null) {
+    fun register(
+        email: String,
+        password: String,
+        passwordHint: String? = null
+    ) {
         val serverPreLogin = preLogin("")
 
         val passwordHash = computePasswordHash(password, email, serverPreLogin.toArgon2())
@@ -37,17 +41,18 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
         // compute shared key
         val sharedKey = computeSharedKey(passwordHash.hash, serverPreLogin.serverPublicKey.fromHexString())
 
-        val request = RegisterRequest(
-            email = email,
-            passwordHint = passwordHint,
-            sharedKey = sharedKey.toHexString(),
-            // Argon2id parameters
-            parallelism = passwordHash.parallelism,
-            memory = passwordHash.memory,
-            iterations = passwordHash.iterations,
-            // Curve25519 public key
-            publicKey = publicKey.toHexString()
-        )
+        val request =
+            RegisterRequest(
+                email = email,
+                passwordHint = passwordHint,
+                sharedKey = sharedKey.toHexString(),
+                // Argon2id parameters
+                parallelism = passwordHash.parallelism,
+                memory = passwordHash.memory,
+                iterations = passwordHash.iterations,
+                // Curve25519 public key
+                publicKey = publicKey.toHexString()
+            )
 
         client.post("$API_ENDPOINT/register", JsonUtils.serialize(request))
     }
@@ -59,29 +64,38 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
     }
 
     @Throws(ClientException::class, ApiException::class)
-    fun login(email: String, password: String): UserCredentials {
+    fun login(
+        email: String,
+        password: String
+    ): UserCredentials {
         val preLoginData = preLogin(email)
 
-        val passwordHash = computePasswordHash(
-            password = password,
-            email = email,
-            argon2Function = preLoginData.toArgon2()
-        )
+        val passwordHash =
+            computePasswordHash(
+                password = password,
+                email = email,
+                argon2Function = preLoginData.toArgon2()
+            )
 
         return login(email, passwordHash, preLoginData)
     }
 
     @Throws(ClientException::class, ApiException::class)
-    fun login(email: String, passwordHash: Argon2Hash, preLogin: PreLoginResponse? = null): UserCredentials {
+    fun login(
+        email: String,
+        passwordHash: Argon2Hash,
+        preLogin: PreLoginResponse? = null
+    ): UserCredentials {
         val serverPublicKey = preLogin?.serverPublicKey ?: preLogin(email).serverPublicKey
 
         val publicKey = X25519.publicFromPrivate(passwordHash.hash)
         val sharedKey = computeSharedKey(passwordHash.hash, serverPublicKey.fromHexString())
 
-        val request = LoginRequest(
-            email = email,
-            sharedKey = sharedKey.toHexString(),
-        )
+        val request =
+            LoginRequest(
+                email = email,
+                sharedKey = sharedKey.toHexString(),
+            )
 
         val responseBody = client.post("$API_ENDPOINT/oauth?grantType=login", JsonUtils.serialize(request))
         val response = JsonUtils.deserialize<UserCredentialsResponse>(responseBody)
@@ -99,11 +113,15 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
     }
 
     @Throws(ClientException::class, ApiException::class)
-    fun loginTwoFactor(apiKey: String, code: String) {
-        val request = TwoFactorRequest(
-            apiKey = apiKey,
-            code = code
-        )
+    fun loginTwoFactor(
+        apiKey: String,
+        code: String
+    ) {
+        val request =
+            TwoFactorRequest(
+                apiKey = apiKey,
+                code = code
+            )
 
         client.post("$API_ENDPOINT/oauth?grantType=2fa", JsonUtils.serialize(request))
     }
