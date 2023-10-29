@@ -36,9 +36,10 @@ class Client(
     private val apiURL: String,
     private val accessToken: String? = null,
 ) {
-    private val httpClient = OkHttpClient.Builder()
-        .callTimeout(30, TimeUnit.SECONDS)
-        .build()
+    private val httpClient =
+        OkHttpClient.Builder()
+            .callTimeout(30, TimeUnit.SECONDS)
+            .build()
     private val httpMediaTypeJson = "application/json; charset=utf-8".toMediaType()
 
     // create authorization header if access token is provided
@@ -51,11 +52,12 @@ class Client(
      */
     @Throws(ClientException::class, ApiException::class)
     fun get(endpoint: String): String {
-        val request = Request.Builder()
-            .url(apiURL + endpoint)
-            .addHeader("Authorization", authorizationHeader)
-            .get()
-            .build()
+        val request =
+            Request.Builder()
+                .url(apiURL + endpoint)
+                .addHeader("Authorization", authorizationHeader)
+                .get()
+                .build()
 
         return executeAndExtractBody(request)
     }
@@ -67,11 +69,12 @@ class Client(
      */
     @Throws(ClientException::class, ApiException::class)
     fun delete(endpoint: String): String {
-        val request = Request.Builder()
-            .url(apiURL + endpoint)
-            .addHeader("Authorization", authorizationHeader)
-            .delete()
-            .build()
+        val request =
+            Request.Builder()
+                .url(apiURL + endpoint)
+                .addHeader("Authorization", authorizationHeader)
+                .delete()
+                .build()
 
         return executeAndExtractBody(request)
     }
@@ -83,14 +86,18 @@ class Client(
      * @return response body
      */
     @Throws(ClientException::class, ApiException::class)
-    fun post(endpoint: String, json: String): String {
+    fun post(
+        endpoint: String,
+        json: String
+    ): String {
         val body = json.toRequestBody(httpMediaTypeJson)
 
-        val request = Request.Builder()
-            .url(apiURL + endpoint)
-            .addHeader("Authorization", authorizationHeader)
-            .post(body)
-            .build()
+        val request =
+            Request.Builder()
+                .url(apiURL + endpoint)
+                .addHeader("Authorization", authorizationHeader)
+                .post(body)
+                .build()
 
         return executeAndExtractBody(request)
     }
@@ -102,14 +109,18 @@ class Client(
      * @return response body
      */
     @Throws(ClientException::class, ApiException::class)
-    fun patch(endpoint: String, json: String): String {
+    fun patch(
+        endpoint: String,
+        json: String
+    ): String {
         val body = json.toRequestBody(httpMediaTypeJson)
 
-        val request = Request.Builder()
-            .url(apiURL + endpoint)
-            .addHeader("Authorization", authorizationHeader)
-            .patch(body)
-            .build()
+        val request =
+            Request.Builder()
+                .url(apiURL + endpoint)
+                .addHeader("Authorization", authorizationHeader)
+                .patch(body)
+                .build()
 
         return executeAndExtractBody(request)
     }
@@ -121,14 +132,18 @@ class Client(
      * @return response body
      */
     @Throws(ClientException::class, ApiException::class)
-    fun put(endpoint: String, json: String): String {
+    fun put(
+        endpoint: String,
+        json: String
+    ): String {
         val body = json.toRequestBody(httpMediaTypeJson)
 
-        val request = Request.Builder()
-            .url(apiURL + endpoint)
-            .addHeader("Authorization", authorizationHeader)
-            .put(body)
-            .build()
+        val request =
+            Request.Builder()
+                .url(apiURL + endpoint)
+                .addHeader("Authorization", authorizationHeader)
+                .put(body)
+                .build()
 
         return executeAndExtractBody(request)
     }

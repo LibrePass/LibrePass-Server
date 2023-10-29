@@ -49,17 +49,18 @@ data class EncryptedCipher(
         id = cipher.id,
         owner = cipher.owner,
         type = cipher.type.ordinal,
-        protectedData = Aes.encrypt(
-            Aes.GCM,
-            secretKey.fromHexString(),
-            Gson().toJson(
-                when (cipher.type) {
-                    CipherType.Login -> cipher.loginData
-                    CipherType.Card -> cipher.cardData
-                    CipherType.SecureNote -> cipher.secureNoteData
-                }
-            ).toByteArray()
-        ),
+        protectedData =
+            Aes.encrypt(
+                Aes.GCM,
+                secretKey.fromHexString(),
+                Gson().toJson(
+                    when (cipher.type) {
+                        CipherType.Login -> cipher.loginData
+                        CipherType.Card -> cipher.cardData
+                        CipherType.SecureNote -> cipher.secureNoteData
+                    }
+                ).toByteArray()
+            ),
         collection = cipher.collection,
         favorite = cipher.favorite,
         rePrompt = cipher.rePrompt,
