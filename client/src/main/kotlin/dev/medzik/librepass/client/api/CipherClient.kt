@@ -45,7 +45,10 @@ class CipherClient(
      * @return [IdResponse]
      */
     @Throws(ClientException::class, ApiException::class)
-    fun insert(cipher: Cipher, secretKey: String): IdResponse {
+    fun insert(
+        cipher: Cipher,
+        secretKey: String
+    ): IdResponse {
         return insert(
             EncryptedCipher(
                 cipher = cipher,
@@ -114,7 +117,10 @@ class CipherClient(
      * @return [IdResponse]
      */
     @Throws(ClientException::class, ApiException::class)
-    fun update(cipher: Cipher, secretKey: String): IdResponse {
+    fun update(
+        cipher: Cipher,
+        secretKey: String
+    ): IdResponse {
         return update(
             EncryptedCipher(
                 cipher = cipher,
