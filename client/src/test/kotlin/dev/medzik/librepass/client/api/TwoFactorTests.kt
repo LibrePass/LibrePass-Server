@@ -25,7 +25,7 @@ class TwoFactorTests {
             // setup 2fa
             val auth = authClient.login(email, password)
             val code = TOTP.getTOTPCode(twoFactorSecret)
-            UserClient(email, auth.apiKey, apiUrl).setupTwoFactor(email, password, twoFactorSecret, code)
+            UserClient(email, auth.apiKey, apiUrl).setupTwoFactor(password, twoFactorSecret, code)
         }
     }
 
