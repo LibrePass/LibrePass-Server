@@ -43,8 +43,8 @@
         <java.version>1.8</java.version>
         <java.modules.version>9</java.modules.version>
 
-        <maven.compiler.source>9</maven.compiler.source>
-        <maven.compiler.target>9</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
 
         <kotlin.version>1.9.10</kotlin.version>
         <coroutines.version>1.7.3</coroutines.version>
