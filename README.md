@@ -8,3 +8,7 @@ The server is written in Kotlin using Spring Boot framework and Spring Boot JPA 
 ## Setup Guide
 
 Please see the [Setup Guide](https://github.com/LibrePass/server/wiki/Server) for more information on how to set up the server.
+
+## License
+
+Licensed under AGPLv3: https://www.gnu.org/licenses/agpl-3.0.html
