@@ -4,23 +4,22 @@ import com.google.gson.Gson
 import com.google.gson.annotations.JsonAdapter
 import dev.medzik.libcrypto.Aes
 import dev.medzik.librepass.types.adapters.DateAdapter
-import dev.medzik.librepass.utils.fromHexString
 import java.util.*
 
 /**
  * EncryptedCipher is a representation of cipher stored in the database.
  * The data is encrypted and can only be decrypted with the encryption key.
- * @property id cipher identifier
- * @property owner owner identifier
- * @property type type of the cipher
- * @property protectedData encrypted cipher data
- * @property collection unique identifier of the collection the cipher belongs to
- * @property favorite Whether the cipher is marked as favorite
- * @property rePrompt Whether the password should be re-prompted (Only UI-related)
- * @property version version of the cipher (the current version is 1)
- * @property created date the cipher was created
- * @property lastModified date the cipher was last modified
- * @see Cipher
+ *
+ * @property id The cipher identifier.
+ * @property owner The owner identifier of the cipher.
+ * @property type The type of the cipher.
+ * @property protectedData The encrypted cipher data.
+ * @property collection The identifier of the collection to which the cipher belongs.
+ * @property favorite Whether the cipher is marked as favorite.
+ * @property rePrompt Whether the password should be re-prompted. (Only UI-related)
+ * @property version The version of the cipher (the current version is 1)
+ * @property created The date when the cipher was created
+ * @property lastModified The date when the cipher was last modified
  */
 data class EncryptedCipher(
     val id: UUID,
@@ -39,12 +38,12 @@ data class EncryptedCipher(
     /**
      * Creates a new [EncryptedCipher] object from the [Cipher].
      * @param cipher The [Cipher] to encrypt.
-     * @param secretKey The key to encrypt the cipher with.
+     * @param secretKey The key to use for encryption.
      * @return The encrypted cipher.
      */
     constructor(
         cipher: Cipher,
-        secretKey: String
+        secretKey: ByteArray
     ) : this(
         id = cipher.id,
         owner = cipher.owner,
@@ -52,13 +51,13 @@ data class EncryptedCipher(
         protectedData =
             Aes.encrypt(
                 Aes.GCM,
-                secretKey.fromHexString(),
+                secretKey,
                 Gson().toJson(
                     when (cipher.type) {
                         CipherType.Login -> cipher.loginData
                         CipherType.Card -> cipher.cardData
                         CipherType.SecureNote -> cipher.secureNoteData
-                    }
+                    },
                 ).toByteArray()
             ),
         collection = cipher.collection,
@@ -76,8 +75,8 @@ data class EncryptedCipher(
     }
 
     /** Decrypts the cipher data. */
-    fun decryptData(secretKey: String): String {
-        return String(Aes.decrypt(Aes.GCM, secretKey.fromHexString(), this.protectedData))
+    fun decryptData(secretKey: ByteArray): String {
+        return String(Aes.decrypt(Aes.GCM, secretKey, this.protectedData))
     }
 
     /** Converts the cipher to a JSON string. */

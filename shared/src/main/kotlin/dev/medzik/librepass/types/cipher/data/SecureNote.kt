@@ -1,11 +1,11 @@
 package dev.medzik.librepass.types.cipher.data
 
 /**
- * Secure note for the cipher.
+ * Cipher data for secure notes.
  *
- * @param title title of the note
- * @param note secure note
- * @param fields custom fields
+ * @param title The title of the note.
+ * @param note The secure note.
+ * @property fields The custom fields for the cipher.
  */
 data class CipherSecureNoteData(
     val title: String,

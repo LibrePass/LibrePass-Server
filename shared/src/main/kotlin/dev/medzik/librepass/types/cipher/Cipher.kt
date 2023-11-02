@@ -8,18 +8,19 @@ import java.util.*
 
 /**
  * Cipher is a representation of a single cipher entry.
- * @property id cipher identifier
- * @property owner owner identifier
- * @property type cipher type - [CipherType]
- * @property loginData login data (Only if the cipher is a login cipher) - [CipherLoginData]
- * @property secureNoteData secure note data (Only if the cipher is a secure cipher) - [CipherSecureNoteData]
- * @property cardData card data (Only if the cipher is a card cipher) - [CipherCardData]
- * @property collection collection identifier
- * @property favorite whether the cipher is a favorite cipher
- * @property rePrompt whether the cipher should be re-prompted (Only UI feature)
- * @property version cipher version (the current version is 1)
- * @property created created date
- * @property lastModified last modified date
+ *
+ * @property id The cipher identifier.
+ * @property owner The identifier of the cipher owner.
+ * @property type The type of the cipher. - [CipherType]
+ * @property loginData The login data. (Only if the cipher is a login cipher) - [CipherLoginData]
+ * @property secureNoteData The secure note data. (Only if the cipher is a secure cipher) - [CipherSecureNoteData]
+ * @property cardData The card data. (Only if the cipher is a card cipher) - [CipherCardData]
+ * @property collection The identifier of collection,
+ * @property favorite Whether the cipher is a favorite cipher
+ * @property rePrompt Whether the cipher should be re-prompted (Only UI feature)
+ * @property version The version of the cipher object. (the current version is 1)
+ * @property created The date when the cipher was created.
+ * @property lastModified The date when the cipher was last modified.
  */
 data class Cipher(
     val id: UUID,
@@ -55,19 +56,17 @@ data class Cipher(
             throw IllegalArgumentException("Only card cipher can have card data")
     }
 
-    /**
-     * Creates a new [Cipher] object from the [EncryptedCipher].
-     */
+    /** Creates a new [Cipher] object from the [EncryptedCipher]. */
     constructor(
         encryptedCipher: EncryptedCipher,
-        secretKey: String
+        secretKeyBytes: ByteArray
     ) : this(
         id = encryptedCipher.id,
         owner = encryptedCipher.owner,
         type = CipherType.from(encryptedCipher.type),
-        loginData = decryptData(CipherType.Login, encryptedCipher, secretKey),
-        secureNoteData = decryptData(CipherType.SecureNote, encryptedCipher, secretKey),
-        cardData = decryptData(CipherType.Card, encryptedCipher, secretKey),
+        loginData = decryptData(CipherType.Login, encryptedCipher, secretKeyBytes),
+        secureNoteData = decryptData(CipherType.SecureNote, encryptedCipher, secretKeyBytes),
+        cardData = decryptData(CipherType.Card, encryptedCipher, secretKeyBytes),
         collection = encryptedCipher.collection,
         favorite = encryptedCipher.favorite,
         rePrompt = encryptedCipher.rePrompt,
@@ -79,19 +78,21 @@ data class Cipher(
     companion object {
         /**
          * Decrypts the data of the [EncryptedCipher] if the type matches.
-         * @param type type of the cipher
-         * @param encryptedCipher encrypted cipher to decrypt
-         * @param secretKey secret key to use for decrypting
+         *
+         * @param type The type of the cipher.
+         * @param encryptedCipher The encrypted cipher to decrypt.
+         * @param secretKey The secret key to use for decrypting
          * @return The decrypted data or null if the type doesn't match.
          */
         private inline fun <reified T> decryptData(
             type: CipherType,
             encryptedCipher: EncryptedCipher,
-            secretKey: String
+            secretKey: ByteArray
         ): T? =
-            if (type.ordinal == encryptedCipher.type)
+            if (type.ordinal == encryptedCipher.type) {
                 Gson().fromJson(encryptedCipher.decryptData(secretKey), T::class.java)
-            else
+            } else {
                 null
+            }
     }
 }
