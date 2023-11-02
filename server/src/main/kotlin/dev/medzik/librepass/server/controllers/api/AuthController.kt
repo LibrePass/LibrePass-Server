@@ -13,6 +13,9 @@ import dev.medzik.librepass.server.database.TokenRepository
 import dev.medzik.librepass.server.database.TokenTable
 import dev.medzik.librepass.server.database.UserRepository
 import dev.medzik.librepass.server.database.UserTable
+import dev.medzik.librepass.server.ratelimit.AuthControllerEmailRateLimitConfig
+import dev.medzik.librepass.server.ratelimit.AuthControllerRateLimitConfig
+import dev.medzik.librepass.server.ratelimit.BaseRateLimitConfig
 import dev.medzik.librepass.server.services.EmailService
 import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseHandler
@@ -22,8 +25,6 @@ import dev.medzik.librepass.types.api.*
 import dev.medzik.librepass.utils.TOTP
 import dev.medzik.librepass.utils.fromHexString
 import dev.medzik.librepass.utils.toHexString
-import io.github.bucket4j.BandwidthBuilder.BandwidthBuilderCapacityStage
-import io.github.bucket4j.Bucket
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -33,9 +34,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
-import java.time.Duration
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 // The server's key pair is used for authentication using a shared key.
 //
@@ -44,20 +43,6 @@ import java.util.concurrent.ConcurrentHashMap
 // the key is different.
 val ServerPrivateKey: ByteArray = X25519.generatePrivateKey()
 val ServerPublicKey: ByteArray = X25519.publicFromPrivate(ServerPrivateKey)
-
-class AuthRateLimitConfig {
-    private var cache: Map<String, Bucket> = ConcurrentHashMap()
-
-    fun resolveBucket(key: String): Bucket {
-        return cache[key] ?: newBucket().also { cache += key to it }
-    }
-
-    private fun newBucket(): Bucket {
-        return Bucket.builder()
-            .addLimit { limit: BandwidthBuilderCapacityStage -> limit.capacity(20).refillGreedy(10, Duration.ofMinutes(1)) }
-            .build()
-    }
-}
 
 @RestController
 @RequestMapping("/api/auth")
@@ -75,7 +60,8 @@ class AuthController
         private val webUrl: String
     ) {
         private val logger = LoggerFactory.getLogger(this::class.java)
-        private val rateLimit = AuthRateLimitConfig()
+        private val rateLimit = AuthControllerRateLimitConfig()
+        private val rateLimitEmail = AuthControllerEmailRateLimitConfig()
         private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
         @PostMapping("/register")
@@ -274,13 +260,17 @@ class AuthController
         @GetMapping("/passwordHint")
         fun requestPasswordHint(
             @RequestIP ip: String,
-            @RequestParam("email") email: String?
+            @RequestParam("email") emailParam: String?
         ): Response {
-            if (email == null)
-                return ResponseError.INVALID_BODY.toResponse()
+            val email =
+                emailParam?.lowercase()
+                    ?: return ResponseError.INVALID_BODY.toResponse()
 
             consumeRateLimit(ip)
             consumeRateLimit(email)
+
+            consumeRateLimit(ip, rateLimitEmail)
+            consumeRateLimit(email, rateLimitEmail)
 
             val user =
                 userRepository.findByEmail(email)
@@ -336,10 +326,13 @@ class AuthController
             return ResponseHandler.redirectResponse("$webUrl/verification/email")
         }
 
-        private fun consumeRateLimit(key: String) {
+        private fun consumeRateLimit(
+            key: String,
+            rateLimitConfig: BaseRateLimitConfig = rateLimit
+        ) {
             if (!rateLimitEnabled) return
 
-            if (!rateLimit.resolveBucket(key).tryConsume(1))
+            if (!rateLimitConfig.resolveBucket(key).tryConsume(1))
                 throw RateLimitException()
         }
     }
