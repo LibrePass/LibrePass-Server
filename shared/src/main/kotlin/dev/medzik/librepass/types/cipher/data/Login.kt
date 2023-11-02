@@ -6,6 +6,7 @@ import java.util.*
 
 /**
  * Login data for cipher.
+ *
  * @property name cipher name
  * @property username login username
  * @property password login password
@@ -28,8 +29,9 @@ data class CipherLoginData(
 
 /**
  * Passwords history in [CipherLoginData].
- * @param password login password
- * @param lastUsed date when the password was changed
+ *
+ * @property password login password
+ * @property lastUsed date when the password was changed
  */
 data class PasswordHistory(
     val password: String,

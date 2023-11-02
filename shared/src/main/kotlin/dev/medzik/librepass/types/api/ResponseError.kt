@@ -1,7 +1,8 @@
 package dev.medzik.librepass.types.api
 
 /**
- * API error response.
+ * Response that contains API Error.
+ *
  * @property error error message returned from the server
  * @property status http status code
  */

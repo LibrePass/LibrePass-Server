@@ -2,6 +2,7 @@ package dev.medzik.librepass.types.cipher.data
 
 /**
  * Secure note for the cipher.
+ *
  * @param title title of the note
  * @param note secure note
  * @param fields custom fields

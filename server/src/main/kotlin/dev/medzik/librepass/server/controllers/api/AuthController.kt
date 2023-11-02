@@ -18,7 +18,7 @@ import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseHandler
 import dev.medzik.librepass.server.utils.Validator
 import dev.medzik.librepass.server.utils.toResponse
-import dev.medzik.librepass.types.api.auth.*
+import dev.medzik.librepass.types.api.*
 import dev.medzik.librepass.utils.TOTP
 import dev.medzik.librepass.utils.fromHexString
 import dev.medzik.librepass.utils.toHexString

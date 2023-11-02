@@ -2,14 +2,15 @@ package dev.medzik.librepass.types.cipher.data
 
 /**
  * Card data for cipher.
- * @param cardholderName cardholder name
- * @param brand card brand
- * @param number card number
- * @param expMonth card expiration month
- * @param expYear card expiration year
- * @param code CVV card code
- * @param notes notes for card
- * @param fields custom fields
+ *
+ * @property cardholderName cardholder name
+ * @property brand card brand
+ * @property number card number
+ * @property expMonth card expiration month
+ * @property expYear card expiration year
+ * @property code CVV card code
+ * @property notes notes for card
+ * @property fields custom fields
  */
 data class CipherCardData(
     val cardholderName: String,

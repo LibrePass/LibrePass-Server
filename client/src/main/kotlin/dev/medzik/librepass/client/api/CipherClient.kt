@@ -5,8 +5,8 @@ import dev.medzik.librepass.client.Server
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
 import dev.medzik.librepass.client.utils.JsonUtils
-import dev.medzik.librepass.types.api.cipher.IdResponse
-import dev.medzik.librepass.types.api.cipher.SyncResponse
+import dev.medzik.librepass.types.api.CipherIdResponse
+import dev.medzik.librepass.types.api.SyncResponse
 import dev.medzik.librepass.types.cipher.Cipher
 import dev.medzik.librepass.types.cipher.EncryptedCipher
 import java.util.*
@@ -42,13 +42,13 @@ class CipherClient(
      * Inserts a new cipher.
      * @param cipher cipher to insert
      * @param secretKey secret key to use for encrypting the cipher
-     * @return [IdResponse]
+     * @return [CipherIdResponse]
      */
     @Throws(ClientException::class, ApiException::class)
     fun insert(
         cipher: Cipher,
         secretKey: String
-    ): IdResponse {
+    ): CipherIdResponse {
         return insert(
             EncryptedCipher(
                 cipher = cipher,
@@ -60,10 +60,10 @@ class CipherClient(
     /**
      * Inserts a new cipher.
      * @param cipher encrypted cipher to insert
-     * @return [IdResponse]
+     * @return [CipherIdResponse]
      */
     @Throws(ClientException::class, ApiException::class)
-    fun insert(cipher: EncryptedCipher): IdResponse {
+    fun insert(cipher: EncryptedCipher): CipherIdResponse {
         val response = client.put(API_ENDPOINT, cipher.toJson())
         return JsonUtils.deserialize(response)
     }
@@ -114,13 +114,13 @@ class CipherClient(
      * Updates a cipher.
      * @param cipher cipher to update
      * @param secretKey secret key to use for encrypting the cipher
-     * @return [IdResponse]
+     * @return [CipherIdResponse]
      */
     @Throws(ClientException::class, ApiException::class)
     fun update(
         cipher: Cipher,
         secretKey: String
-    ): IdResponse {
+    ): CipherIdResponse {
         return update(
             EncryptedCipher(
                 cipher = cipher,
@@ -132,10 +132,10 @@ class CipherClient(
     /**
      * Updates a cipher.
      * @param cipher cipher to update
-     * @return [IdResponse]
+     * @return [CipherIdResponse]
      */
     @Throws(ClientException::class, ApiException::class)
-    fun update(cipher: EncryptedCipher): IdResponse {
+    fun update(cipher: EncryptedCipher): CipherIdResponse {
         val response = client.patch("$API_ENDPOINT/${cipher.id}", cipher.toJson())
         return JsonUtils.deserialize(response)
     }

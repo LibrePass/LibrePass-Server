@@ -8,9 +8,9 @@ import dev.medzik.librepass.server.database.UserTable
 import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseHandler
 import dev.medzik.librepass.server.utils.toResponse
-import dev.medzik.librepass.types.api.cipher.IdResponse
-import dev.medzik.librepass.types.api.collection.CipherCollection
-import dev.medzik.librepass.types.api.collection.CreateCollectionRequest
+import dev.medzik.librepass.types.api.CipherCollection
+import dev.medzik.librepass.types.api.CollectionIdResponse
+import dev.medzik.librepass.types.api.CreateCollectionRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -36,7 +36,7 @@ class CollectionController
                 )
             )
 
-            return ResponseHandler.generateResponse(IdResponse(collection.id), HttpStatus.CREATED)
+            return ResponseHandler.generateResponse(CollectionIdResponse(collection.id), HttpStatus.CREATED)
         }
 
         @GetMapping
@@ -97,7 +97,7 @@ class CollectionController
                 )
             )
 
-            return ResponseHandler.generateResponse(IdResponse(collection.id), HttpStatus.OK)
+            return ResponseHandler.generateResponse(CollectionIdResponse(collection.id), HttpStatus.OK)
         }
 
         @DeleteMapping("/{id}")
@@ -111,6 +111,6 @@ class CollectionController
 
             collectionRepository.delete(collection)
 
-            return ResponseHandler.generateResponse(IdResponse(collection.id), HttpStatus.OK)
+            return ResponseHandler.generateResponse(CollectionIdResponse(collection.id), HttpStatus.OK)
         }
     }
