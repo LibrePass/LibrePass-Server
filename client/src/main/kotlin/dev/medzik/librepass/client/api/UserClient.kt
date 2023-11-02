@@ -12,15 +12,15 @@ import dev.medzik.librepass.client.utils.Cryptography.computeSecretKey
 import dev.medzik.librepass.client.utils.Cryptography.computeSecretKeyFromPassword
 import dev.medzik.librepass.client.utils.Cryptography.computeSharedKey
 import dev.medzik.librepass.client.utils.JsonUtils
-import dev.medzik.librepass.types.api.user.ChangePasswordCipherData
-import dev.medzik.librepass.types.api.user.ChangePasswordRequest
-import dev.medzik.librepass.types.api.user.SetupTwoFactorRequest
-import dev.medzik.librepass.types.api.user.SetupTwoFactorResponse
+import dev.medzik.librepass.types.api.ChangePasswordCipherData
+import dev.medzik.librepass.types.api.ChangePasswordRequest
+import dev.medzik.librepass.types.api.SetupTwoFactorRequest
+import dev.medzik.librepass.types.api.SetupTwoFactorResponse
 import dev.medzik.librepass.utils.fromHexString
 import dev.medzik.librepass.utils.toHexString
 
 /**
- * User Client for the LibrePass API. This client is used to manage user.
+ * User Client for the LibrePass API. This client is used to manage users.
  * @param email user email
  * @param apiKey api key to use for authentication
  * @param apiUrl api url address (optional)

@@ -11,9 +11,9 @@ import dev.medzik.librepass.server.database.UserTable
 import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseHandler
 import dev.medzik.librepass.server.utils.toResponse
-import dev.medzik.librepass.types.api.user.ChangePasswordRequest
-import dev.medzik.librepass.types.api.user.SetupTwoFactorRequest
-import dev.medzik.librepass.types.api.user.SetupTwoFactorResponse
+import dev.medzik.librepass.types.api.ChangePasswordRequest
+import dev.medzik.librepass.types.api.SetupTwoFactorRequest
+import dev.medzik.librepass.types.api.SetupTwoFactorResponse
 import dev.medzik.librepass.utils.TOTP
 import dev.medzik.librepass.utils.fromHexString
 import dev.medzik.librepass.utils.toHexString
