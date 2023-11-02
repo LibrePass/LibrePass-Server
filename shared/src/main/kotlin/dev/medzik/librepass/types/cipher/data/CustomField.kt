@@ -1,12 +1,11 @@
 package dev.medzik.librepass.types.cipher.data
 
 /**
- * CipherField represents a custom field of a cipher.
+ * CipherField represents a custom field in a cipher.
  *
- * @property name field name
- * @property type field type
- * @property value value of the field
- * @see CipherFieldType
+ * @property name The name of the field.
+ * @property type The type of the field.
+ * @property value The field value.
  */
 data class CipherField(
     val name: String,
