@@ -5,9 +5,9 @@ import dev.medzik.librepass.client.Server
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
 import dev.medzik.librepass.client.utils.JsonUtils
-import dev.medzik.librepass.types.api.cipher.IdResponse
-import dev.medzik.librepass.types.api.collection.CipherCollection
-import dev.medzik.librepass.types.api.collection.CreateCollectionRequest
+import dev.medzik.librepass.types.api.CipherCollection
+import dev.medzik.librepass.types.api.CollectionIdResponse
+import dev.medzik.librepass.types.api.CreateCollectionRequest
 import java.util.*
 
 /**
@@ -28,10 +28,10 @@ class CollectionClient(
     /**
      * Create a new collection.
      * @param name collection name
-     * @return [IdResponse]
+     * @return [CollectionIdResponse]
      */
     @Throws(ClientException::class, ApiException::class)
-    fun createCollection(name: String): IdResponse {
+    fun createCollection(name: String): CollectionIdResponse {
         val request = CreateCollectionRequest(name = name)
         val response = client.put(API_ENDPOINT, JsonUtils.serialize(request))
         return JsonUtils.deserialize(response)
@@ -72,13 +72,13 @@ class CollectionClient(
      * Update a collection.
      * @param id collection identifier
      * @param name collection name
-     * @return [IdResponse]
+     * @return [CollectionIdResponse]
      */
     @Throws(ClientException::class, ApiException::class)
     fun updateCollection(
         id: UUID,
         name: String
-    ): IdResponse {
+    ): CollectionIdResponse {
         return updateCollection(id.toString(), name)
     }
 
@@ -86,13 +86,13 @@ class CollectionClient(
      * Update a collection.
      * @param id collection identifier
      * @param name collection name
-     * @return [IdResponse]
+     * @return [CollectionIdResponse]
      */
     @Throws(ClientException::class, ApiException::class)
     fun updateCollection(
         id: String,
         name: String
-    ): IdResponse {
+    ): CollectionIdResponse {
         val request = CreateCollectionRequest(name = name)
         val response = client.patch("$API_ENDPOINT/$id", JsonUtils.serialize(request))
         return JsonUtils.deserialize(response)

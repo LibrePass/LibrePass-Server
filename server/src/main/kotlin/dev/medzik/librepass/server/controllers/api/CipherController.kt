@@ -9,8 +9,8 @@ import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseHandler
 import dev.medzik.librepass.server.utils.Validator
 import dev.medzik.librepass.server.utils.toResponse
-import dev.medzik.librepass.types.api.cipher.IdResponse
-import dev.medzik.librepass.types.api.cipher.SyncResponse
+import dev.medzik.librepass.types.api.CipherIdResponse
+import dev.medzik.librepass.types.api.SyncResponse
 import dev.medzik.librepass.types.cipher.EncryptedCipher
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.*
@@ -38,7 +38,7 @@ class CipherController
             val cipher = cipherRepository.save(CipherTable(encryptedCipher))
 
             return ResponseHandler.generateResponse(
-                IdResponse(cipher.id),
+                CipherIdResponse(cipher.id),
                 HttpStatus.CREATED
             )
         }
@@ -108,7 +108,7 @@ class CipherController
 
             cipherRepository.save(CipherTable(encryptedCipher))
 
-            return ResponseHandler.generateResponse(IdResponse(id), HttpStatus.OK)
+            return ResponseHandler.generateResponse(CipherIdResponse(id), HttpStatus.OK)
         }
 
         @DeleteMapping("/{id}")
@@ -121,7 +121,7 @@ class CipherController
 
             cipherRepository.deleteById(id)
 
-            return ResponseHandler.generateResponse(IdResponse(id), HttpStatus.OK)
+            return ResponseHandler.generateResponse(CipherIdResponse(id), HttpStatus.OK)
         }
 
         /**

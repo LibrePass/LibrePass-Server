@@ -1,7 +1,7 @@
 package dev.medzik.librepass.utils
 
-import org.apache.commons.codec.binary.Hex
+import dev.medzik.libcrypto.Hex
 
-fun ByteArray.toHexString(): String = Hex.encodeHexString(this)
+fun ByteArray.toHexString(): String = Hex.encode(this)
 
-fun String.fromHexString(): ByteArray = Hex.decodeHex(this)
+fun String.fromHexString(): ByteArray = Hex.decode(this)
