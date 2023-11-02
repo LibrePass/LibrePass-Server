@@ -1,6 +1,7 @@
 package dev.medzik.librepass.client.api
 
 import dev.medzik.libcrypto.Argon2Hash
+import dev.medzik.libcrypto.Hex
 import dev.medzik.libcrypto.X25519
 import dev.medzik.librepass.client.Client
 import dev.medzik.librepass.client.Server
@@ -10,7 +11,7 @@ import dev.medzik.librepass.client.utils.Cryptography.computePasswordHash
 import dev.medzik.librepass.client.utils.Cryptography.computeSecretKey
 import dev.medzik.librepass.client.utils.Cryptography.computeSharedKey
 import dev.medzik.librepass.client.utils.JsonUtils
-import dev.medzik.librepass.types.api.auth.*
+import dev.medzik.librepass.types.api.*
 import dev.medzik.librepass.utils.fromHexString
 import dev.medzik.librepass.utils.toHexString
 import java.util.*
@@ -106,8 +107,8 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
             userId = response.userId,
             apiKey = response.apiKey,
             apiKeyVerified = response.verified,
-            publicKey = publicKey,
-            privateKey = passwordHash.hash,
+            publicKey = Hex.encode(publicKey),
+            privateKey = Hex.encode(passwordHash.hash),
             secretKey = secretKey.toHexString()
         )
     }
@@ -136,35 +137,7 @@ data class UserCredentials(
     val userId: UUID,
     val apiKey: String,
     val apiKeyVerified: Boolean,
-    val publicKey: ByteArray,
-    val privateKey: ByteArray,
+    val publicKey: String,
+    val privateKey: String,
     val secretKey: String
-) {
-    // Auto-Generated functions
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as UserCredentials
-
-        if (userId != other.userId) return false
-        if (apiKey != other.apiKey) return false
-        if (apiKeyVerified != other.apiKeyVerified) return false
-        if (!publicKey.contentEquals(other.publicKey)) return false
-        if (!privateKey.contentEquals(other.privateKey)) return false
-        if (secretKey != other.secretKey) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = userId.hashCode()
-        result = 31 * result + apiKey.hashCode()
-        result = 31 * result + apiKeyVerified.hashCode()
-        result = 31 * result + publicKey.contentHashCode()
-        result = 31 * result + privateKey.contentHashCode()
-        result = 31 * result + secretKey.hashCode()
-        return result
-    }
-}
+)
