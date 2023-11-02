@@ -27,8 +27,8 @@
 
     <licenses>
         <license>
-            <name>GNU General Public License v3.0</name>
-            <url>https://github.com/LibrePass/server/blob/main/LICENSE</url>
+            <name>GNU Affero General Public License v3.0</name>
+            <url>https://github.com/LibrePass/LibrePass-Server/blob/main/LICENSE</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
