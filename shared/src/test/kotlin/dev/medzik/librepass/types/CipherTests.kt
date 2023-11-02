@@ -7,13 +7,14 @@ import dev.medzik.librepass.types.cipher.data.CipherField
 import dev.medzik.librepass.types.cipher.data.CipherFieldType
 import dev.medzik.librepass.types.cipher.data.CipherLoginData
 import dev.medzik.librepass.types.cipher.data.PasswordHistory
+import dev.medzik.librepass.utils.fromHexString
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.*
 
 class CipherTests {
     // example secret key
-    private val secretKey = "1234567890123456789012345678901212345678901234567890123456789012"
+    private val secretKey = "1234567890123456789012345678901212345678901234567890123456789012".fromHexString()
 
     // example cipher
     private val cipher =

@@ -4,6 +4,7 @@ import dev.medzik.librepass.types.cipher.Cipher
 import dev.medzik.librepass.types.cipher.CipherType
 import dev.medzik.librepass.types.cipher.EncryptedCipher
 import dev.medzik.librepass.types.cipher.data.CipherLoginData
+import dev.medzik.librepass.utils.fromHexString
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -23,7 +24,7 @@ class UserClientTests {
     }
 
     private lateinit var userId: UUID
-    private lateinit var secretKey: String
+    private lateinit var secretKey: ByteArray
 
     private lateinit var userClient: UserClient
     private lateinit var cipherClient: CipherClient
@@ -34,7 +35,7 @@ class UserClientTests {
         val credentials = authClient.login("test_user@example.com", "test")
 
         userId = credentials.userId
-        secretKey = credentials.secretKey
+        secretKey = credentials.secretKey.fromHexString()
 
         userClient = UserClient("test_user@example.com", credentials.apiKey, "http://localhost:8080")
         cipherClient = CipherClient(credentials.apiKey, "http://localhost:8080")
@@ -59,7 +60,7 @@ class UserClientTests {
             cipherClient.insert(EncryptedCipher(testCipher, secretKey))
         }
 
-        fun checkCipher(secretKey: String) {
+        fun checkCipher(secretKey: ByteArray) {
             val ciphers = cipherClient.getAll()
 
             val cipher = Cipher(ciphers[0], secretKey)
@@ -81,8 +82,9 @@ class UserClientTests {
         var credentials = authClient.login("test_user@example.com", "test2")
         userClient = UserClient("test_user@example.com", credentials.apiKey, "http://localhost:8080")
         cipherClient = CipherClient(credentials.apiKey, "http://localhost:8080")
+        secretKey = credentials.secretKey.fromHexString()
 
-        checkCipher(credentials.secretKey)
+        checkCipher(secretKey)
 
         // wait for 1 second to prevent unauthorized error
         Thread.sleep(1000)
@@ -97,7 +99,8 @@ class UserClientTests {
         credentials = authClient.login("test_user@example.com", "test")
         userClient = UserClient("test_user@example.com", credentials.apiKey, "http://localhost:8080")
         cipherClient = CipherClient(credentials.apiKey, "http://localhost:8080")
+        secretKey = credentials.secretKey.fromHexString()
 
-        checkCipher(credentials.secretKey)
+        checkCipher(secretKey)
     }
 }

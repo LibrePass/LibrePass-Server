@@ -47,7 +47,7 @@ class CipherClient(
     @Throws(ClientException::class, ApiException::class)
     fun insert(
         cipher: Cipher,
-        secretKey: String
+        secretKey: ByteArray
     ): CipherIdResponse {
         return insert(
             EncryptedCipher(
@@ -119,7 +119,7 @@ class CipherClient(
     @Throws(ClientException::class, ApiException::class)
     fun update(
         cipher: Cipher,
-        secretKey: String
+        secretKey: ByteArray
     ): CipherIdResponse {
         return update(
             EncryptedCipher(

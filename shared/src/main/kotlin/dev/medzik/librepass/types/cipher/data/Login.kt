@@ -5,16 +5,16 @@ import dev.medzik.librepass.types.adapters.DateAdapter
 import java.util.*
 
 /**
- * Login data for cipher.
+ * Cipher data for logins.
  *
- * @property name cipher name
- * @property username login username
- * @property password login password
- * @property passwordHistory password history
- * @property uris list of URIs
- * @property twoFactor two-factor authentication secret
- * @property notes notes for the cipher
- * @property fields custom fields
+ * @property name The name of the cipher.
+ * @property username The login username.
+ * @property password The login password.
+ * @property passwordHistory The history of passwords.
+ * @property uris The list of uris.
+ * @property twoFactor The two-factor secret.
+ *  @property notes The note for the cipher.
+ *  * @property fields The custom fields for the cipher.
  */
 data class CipherLoginData(
     val name: String,
@@ -30,8 +30,8 @@ data class CipherLoginData(
 /**
  * Passwords history in [CipherLoginData].
  *
- * @property password login password
- * @property lastUsed date when the password was changed
+ * @property password The login password.
+ * @property lastUsed The date when the password was changed.
  */
 data class PasswordHistory(
     val password: String,
