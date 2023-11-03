@@ -3,15 +3,13 @@ package dev.medzik.librepass.server.database
 import org.springframework.data.repository.CrudRepository
 import java.util.*
 
-/**
- * Repository for collections. It is used to interact with the database.
- * @see CollectionTable
- */
+/** Repository for [CollectionTable]. */
 interface CollectionRepository : CrudRepository<CollectionTable, UUID> {
     /**
      * Find a collection by its ID and owner.
-     * @param id collection identifier
-     * @param owner user identifier
+     *
+     * @param id The collection identifier.
+     * @param owner The user identifier.
      * @return The collection with the given ID and owner, or null if it doesn't exist.
      */
     fun findByIdAndOwner(
@@ -21,7 +19,8 @@ interface CollectionRepository : CrudRepository<CollectionTable, UUID> {
 
     /**
      * Find all collections owned by the given user.
-     * @param owner user identifier
+     *
+     * @param owner The user identifier.
      * @return A list of all collections owned by the given user.
      */
     fun findAllByOwner(owner: UUID): List<CollectionTable>

@@ -39,9 +39,7 @@ data class CipherTable(
         lastModified = cipher.lastModified ?: Date()
     )
 
-    /**
-     * Convert to [EncryptedCipher] object. This is used to send data to the client.
-     */
+    /** Convert to [EncryptedCipher] object. This is used to send data to the client. */
     fun toEncryptedCipher() =
         EncryptedCipher(
             id = id,

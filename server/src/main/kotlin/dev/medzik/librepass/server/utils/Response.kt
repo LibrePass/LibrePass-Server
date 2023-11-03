@@ -12,9 +12,7 @@ import java.net.URI
  */
 typealias Response = ResponseEntity<Any>
 
-/**
- * ResponseHandler is a helper class for generating responses.
- */
+/** Helper for generating responses. */
 object ResponseHandler {
     fun generateResponse(status: HttpStatus) = createResponse(HashMap<String, Any>(), status.value())
 
