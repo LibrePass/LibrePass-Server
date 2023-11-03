@@ -8,9 +8,6 @@ import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 
-/**
- * Handler for database errors.
- */
 @ControllerAdvice
 class DatabaseErrorHandler {
     @ExceptionHandler(value = [DataIntegrityViolationException::class])

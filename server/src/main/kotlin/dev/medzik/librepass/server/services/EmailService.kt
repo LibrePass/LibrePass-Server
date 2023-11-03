@@ -6,9 +6,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Service
 
-/**
- * Service for sending email messages.
- */
+/** Service for sending email messages. */
 @Service
 class EmailService
     @Autowired
@@ -22,16 +20,17 @@ class EmailService
         // get email templates
         private val emailVerificationTemplate =
             this::class.java.getResource("/templates/email-verification.html")?.readText()
-                ?: throw Exception("Could not read `email verification` email template")
+                ?: throw Exception("Failed to read `email verification` email template")
         private val passwordHintTemplate =
             this::class.java.getResource("/templates/password-hint.html")?.readText()
-                ?: throw Exception("Could not read `password hint` email template")
+                ?: throw Exception("Failed to read `password hint` email template")
 
         /**
          * Email the given address.
-         * @param to email address to send to
-         * @param subject subject of the email
-         * @param body body of the email
+         *
+         * @param to The email address.
+         * @param subject The subject of the email.
+         * @param body The body of the email.
          */
         fun send(
             to: String,
@@ -47,9 +46,7 @@ class EmailService
             emailSender.send(message)
         }
 
-        /**
-         * Email the given address with the given code.
-         */
+        /** Email the given address with the given verification code. */
         fun sendEmailVerification(
             to: String,
             user: String,
@@ -65,9 +62,7 @@ class EmailService
             send(to, subject, body)
         }
 
-        /**
-         * Email the given address with the password hint.
-         */
+        /** Email the given address with the password hint. */
         fun sendPasswordHint(
             to: String,
             hint: String?

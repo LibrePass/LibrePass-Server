@@ -7,14 +7,12 @@ import org.springframework.data.repository.CrudRepository
 import org.springframework.data.repository.query.Param
 import java.util.*
 
-/**
- * Repository for the ciphers. It is used to interact with the database.
- * @see CipherTable
- */
+/** Repository for the [CipherTable]. */
 interface CipherRepository : CrudRepository<CipherTable, UUID> {
     /**
      * Get a list of all ciphers owned by the user.
-     * @param owner user identifier
+     *
+     * @param owner The user identifier.
      * @return A list of all ciphers owned by the user.
      */
     @Query("SELECT p FROM #{#entityName} p WHERE p.owner = :owner ORDER BY p.lastModified DESC")
@@ -24,8 +22,8 @@ interface CipherRepository : CrudRepository<CipherTable, UUID> {
 
     /**
      * Check if a cipher exists and is owned by the user.
-     * @param id cipher identifier
-     * @param owner user identifier
+     * @param id The cipher identifier.
+     * @param owner THe user identifier.
      * @return True if the cipher exists and is owned by the user, false otherwise.
      */
     @Query("SELECT EXISTS(SELECT 1 FROM #{#entityName} p WHERE p.id = :id AND p.owner = :owner)")
@@ -36,8 +34,9 @@ interface CipherRepository : CrudRepository<CipherTable, UUID> {
 
     /**
      * Get all user cipher ids.
-     * @param owner user identifier
-     * @return A list of all user cipher ids.
+     *
+     * @param owner The user identifier.
+     * @return A list of all user cipher IDs.
      */
     @Query("SELECT p.id FROM #{#entityName} p WHERE p.owner = :owner")
     fun getAllIds(
@@ -46,8 +45,9 @@ interface CipherRepository : CrudRepository<CipherTable, UUID> {
 
     /**
      * Update cipher data.
-     * @param id cipher identifier
-     * @param data new cipher data
+     *
+     * @param id The cipher identifier.
+     * @param data The new cipher data.
      */
     @Transactional
     @Modifying

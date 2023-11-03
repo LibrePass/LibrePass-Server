@@ -7,9 +7,6 @@ import org.springframework.web.bind.MissingServletRequestParameterException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 
-/**
- * Handler for invalid body parameters.
- */
 @ControllerAdvice
 class InvalidBodyHandler {
     @ExceptionHandler(value = [HttpMessageNotReadableException::class, MissingServletRequestParameterException::class])
