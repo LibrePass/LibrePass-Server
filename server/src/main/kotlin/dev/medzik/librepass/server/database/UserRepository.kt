@@ -18,6 +18,6 @@ interface UserRepository : CrudRepository<UserTable, UUID> {
     /** Remove unverified users who have not verified their account, which was [createdBefore]. */
     @Transactional
     @Modifying
-    @Query("DELETE FROM #{#entityName} u WHERE u.emailVerified = false AND u.created < :lastUsedBefore")
+    @Query("DELETE FROM #{#entityName} u WHERE u.emailVerified = false AND u.created < :createdBefore")
     fun deleteUnverifiedUsers(createdBefore: Date)
 }
