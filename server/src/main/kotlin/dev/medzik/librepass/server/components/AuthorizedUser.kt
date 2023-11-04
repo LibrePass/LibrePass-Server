@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.MethodParameter
 import org.springframework.data.repository.findByIdOrNull
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import org.springframework.web.bind.support.WebDataBinderFactory
 import org.springframework.web.context.request.NativeWebRequest
@@ -63,8 +62,6 @@ class AuthorizedUserArgumentResolver
                     .orElse(null)
                     ?: throw AuthorizedUserException()
 
-            // TODO: Expire inactive tokens after some time.
-
             // check if user changed password after the token was created
             if (user.lastPasswordChange > tokenTable.created)
                 throw AuthorizedUserException()
@@ -91,18 +88,5 @@ class AuthorizedUserArgumentResolver
             }
 
             return user
-        }
-
-        /**
-         * Delete expired tokens every 30 minutes.
-         */
-        @Scheduled(cron = "0 */30 * ? * *")
-        fun deleteExpiredTokens() {
-            val currentDate = Date()
-            val date30DaysAgo = Date(currentDate.time - 1000L * 60 * 60 * 24 * 30)
-
-            tokenRepository.findAllByLastUsedBefore(date30DaysAgo).forEach { token ->
-                tokenRepository.delete(token)
-            }
         }
     }
