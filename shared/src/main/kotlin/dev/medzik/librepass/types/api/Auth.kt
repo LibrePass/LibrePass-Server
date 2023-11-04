@@ -38,10 +38,10 @@ data class PreLoginResponse(
     val iterations: Int,
     val serverPublicKey: String
 ) {
-    /** Creates argon2 hasher */
+    /** Creates argon2 hasher. */
     fun toArgon2(): Argon2 {
         return Argon2(
-            32, // 256 bits
+            32,
             parallelism,
             memory,
             iterations

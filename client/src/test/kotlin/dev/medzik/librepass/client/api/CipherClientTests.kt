@@ -17,14 +17,14 @@ class CipherClientTests {
     private lateinit var userId: UUID
 
     companion object {
-        private const val email = "_test_cipher@example.com"
-        private const val password = "test password"
+        private const val EMAIL = "_test_cipher@example.com"
+        private const val PASSWORD = "test password"
 
         @BeforeAll
         @JvmStatic
         fun setup() {
-            val authClient = AuthClient("http://localhost:8080")
-            authClient.register(email, password)
+            val authClient = AuthClient(API_URL)
+            authClient.register(EMAIL, PASSWORD)
             // wait for 1 second to prevent unauthorized error
             Thread.sleep(1000)
         }
@@ -32,10 +32,10 @@ class CipherClientTests {
         @AfterAll
         @JvmStatic
         fun cleanup() {
-            val authClient = AuthClient("http://localhost:8080")
-            val credentials = authClient.login(email, password)
+            val authClient = AuthClient(API_URL)
+            val credentials = authClient.login(EMAIL, PASSWORD)
 
-            val cipherClient = CipherClient(credentials.apiKey, "http://localhost:8080")
+            val cipherClient = CipherClient(credentials.apiKey, API_URL)
 
             cipherClient.getAll().forEach {
                 cipherClient.delete(it.id)
@@ -47,11 +47,11 @@ class CipherClientTests {
 
     @BeforeEach
     fun beforeEach() {
-        val authClient = AuthClient("http://localhost:8080")
+        val authClient = AuthClient(API_URL)
 
-        val credentials = authClient.login(email, password)
+        val credentials = authClient.login(EMAIL, PASSWORD)
 
-        cipherClient = CipherClient(credentials.apiKey, "http://localhost:8080")
+        cipherClient = CipherClient(credentials.apiKey, API_URL)
         userId = credentials.userId
         secretKey = credentials.secretKey.fromHexString()
     }
