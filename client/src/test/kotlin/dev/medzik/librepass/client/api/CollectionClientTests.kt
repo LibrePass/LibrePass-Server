@@ -10,11 +10,14 @@ class CollectionClientTests {
     private lateinit var collectionClient: CollectionClient
 
     companion object {
+        private const val EMAIL = "test_collection@example.com"
+        private const val PASSWORD = "test"
+
         @BeforeAll
         @JvmStatic
         fun setup() {
-            val authClient = AuthClient("http://localhost:8080")
-            authClient.register("test_collection@example.com", "test")
+            val authClient = AuthClient(API_URL)
+            authClient.register(EMAIL, PASSWORD)
             // wait for 1 second to prevent unauthorized error
             Thread.sleep(1000)
         }
@@ -22,15 +25,15 @@ class CollectionClientTests {
 
     @BeforeEach
     fun beforeEach() {
-        val authClient = AuthClient("http://localhost:8080")
-        val credentials = authClient.login("test_collection@example.com", "test")
+        val authClient = AuthClient(API_URL)
+        val credentials = authClient.login(EMAIL, PASSWORD)
 
-        collectionClient = CollectionClient(credentials.apiKey, "http://localhost:8080")
+        collectionClient = CollectionClient(credentials.apiKey, API_URL)
     }
 
     @Test
     fun `create collection`() {
-        val collection = collectionClient.createCollection("test")
+        val collection = collectionClient.createCollection(API_URL)
 
         assertNotNull(collection.id)
     }

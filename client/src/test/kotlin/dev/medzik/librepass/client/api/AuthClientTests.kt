@@ -5,15 +5,15 @@ import org.junit.jupiter.api.Test
 
 class AuthClientTests {
     companion object {
-        private val authClient = AuthClient("http://localhost:8080")
+        private val authClient = AuthClient(API_URL)
 
-        private const val email = "_test_user@example.com"
-        private const val password = "_test_user@example.com"
+        private const val EMAIL = "_test_user@example.com"
+        private const val PASSWORD = "_test_user@example.com"
 
         @BeforeAll
         @JvmStatic
         fun register() {
-            authClient.register(email, password)
+            authClient.register(EMAIL, PASSWORD)
             // wait for 1 second to prevent unauthorized error
             Thread.sleep(1000)
         }
@@ -21,11 +21,11 @@ class AuthClientTests {
 
     @Test
     fun login() {
-        authClient.login(email, password)
+        authClient.login(EMAIL, PASSWORD)
     }
 
     @Test
     fun `request password hint`() {
-        authClient.requestPasswordHint(email)
+        authClient.requestPasswordHint(EMAIL)
     }
 }

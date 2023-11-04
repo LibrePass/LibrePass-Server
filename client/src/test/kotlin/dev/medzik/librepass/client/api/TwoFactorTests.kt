@@ -7,31 +7,30 @@ import org.junit.jupiter.api.Test
 
 class TwoFactorTests {
     companion object {
-        private const val apiUrl = "http://localhost:8080"
-        private val authClient = AuthClient(apiUrl)
+        private val authClient = AuthClient(API_URL)
 
-        private const val email = "_test_2fa@example.com"
-        private const val password = "_test_2fa@example.com"
+        private const val EMAIL = "_test_2fa@example.com"
+        private const val PASSWORD = "_test_2fa@example.com"
 
         private val twoFactorSecret = TOTP.generateSecretKey()
 
         @BeforeAll
         @JvmStatic
         fun register() {
-            authClient.register(email, password)
+            authClient.register(EMAIL, PASSWORD)
             // wait for 1 second to prevent unauthorized error
             Thread.sleep(1000)
 
             // setup 2fa
-            val auth = authClient.login(email, password)
+            val auth = authClient.login(EMAIL, PASSWORD)
             val code = TOTP.getTOTPCode(twoFactorSecret)
-            UserClient(email, auth.apiKey, apiUrl).setupTwoFactor(password, twoFactorSecret, code)
+            UserClient(EMAIL, auth.apiKey, API_URL).setupTwoFactor(PASSWORD, twoFactorSecret, code)
         }
     }
 
     @Test
     fun testTwoFactorLogin() {
-        val auth = authClient.login(email, password)
+        val auth = authClient.login(EMAIL, PASSWORD)
 
         assertEquals(false, auth.apiKeyVerified)
 

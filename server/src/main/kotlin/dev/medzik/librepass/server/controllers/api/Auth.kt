@@ -135,7 +135,7 @@ class AuthController
                     PreLoginResponse(
                         // Default argon2id parameters
                         parallelism = 3,
-                        memory = 65536, // 64MB
+                        memory = 65536,
                         iterations = 4,
                         // Server Curve25519 public key
                         serverPublicKey = ServerPublicKey.toHexString()

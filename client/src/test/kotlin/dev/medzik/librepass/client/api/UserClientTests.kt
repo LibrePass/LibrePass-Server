@@ -13,11 +13,14 @@ import java.util.*
 
 class UserClientTests {
     companion object {
+        private const val EMAIL = "test_user@example.com"
+        private const val PASSWORD = "test"
+
         @BeforeAll
         @JvmStatic
         fun setup() {
-            val authClient = AuthClient("http://localhost:8080")
-            authClient.register("test_user@example.com", "test")
+            val authClient = AuthClient(API_URL)
+            authClient.register(EMAIL, PASSWORD)
             // wait for 1 second to prevent unauthorized error
             Thread.sleep(1000)
         }
@@ -31,14 +34,14 @@ class UserClientTests {
 
     @BeforeEach
     fun beforeEach() {
-        val authClient = AuthClient("http://localhost:8080")
-        val credentials = authClient.login("test_user@example.com", "test")
+        val authClient = AuthClient(API_URL)
+        val credentials = authClient.login(EMAIL, PASSWORD)
 
         userId = credentials.userId
         secretKey = credentials.secretKey.fromHexString()
 
-        userClient = UserClient("test_user@example.com", credentials.apiKey, "http://localhost:8080")
-        cipherClient = CipherClient(credentials.apiKey, "http://localhost:8080")
+        userClient = UserClient(EMAIL, credentials.apiKey, API_URL)
+        cipherClient = CipherClient(credentials.apiKey, API_URL)
     }
 
     @Test
@@ -72,16 +75,16 @@ class UserClientTests {
 
         checkCipher(secretKey)
 
-        userClient.changePassword("test", "test2")
+        userClient.changePassword(PASSWORD, "test2")
 
         // wait for 1 second to prevent unauthorized error
         Thread.sleep(1000)
 
         // login with new password
-        var authClient = AuthClient("http://localhost:8080")
-        var credentials = authClient.login("test_user@example.com", "test2")
-        userClient = UserClient("test_user@example.com", credentials.apiKey, "http://localhost:8080")
-        cipherClient = CipherClient(credentials.apiKey, "http://localhost:8080")
+        var authClient = AuthClient(API_URL)
+        var credentials = authClient.login(EMAIL, "test2")
+        userClient = UserClient(EMAIL, credentials.apiKey, API_URL)
+        cipherClient = CipherClient(credentials.apiKey, API_URL)
         secretKey = credentials.secretKey.fromHexString()
 
         checkCipher(secretKey)
@@ -90,15 +93,15 @@ class UserClientTests {
         Thread.sleep(1000)
 
         // change password back
-        userClient.changePassword("test2", "test")
+        userClient.changePassword("test2", PASSWORD)
 
         // wait for 1 second to prevent unauthorized error
         Thread.sleep(1000)
 
-        authClient = AuthClient("http://localhost:8080")
-        credentials = authClient.login("test_user@example.com", "test")
-        userClient = UserClient("test_user@example.com", credentials.apiKey, "http://localhost:8080")
-        cipherClient = CipherClient(credentials.apiKey, "http://localhost:8080")
+        authClient = AuthClient(API_URL)
+        credentials = authClient.login(EMAIL, PASSWORD)
+        userClient = UserClient(EMAIL, credentials.apiKey, API_URL)
+        cipherClient = CipherClient(credentials.apiKey, API_URL)
         secretKey = credentials.secretKey.fromHexString()
 
         checkCipher(secretKey)
