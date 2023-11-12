@@ -20,10 +20,10 @@ import dev.medzik.librepass.server.services.EmailService
 import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseHandler
 import dev.medzik.librepass.server.utils.Validator
+import dev.medzik.librepass.server.utils.Validator.validateSharedKey
 import dev.medzik.librepass.server.utils.toResponse
 import dev.medzik.librepass.types.api.*
 import dev.medzik.librepass.utils.TOTP
-import dev.medzik.librepass.utils.fromHexString
 import dev.medzik.librepass.utils.toHexString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -80,8 +80,7 @@ class AuthController
             )
                 return ResponseError.INVALID_BODY.toResponse()
 
-            val sharedKey = X25519.computeSharedSecret(ServerPrivateKey, request.publicKey.fromHexString())
-            if (!request.sharedKey.fromHexString().contentEquals(sharedKey))
+            if (!validateSharedKey(request.publicKey, request.sharedKey))
                 return ResponseError.INVALID_CREDENTIALS.toResponse()
 
             val verificationToken = Random.randBytes(16).toHexString()
@@ -205,8 +204,7 @@ class AuthController
             if (emailVerificationRequired && !user.emailVerified)
                 return ResponseError.EMAIL_NOT_VERIFIED.toResponse()
 
-            val sharedKey = X25519.computeSharedSecret(ServerPrivateKey, user.publicKey.fromHexString())
-            if (!request.sharedKey.fromHexString().contentEquals(sharedKey))
+            if (!validateSharedKey(user, request.sharedKey))
                 return ResponseError.INVALID_CREDENTIALS.toResponse()
 
             val apiToken =

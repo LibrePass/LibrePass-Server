@@ -1,7 +1,5 @@
 package dev.medzik.librepass.server.controllers.api
 
-import dev.medzik.libcrypto.Random
-import dev.medzik.libcrypto.X25519
 import dev.medzik.librepass.responses.ResponseError
 import dev.medzik.librepass.server.components.AuthorizedUser
 import dev.medzik.librepass.server.controllers.advice.InvalidTwoFactorCodeException
@@ -10,13 +8,12 @@ import dev.medzik.librepass.server.database.UserRepository
 import dev.medzik.librepass.server.database.UserTable
 import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseHandler
+import dev.medzik.librepass.server.utils.Validator.validateSharedKey
 import dev.medzik.librepass.server.utils.toResponse
 import dev.medzik.librepass.types.api.ChangePasswordRequest
 import dev.medzik.librepass.types.api.SetupTwoFactorRequest
 import dev.medzik.librepass.types.api.SetupTwoFactorResponse
 import dev.medzik.librepass.utils.TOTP
-import dev.medzik.librepass.utils.fromHexString
-import dev.medzik.librepass.utils.toHexString
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -36,13 +33,11 @@ class UserController
             @RequestBody body: ChangePasswordRequest
         ): Response {
             // validate shared key with an old public key
-            val oldSharedKey = X25519.computeSharedSecret(ServerPrivateKey, user.publicKey.fromHexString())
-            if (!body.oldSharedKey.fromHexString().contentEquals(oldSharedKey))
+            if (!validateSharedKey(user, body.oldSharedKey))
                 return ResponseError.INVALID_CREDENTIALS.toResponse()
 
             // validate shared key with a new public key
-            val newSharedKey = X25519.computeSharedSecret(ServerPrivateKey, body.newPublicKey.fromHexString())
-            if (!body.newSharedKey.fromHexString().contentEquals(newSharedKey))
+            if (!validateSharedKey(body.newPublicKey, body.newSharedKey))
                 return ResponseError.INVALID_CREDENTIALS.toResponse()
 
             // get all user cipher ids
@@ -86,15 +81,13 @@ class UserController
             @AuthorizedUser user: UserTable,
             @RequestBody body: SetupTwoFactorRequest
         ): Response {
-            // validate shared key with a new public key
-            val sharedKey = X25519.computeSharedSecret(ServerPrivateKey, user.publicKey.fromHexString())
-            if (!body.sharedKey.fromHexString().contentEquals(sharedKey))
+            if (!validateSharedKey(user, body.sharedKey))
                 return ResponseError.INVALID_CREDENTIALS.toResponse()
 
             if (body.code != TOTP.getTOTPCode(body.secret))
                 throw InvalidTwoFactorCodeException()
 
-            val recoveryCode = Random.randBytes(32).toHexString()
+            val recoveryCode = UUID.randomUUID().toString()
 
             userRepository.save(
                 user.copy(
