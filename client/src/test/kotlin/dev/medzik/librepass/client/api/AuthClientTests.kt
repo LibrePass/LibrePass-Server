@@ -25,7 +25,12 @@ class AuthClientTests {
     }
 
     @Test
-    fun `request password hint`() {
+    fun requestPasswordHint() {
         authClient.requestPasswordHint(EMAIL)
+    }
+
+    @Test
+    fun resendVerificationEmail() {
+        authClient.resendVerificationEmail(EMAIL)
     }
 }

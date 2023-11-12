@@ -169,6 +169,16 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
     fun requestPasswordHint(email: String) {
         client.get("$API_ENDPOINT/passwordHint?email=$email")
     }
+
+    /**
+     * Request a new email verification email.
+     *
+     * @param email The email address of the user.
+     */
+    @Throws(ClientException::class, ApiException::class)
+    fun resendVerificationEmail(email: String) {
+        client.get("$API_ENDPOINT/resendVerificationEmail?email=$email")
+    }
 }
 
 /**

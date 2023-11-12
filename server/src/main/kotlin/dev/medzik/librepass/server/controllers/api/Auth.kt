@@ -326,6 +326,48 @@ class AuthController
             return ResponseHandler.redirectResponse("$webUrl/verification/email")
         }
 
+        @GetMapping("/resendVerificationEmail")
+        fun resendVerificationEmail(
+            @RequestIP ip: String,
+            @RequestParam("email") emailParam: String
+        ): Response {
+            val email = emailParam.lowercase()
+
+            consumeRateLimit(ip)
+            consumeRateLimit(email)
+
+            consumeRateLimit(ip, rateLimitEmail)
+            consumeRateLimit(email, rateLimitEmail)
+
+            val user =
+                userRepository.findByEmail(email)
+                    ?: return ResponseError.INVALID_BODY.toResponse()
+
+            // check if user email is already verified
+            if (user.emailVerified)
+                return ResponseError.INVALID_BODY.toResponse()
+
+            userRepository.save(
+                user.copy(
+                    emailVerificationCodeExpiresAt = Date()
+                )
+            )
+
+            coroutineScope.launch {
+                try {
+                    emailService.sendEmailVerification(
+                        to = email,
+                        user = user.id.toString(),
+                        code = user.emailVerificationCode.toString()
+                    )
+                } catch (e: Throwable) {
+                    logger.error("Error sending email verification", e)
+                }
+            }
+
+            return ResponseHandler.generateResponse(HttpStatus.OK)
+        }
+
         private fun consumeRateLimit(
             key: String,
             rateLimitConfig: BaseRateLimitConfig = rateLimit
