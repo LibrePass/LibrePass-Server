@@ -80,6 +80,29 @@ class Client(
     }
 
     /**
+     * Send a DELETE request to the API.
+     * @param endpoint endpoint of the API
+     * @param json JSON body of the request
+     * @return response body
+     */
+    @Throws(ClientException::class, ApiException::class)
+    fun delete(
+        endpoint: String,
+        json: String
+    ): String {
+        val body = json.toRequestBody(httpMediaTypeJson)
+
+        val request =
+            Request.Builder()
+                .url(apiURL + endpoint)
+                .addHeader("Authorization", authorizationHeader)
+                .delete(body)
+                .build()
+
+        return executeAndExtractBody(request)
+    }
+
+    /**
      * Send a POST request to the API.
      * @param endpoint endpoint of the API
      * @param json JSON body of the request

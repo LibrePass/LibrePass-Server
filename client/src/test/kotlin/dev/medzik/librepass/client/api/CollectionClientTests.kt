@@ -1,5 +1,6 @@
 package dev.medzik.librepass.client.api
 
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeAll
@@ -20,6 +21,14 @@ class CollectionClientTests {
             authClient.register(EMAIL, PASSWORD)
             // wait for 1 second to prevent unauthorized error
             Thread.sleep(1000)
+        }
+
+        @AfterAll
+        @JvmStatic
+        fun delete() {
+            val authClient = AuthClient(API_URL)
+            val credentials = authClient.login(EMAIL, PASSWORD)
+            UserClient(EMAIL, credentials.apiKey, API_URL).deleteAccount(PASSWORD)
         }
     }
 

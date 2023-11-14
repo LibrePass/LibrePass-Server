@@ -12,10 +12,7 @@ import dev.medzik.librepass.client.utils.Cryptography.computeSecretKey
 import dev.medzik.librepass.client.utils.Cryptography.computeSecretKeyFromPassword
 import dev.medzik.librepass.client.utils.Cryptography.computeSharedKey
 import dev.medzik.librepass.client.utils.JsonUtils
-import dev.medzik.librepass.types.api.ChangePasswordCipherData
-import dev.medzik.librepass.types.api.ChangePasswordRequest
-import dev.medzik.librepass.types.api.SetupTwoFactorRequest
-import dev.medzik.librepass.types.api.SetupTwoFactorResponse
+import dev.medzik.librepass.types.api.*
 import dev.medzik.librepass.utils.fromHexString
 import dev.medzik.librepass.utils.toHexString
 
@@ -167,5 +164,34 @@ class UserClient(
                 JsonUtils.serialize(request)
             )
         return JsonUtils.deserialize(response)
+    }
+
+    @Throws(ClientException::class, ApiException::class)
+    fun deleteAccount(
+        password: String,
+        tfaCode: String? = null
+    ) {
+        val preLogin = AuthClient(apiUrl).preLogin(email)
+
+        val passwordHash =
+            computePasswordHash(
+                email = email,
+                password = password,
+                argon2Function = preLogin.toArgon2()
+            )
+
+        val serverPublicKey = preLogin.serverPublicKey.fromHexString()
+        val sharedKey = computeSharedKey(passwordHash.hash, serverPublicKey)
+
+        val request =
+            DeleteAccountRequest(
+                sharedKey = sharedKey.toHexString(),
+                code = tfaCode
+            )
+
+        client.delete(
+            "$API_ENDPOINT/delete",
+            JsonUtils.serialize(request)
+        )
     }
 }

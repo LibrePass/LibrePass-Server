@@ -1,6 +1,7 @@
 package dev.medzik.librepass.client.api
 
 import dev.medzik.librepass.utils.TOTP
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -25,6 +26,17 @@ class TwoFactorTests {
             val auth = authClient.login(EMAIL, PASSWORD)
             val code = TOTP.getTOTPCode(twoFactorSecret)
             UserClient(EMAIL, auth.apiKey, API_URL).setupTwoFactor(PASSWORD, twoFactorSecret, code)
+        }
+
+        @AfterAll
+        @JvmStatic
+        fun delete() {
+            val credentials = authClient.login(EMAIL, PASSWORD)
+
+            val code = TOTP.getTOTPCode(twoFactorSecret)
+            authClient.loginTwoFactor(credentials.apiKey, code)
+
+            UserClient(EMAIL, credentials.apiKey, API_URL).deleteAccount(PASSWORD, code)
         }
     }
 
