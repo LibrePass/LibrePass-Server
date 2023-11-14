@@ -50,6 +50,17 @@ data class SetupTwoFactorRequest(
 )
 
 /**
+ * Request for endpoint that setups two-factor authentication.
+ *
+ * @property sharedKey The shared key with server, to verify authentication.
+ * @property code The OTP code (if 2fa is set)
+ */
+data class DeleteAccountRequest(
+    val sharedKey: String,
+    val code: String?
+)
+
+/**
  * Response from endpoint that setups two-factor authentication.
  *
  * @property recoveryCode The generated recovery code for emergency access to your account.
