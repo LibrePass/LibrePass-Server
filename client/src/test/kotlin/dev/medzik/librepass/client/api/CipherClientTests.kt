@@ -31,19 +31,6 @@ class CipherClientTests {
 
         @AfterAll
         @JvmStatic
-        fun cleanup() {
-            val authClient = AuthClient(API_URL)
-            val credentials = authClient.login(EMAIL, PASSWORD)
-
-            val cipherClient = CipherClient(credentials.apiKey, API_URL)
-
-            cipherClient.getAll().forEach {
-                cipherClient.delete(it.id)
-            }
-        }
-
-        @AfterAll
-        @JvmStatic
         fun delete() {
             val authClient = AuthClient(API_URL)
             val credentials = authClient.login(EMAIL, PASSWORD)
