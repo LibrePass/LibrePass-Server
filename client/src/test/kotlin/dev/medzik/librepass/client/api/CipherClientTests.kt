@@ -41,6 +41,14 @@ class CipherClientTests {
                 cipherClient.delete(it.id)
             }
         }
+
+        @AfterAll
+        @JvmStatic
+        fun delete() {
+            val authClient = AuthClient(API_URL)
+            val credentials = authClient.login(EMAIL, PASSWORD)
+            UserClient(EMAIL, credentials.apiKey, API_URL).deleteAccount(PASSWORD)
+        }
     }
 
     private lateinit var secretKey: ByteArray

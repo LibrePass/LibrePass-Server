@@ -4,6 +4,7 @@ import dev.medzik.librepass.responses.ResponseError
 import dev.medzik.librepass.server.components.AuthorizedUser
 import dev.medzik.librepass.server.controllers.advice.InvalidTwoFactorCodeException
 import dev.medzik.librepass.server.database.CipherRepository
+import dev.medzik.librepass.server.database.TokenRepository
 import dev.medzik.librepass.server.database.UserRepository
 import dev.medzik.librepass.server.database.UserTable
 import dev.medzik.librepass.server.utils.Response
@@ -11,6 +12,7 @@ import dev.medzik.librepass.server.utils.ResponseHandler
 import dev.medzik.librepass.server.utils.Validator.validateSharedKey
 import dev.medzik.librepass.server.utils.toResponse
 import dev.medzik.librepass.types.api.ChangePasswordRequest
+import dev.medzik.librepass.types.api.DeleteAccountRequest
 import dev.medzik.librepass.types.api.SetupTwoFactorRequest
 import dev.medzik.librepass.types.api.SetupTwoFactorResponse
 import dev.medzik.librepass.utils.TOTP
@@ -25,6 +27,7 @@ class UserController
     @Autowired
     constructor(
         private val userRepository: UserRepository,
+        private val tokenRepository: TokenRepository,
         private val cipherRepository: CipherRepository
     ) {
         @PatchMapping("/password")
@@ -99,5 +102,23 @@ class UserController
 
             val response = SetupTwoFactorResponse(recoveryCode = recoveryCode)
             return ResponseHandler.generateResponse(response, HttpStatus.OK)
+        }
+
+        @DeleteMapping("/delete")
+        fun deleteAccount(
+            @AuthorizedUser user: UserTable,
+            @RequestBody body: DeleteAccountRequest
+        ): Response {
+            if (!validateSharedKey(user, body.sharedKey))
+                return ResponseError.INVALID_CREDENTIALS.toResponse()
+
+            if (user.twoFactorEnabled && body.code != TOTP.getTOTPCode(user.twoFactorSecret!!))
+                throw InvalidTwoFactorCodeException()
+
+            tokenRepository.deleteAllByOwner(user.id)
+            cipherRepository.deleteAllByOwner(user.id)
+            userRepository.delete(user)
+
+            return ResponseHandler.generateResponse(HttpStatus.OK)
         }
     }
