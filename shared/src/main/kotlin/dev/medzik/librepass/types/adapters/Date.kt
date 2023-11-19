@@ -23,8 +23,7 @@ class DateAdapter : JsonSerializer<Date>, JsonDeserializer<Date> {
         context: JsonDeserializationContext?
     ): Date {
         return if (json != null) {
-            val timestamp = json.asLong * 1000 // Convert seconds to milliseconds
-            Date(timestamp)
+            Date(json.asLong * 1000) // Convert seconds to milliseconds
         } else {
             Date()
         }

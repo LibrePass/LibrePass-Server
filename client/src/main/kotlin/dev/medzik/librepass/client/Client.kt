@@ -11,26 +11,21 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
-/**
- * LibrePass API Servers
- */
+/** LibrePass API Servers */
 object Server {
-    /**
-     * Production server instance.
-     */
+    /** Production server instance. */
     const val PRODUCTION = "https://api.librepass.medzik.dev"
 
-    /**
-     * Test server instance. The database from this instance can be deleted at any time!
-     */
+    /** Test server instance. The database from this instance can be deleted at any time! */
     @Suppress("UNUSED")
     const val TEST = "https://api.test.librepass.medzik.dev"
 }
 
 /**
  * HTTP Client for sending requests to the API.
- * @param apiURL api url address
- * @param accessToken access token to use for authorization
+ *
+ * @param apiURL The API URL to use.
+ * @param accessToken The access token to use for authorization.
  */
 class Client(
     private val apiURL: String,
@@ -47,8 +42,9 @@ class Client(
 
     /**
      * Send a GET request to the API.
-     * @param endpoint endpoint of the API
-     * @return response body
+     *
+     * @param endpoint The API endpoint to send the request to.
+     * @return The response from the API.
      */
     @Throws(ClientException::class, ApiException::class)
     fun get(endpoint: String): String {
@@ -64,8 +60,9 @@ class Client(
 
     /**
      * Send a DELETE request to the API.
-     * @param endpoint endpoint of the API
-     * @return response body
+     *
+     * @param endpoint The API endpoint to send the request to.
+     * @return The response from the API.
      */
     @Throws(ClientException::class, ApiException::class)
     fun delete(endpoint: String): String {
@@ -81,9 +78,10 @@ class Client(
 
     /**
      * Send a DELETE request to the API.
-     * @param endpoint endpoint of the API
-     * @param json JSON body of the request
-     * @return response body
+     *
+     * @param endpoint The API endpoint to send the request to.
+     * @param json The JSON to send in the request body.
+     * @return The response from the API.
      */
     @Throws(ClientException::class, ApiException::class)
     fun delete(
@@ -104,9 +102,10 @@ class Client(
 
     /**
      * Send a POST request to the API.
-     * @param endpoint endpoint of the API
-     * @param json JSON body of the request
-     * @return response body
+     *
+     * @param endpoint The API endpoint to send the request to.
+     * @param json The JSON to send in the request body.
+     * @return The response from the API.
      */
     @Throws(ClientException::class, ApiException::class)
     fun post(
@@ -127,9 +126,10 @@ class Client(
 
     /**
      * Send a PATCH request to the API.
-     * @param endpoint endpoint of the API
-     * @param json JSON body of the request
-     * @return response body
+     *
+     * @param endpoint The API endpoint to send the request to.
+     * @param json The JSON to send in the request body.
+     * @return The response from the API.
      */
     @Throws(ClientException::class, ApiException::class)
     fun patch(
@@ -150,9 +150,10 @@ class Client(
 
     /**
      * Send a PUT request to the API.
-     * @param endpoint endpoint of the API
-     * @param json JSON body of the request
-     * @return response body
+     *
+     * @param endpoint The API endpoint to send the request to.
+     * @param json The JSON to send in the request body.
+     * @return The response from the API.
      */
     @Throws(ClientException::class, ApiException::class)
     fun put(
@@ -171,9 +172,7 @@ class Client(
         return executeAndExtractBody(request)
     }
 
-    /**
-     * Execute a request and extract the body from the response.
-     */
+    /** Execute a request and extract the body from the response. */
     @Throws(ClientException::class, ApiException::class)
     private fun executeAndExtractBody(request: Request): String {
         try {
