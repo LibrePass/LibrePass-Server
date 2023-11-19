@@ -9,6 +9,7 @@ enum class ResponseError(val statusCode: HttpStatus) {
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED),
     NOT_FOUND(HttpStatus.NOT_FOUND),
     TOO_MANY_REQUESTS(HttpStatus.TOO_MANY_REQUESTS),
+    CIPHER_TOO_LARGE(HttpStatus.CONTENT_TOO_LARGE),
 
     // Database errors
     DATABASE_DUPLICATED_KEY(HttpStatus.CONFLICT),
@@ -22,6 +23,7 @@ enum class HttpStatus(val code: Int) {
     UNAUTHORIZED(401),
     NOT_FOUND(404),
     CONFLICT(409),
+    CONTENT_TOO_LARGE(413),
     TOO_MANY_REQUESTS(429),
     INTERNAL_SERVER_ERROR(500)
 }
