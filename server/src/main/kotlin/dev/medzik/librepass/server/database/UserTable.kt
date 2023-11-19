@@ -17,18 +17,18 @@ data class UserTable(
     val emailVerificationCodeExpiresAt: Date? = null,
     @Column(columnDefinition = "TEXT")
     val passwordHint: String? = null,
+    // Argon2id parameters
+    val parallelism: Int,
+    val memory: Int,
+    val iterations: Int,
+    // X25519 public key
+    val publicKey: String,
     @Temporal(TemporalType.TIMESTAMP)
     val lastPasswordChange: Date = Date(),
     // 2FA
     val twoFactorEnabled: Boolean = false,
     val twoFactorSecret: String? = null,
     val twoFactorRecoveryCode: String? = null,
-    // Argon2id parameters
-    val parallelism: Int,
-    val memory: Int,
-    val iterations: Int,
-    // Curve25519 public key
-    val publicKey: String,
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     val created: Date = Date(),
