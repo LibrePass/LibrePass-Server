@@ -77,7 +77,7 @@ data class TwoFactorRequest(
  * @property userId The identifier of the user.
  * @property apiKey The API key.
  * @property verified If false, you need to authenticate the API key with OTP code to use the API. (Only if the user enabled
- * 2FA authentication)
+ *  2FA authentication)
  */
 data class UserCredentialsResponse(
     val userId: UUID,
