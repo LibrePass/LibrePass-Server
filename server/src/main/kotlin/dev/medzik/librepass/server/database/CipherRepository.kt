@@ -57,7 +57,11 @@ interface CipherRepository : CrudRepository<CipherTable, UUID> {
         @Param("data") data: String
     )
 
-    /** Remove all tokens owned by the user */
+    /**
+     * Delete all tokens owned by the user.
+     *
+     * @param owner The user identifier.
+     */
     @Transactional
     @Modifying
     fun deleteAllByOwner(owner: UUID)

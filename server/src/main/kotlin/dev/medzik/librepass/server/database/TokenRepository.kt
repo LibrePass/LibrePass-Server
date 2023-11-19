@@ -14,7 +14,11 @@ interface TokenRepository : CrudRepository<TokenTable, String> {
     @Query("DELETE FROM #{#entityName} t WHERE t.lastUsed < :lastUsedBefore")
     fun deleteUnused(lastUsedBefore: Date)
 
-    /** Remove all tokens owned by the user */
+    /**
+     * Delete all tokens owned by the user.
+     *
+     * @param owner The user identifier.
+     */
     @Transactional
     @Modifying
     fun deleteAllByOwner(owner: UUID)

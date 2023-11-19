@@ -3,10 +3,7 @@ package dev.medzik.librepass.server.controllers.api
 import dev.medzik.librepass.responses.ResponseError
 import dev.medzik.librepass.server.components.AuthorizedUser
 import dev.medzik.librepass.server.controllers.advice.InvalidTwoFactorCodeException
-import dev.medzik.librepass.server.database.CipherRepository
-import dev.medzik.librepass.server.database.TokenRepository
-import dev.medzik.librepass.server.database.UserRepository
-import dev.medzik.librepass.server.database.UserTable
+import dev.medzik.librepass.server.database.*
 import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseHandler
 import dev.medzik.librepass.server.utils.Validator.validateSharedKey
@@ -28,7 +25,8 @@ class UserController
     constructor(
         private val userRepository: UserRepository,
         private val tokenRepository: TokenRepository,
-        private val cipherRepository: CipherRepository
+        private val cipherRepository: CipherRepository,
+        private val collectionRepository: CollectionRepository
     ) {
         @PatchMapping("/password")
         fun changePassword(
@@ -115,8 +113,9 @@ class UserController
             if (user.twoFactorEnabled && body.code != TOTP.getTOTPCode(user.twoFactorSecret!!))
                 throw InvalidTwoFactorCodeException()
 
-            tokenRepository.deleteAllByOwner(user.id)
+            collectionRepository.deleteAllByOwner(user.id)
             cipherRepository.deleteAllByOwner(user.id)
+            tokenRepository.deleteAllByOwner(user.id)
             userRepository.delete(user)
 
             return ResponseHandler.generateResponse(HttpStatus.OK)
