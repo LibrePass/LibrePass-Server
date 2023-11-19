@@ -10,19 +10,18 @@ import org.springframework.web.context.request.NativeWebRequest
 import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.method.support.ModelAndViewContainer
 
-/**
- * Annotation for getting request IP from request.
- * @see RequestIPArgumentResolver
- */
+/** Annotation for getting request IP from request. */
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.VALUE_PARAMETER, AnnotationTarget.ANNOTATION_CLASS)
 annotation class RequestIP
 
+/** Implementation of the [RequestIP] annotation. */
 @Component
 class RequestIPArgumentResolver
     @Autowired
     constructor(
-        @Value("\${http.ip.header}") private val ipHeader: String
+        @Value("\${http.ip.header}")
+        private val ipHeader: String
     ) : HandlerMethodArgumentResolver {
         override fun supportsParameter(parameter: MethodParameter): Boolean {
             return parameter.hasParameterAnnotation(RequestIP::class.java)

@@ -17,14 +17,12 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.method.support.ModelAndViewContainer
 import java.util.*
 
-/**
- * Annotation for getting authorized user from request.
- * @see AuthorizedUserArgumentResolver
- */
+/** Annotation for getting authorized user from request. */
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.VALUE_PARAMETER, AnnotationTarget.ANNOTATION_CLASS)
 annotation class AuthorizedUser
 
+/** Implementation of the [AuthorizedUser] annotation */
 @Component
 class AuthorizedUserArgumentResolver
     @Autowired

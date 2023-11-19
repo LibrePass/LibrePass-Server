@@ -37,6 +37,7 @@ data class EncryptedCipher(
 ) {
     /**
      * Creates a new [EncryptedCipher] object from the [Cipher].
+     *
      * @param cipher The [Cipher] to encrypt.
      * @param secretKey The key to use for encryption.
      * @return The encrypted cipher.
