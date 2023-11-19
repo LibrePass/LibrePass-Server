@@ -13,6 +13,7 @@ import dev.medzik.librepass.types.api.CipherIdResponse
 import dev.medzik.librepass.types.api.SyncResponse
 import dev.medzik.librepass.types.cipher.EncryptedCipher
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.client.RestTemplate
@@ -23,7 +24,9 @@ import java.util.*
 class CipherController
     @Autowired
     constructor(
-        private val cipherRepository: CipherRepository
+        private val cipherRepository: CipherRepository,
+        @Value("\${cipher.max_length}")
+        private val cipherMaxLength: Int
     ) {
         @PutMapping
         fun insertCipher(
@@ -34,6 +37,9 @@ class CipherController
                 encryptedCipher.owner != user.id
             )
                 return ResponseError.INVALID_BODY.toResponse()
+
+            if (encryptedCipher.protectedData.length > cipherMaxLength)
+                return ResponseError.CIPHER_TOO_LARGE.toResponse()
 
             val cipher = cipherRepository.save(CipherTable(encryptedCipher))
 
@@ -105,6 +111,9 @@ class CipherController
         ): Response {
             if (!checkIfCipherExistsAndOwnedBy(id, user.id))
                 return ResponseError.NOT_FOUND.toResponse()
+
+            if (encryptedCipher.protectedData.length > cipherMaxLength)
+                return ResponseError.CIPHER_TOO_LARGE.toResponse()
 
             cipherRepository.save(CipherTable(encryptedCipher))
 
