@@ -92,7 +92,7 @@ class CipherController
             @AuthorizedUser user: UserTable,
             @PathVariable id: UUID
         ): Response {
-            if (!checkIfCipherExistsAndOwnedBy(id, user.id))
+            if (!checkIfCipherExists(id, user.id))
                 return ResponseError.NOT_FOUND.toResponse()
 
             val cipher = cipherRepository.findById(id).get()
@@ -109,7 +109,7 @@ class CipherController
             @PathVariable id: UUID,
             @RequestBody encryptedCipher: EncryptedCipher
         ): Response {
-            if (!checkIfCipherExistsAndOwnedBy(id, user.id))
+            if (!checkIfCipherExists(id, user.id))
                 return ResponseError.NOT_FOUND.toResponse()
 
             if (encryptedCipher.protectedData.length > cipherMaxLength)
@@ -125,7 +125,7 @@ class CipherController
             @AuthorizedUser user: UserTable,
             @PathVariable id: UUID
         ): Response {
-            if (!checkIfCipherExistsAndOwnedBy(id, user.id))
+            if (!checkIfCipherExists(id, user.id))
                 return ResponseError.NOT_FOUND.toResponse()
 
             cipherRepository.deleteById(id)
@@ -136,11 +136,11 @@ class CipherController
         /**
          * Checks if cipher exists and is owned by user.
          */
-        private fun checkIfCipherExistsAndOwnedBy(
+        private fun checkIfCipherExists(
             id: UUID,
             owner: UUID
         ): Boolean {
-            return cipherRepository.checkIfCipherExistsAndOwnedBy(id, owner)
+            return cipherRepository.checkIfCipherExists(id, owner)
         }
 
         @GetMapping("/icon")
