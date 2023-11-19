@@ -1,5 +1,7 @@
 package dev.medzik.librepass.server.database
 
+import jakarta.transaction.Transactional
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.repository.CrudRepository
 import java.util.*
 
@@ -24,4 +26,13 @@ interface CollectionRepository : CrudRepository<CollectionTable, UUID> {
      * @return A list of all collections owned by the given user.
      */
     fun findAllByOwner(owner: UUID): List<CollectionTable>
+
+    /**
+     * Delete all collections owned by the user.
+     *
+     * @param owner The user identifier.
+     */
+    @Transactional
+    @Modifying
+    fun deleteAllByOwner(owner: UUID)
 }
