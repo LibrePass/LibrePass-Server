@@ -1,0 +1,39 @@
+name: 🚀 Feature Request
+description: Give us ideas for new features!
+title: "[Enhancement]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking your time to give us new ideas!
+  - type: input
+    id: contact
+    attributes:
+      label: (Optional) Contact Details
+      description: How can we reach you in case we need more information?
+      placeholder: email@example.com
+    validations:
+      required: false
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: "Give us a concise description of the suggested feature."
+      placeholder: "Example: Add a button that..."
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Detailed description
+      description: "Describe in detail the feature you would like to see."
+    validations:
+      required: true
+  - type: textarea
+    id: technical
+    attributes:
+      label: (Optional) Technical description
+      description: "Describe how the feature works in a technical level."
+    validations:
+      required: false
