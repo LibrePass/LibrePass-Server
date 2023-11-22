@@ -1,0 +1,39 @@
+name: 🐛 Bug Report
+description: Help us by reporting a bug in the app
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to report a bug!
+  - type: input
+    id: contact
+    attributes:
+      label: (Optional) Contact Details
+      description: How can we reach you in case we need more information?
+      placeholder: email@example.com
+    validations:
+      required: false
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Explain the problem in detail
+      placeholder: Tell us what you see!
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Which version of our software are you using?
+      placeholder: 1.0.0
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs
+      description: Please copy and paste any logs that may be relevant
+      render: Shell
