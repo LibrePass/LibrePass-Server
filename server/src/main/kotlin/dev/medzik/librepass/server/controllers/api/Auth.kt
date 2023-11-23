@@ -317,7 +317,8 @@ class AuthController
             userRepository.save(
                 user.copy(
                     emailVerified = true,
-                    emailVerificationCode = null
+                    emailVerificationCode = null,
+                    emailVerificationCodeExpiresAt = null
                 )
             )
 
