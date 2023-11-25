@@ -13,8 +13,8 @@ import java.util.*
  * @property passwordHistory The history of passwords.
  * @property uris The list of uris.
  * @property twoFactor The two-factor secret.
- *  @property notes The note for the cipher.
- *  * @property fields The custom fields for the cipher.
+ * @property notes The note for the cipher.
+ * @property fields The custom fields for the cipher.
  */
 data class CipherLoginData(
     val name: String,
