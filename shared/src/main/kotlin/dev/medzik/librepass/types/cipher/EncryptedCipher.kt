@@ -17,8 +17,8 @@ import java.util.*
  * @property collection The identifier of the collection to which the cipher belongs.
  * @property favorite Whether the cipher is marked as favorite.
  * @property rePrompt Whether the password should be re-prompted. (Only UI-related)
- * @property version The version of the cipher (the current version is 1)
- * @property created The date when the cipher was created
+ * @property version The version of the cipher. (the current version is 1)
+ * @property created The date when the cipher was created.
  * @property lastModified The date when the cipher was last modified
  */
 data class EncryptedCipher(
