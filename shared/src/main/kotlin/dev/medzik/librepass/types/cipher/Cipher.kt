@@ -11,13 +11,13 @@ import java.util.*
  *
  * @property id The cipher identifier.
  * @property owner The identifier of the cipher owner.
- * @property type The type of the cipher. - [CipherType]
- * @property loginData The login data. (Only if the cipher is a login cipher) - [CipherLoginData]
- * @property secureNoteData The secure note data. (Only if the cipher is a secure cipher) - [CipherSecureNoteData]
- * @property cardData The card data. (Only if the cipher is a card cipher) - [CipherCardData]
+ * @property type The type of the cipher.
+ * @property loginData The login data. (Only if the cipher is a login cipher)
+ * @property secureNoteData The secure note data. (Only if the cipher is a secure cipher)
+ * @property cardData The card data. (Only if the cipher is a card cipher)
  * @property collection The identifier of collection,
- * @property favorite Whether the cipher is a favorite cipher
- * @property rePrompt Whether the cipher should be re-prompted (Only UI feature)
+ * @property favorite Whether the cipher is a favorite cipher.
+ * @property rePrompt Whether the cipher should be re-prompted. (Only UI feature)
  * @property version The version of the cipher object. (the current version is 1)
  * @property created The date when the cipher was created.
  * @property lastModified The date when the cipher was last modified.

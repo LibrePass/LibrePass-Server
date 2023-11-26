@@ -8,17 +8,31 @@ import org.apache.commons.codec.binary.Base32
 import java.time.Duration
 
 object TOTP {
+    /** Generates a random two-factor secret key. */
     fun generateSecretKey(): String {
         val bytes = SecretGenerator.generate()
         val base32 = Base32()
         return base32.encodeToString(bytes)
     }
 
+    /**
+     * Generates a new two-factor code.
+     *
+     * @param secret The secret key of the code to generate.
+     * @return The generated two-factor code.
+     */
     fun getTOTPCode(secret: String): String {
         val totpGenerator = initializeTOTPGenerator(secret)
         return totpGenerator.now()
     }
 
+    /**
+     * Validates the two-factor code with the given secret key.
+     *
+     * @param secret The secret key of the code to validate.
+     * @param otpCode The code to validate.
+     * @return True if the code is valid, false otherwise.
+     */
     fun validate(
         secret: String,
         otpCode: String
