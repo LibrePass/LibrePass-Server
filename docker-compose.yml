@@ -4,6 +4,7 @@ services:
   librepass:
     image: medzik/librepass
     build:
+      context: .
       dockerfile: './Dockerfile'
     env_file:
       - .env
