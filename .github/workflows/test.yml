@@ -21,7 +21,6 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-          cache: 'maven'
 
       - name: Setup env
         run: cp .github/github.env .env
