@@ -20,6 +20,8 @@ services:
 
   postgres:
     image: postgres
+    expose:
+      - "5432"
     networks:
       - librepass-db
     env_file:
