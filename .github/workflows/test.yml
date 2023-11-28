@@ -10,12 +10,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    services:
-      smtp_server:
-        image: namshi/smtp
-        ports:
-          - 1025:25
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,10 +24,10 @@ jobs:
         run: cp .github/github.env .env
 
       - name: Build server
-        run: docker-compose build
+        run: docker compose build
 
       - name: Run server for testing
-        run: docker-compose up -d
+        run: docker compose -f docker-compose.yml -f .github/mail.docker-compose.yml up -d
 
       - name: Download maven dependencies
         run: ./mvnw dependency:copy-dependencies

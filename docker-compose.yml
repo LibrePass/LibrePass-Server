@@ -6,8 +6,6 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
-    networks:
-      - librepass-db
     env_file:
       - .env
     volumes:
@@ -22,13 +20,7 @@ services:
     image: postgres
     expose:
       - "5432"
-    networks:
-      - librepass-db
     env_file:
       - .env
     volumes:
       - ./db-data:/var/lib/postgresql/data:Z
-
-networks:
-  librepass-db:
-    external: false
