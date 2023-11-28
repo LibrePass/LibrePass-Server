@@ -23,48 +23,17 @@ jobs:
           java-version: '17'
           cache: 'maven'
 
-      - name: Build and run server for tests
-        run: |
-          ./mvnw clean package -DskipTests
-          rm -r server/target/server-*-sources.jar
-          java -jar server/target/server-*.jar --trace &
-        env:
-          API_DOMAIN: example.com
-          PORT: 8080
-          CORS_ALLOWED_ORIGINS: 'https://example.com,https://www.example.com'
-          SSL_ENABLED: false
-          SSL_KEYSTORE: none
-          SSL_KEYSTORE_PASSWORD: none
-          DATABASE_URI: jdbc:h2:mem:db;DB_CLOSE_DELAY=-1
-          DATABASE_USER: sa
-          DATABASE_PASSWORD: sa
-          MAIL_SMTP: localhost
-          MAIL_SMTP_PORT: 1025
-          MAIL_SMTP_AUTH: false
-          MAIL_SMTP_TLS_ENABLED: false
-          SMTP_EMAIL_ADDRESS: librepass@localhost
-          RATE_LIMIT_ENABLED: false
-          EMAIL_VERIFICATION_REQUIRED: false
+      - name: Setup env
+        run: cp .github/github.env .env
+
+      - name: Build server
+        run: docker-compose build
+
+      - name: Run server for testing
+        run: docker-compose up -d
 
       - name: Run tests
         run: ./mvnw clean test
-        env:
-          API_DOMAIN: example.com
-          PORT: 8080
-          CORS_ALLOWED_ORIGINS: 'https://example.com,https://www.example.com'
-          SSL_ENABLED: false
-          SSL_KEYSTORE: none
-          SSL_KEYSTORE_PASSWORD: none
-          DATABASE_URI: jdbc:h2:mem:db;DB_CLOSE_DELAY=-1
-          DATABASE_USER: sa
-          DATABASE_PASSWORD: sa
-          MAIL_SMTP: localhost
-          MAIL_SMTP_PORT: 1025
-          MAIL_SMTP_AUTH: false
-          MAIL_SMTP_TLS_ENABLED: false
-          SMTP_EMAIL_ADDRESS: librepass@localhost
-          RATE_LIMIT_ENABLED: false
-          EMAIL_VERIFICATION_REQUIRED: false
 
       - name: Log server output for debugging purposes
         if: always()
