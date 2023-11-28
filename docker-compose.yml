@@ -5,10 +5,10 @@ services:
     image: medzik/librepass
     build:
       dockerfile: './Dockerfile'
-
     env_file:
       - .env
-
+    volumes:
+      - ./logs:/logs:Z
     ports:
       - "80:8080"
 
@@ -17,9 +17,7 @@ services:
 
   postgres:
     image: 'postgres:latest'
-
+    env_file:
+      - .env
     volumes:
       - ./db-data:/var/lib/postgresql/data:Z
-
-    env_file:
-      - '.env'
