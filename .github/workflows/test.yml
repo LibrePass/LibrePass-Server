@@ -35,6 +35,9 @@ jobs:
       - name: Run server for testing
         run: docker-compose up -d
 
+      - name: Download maven dependencies
+        run: ./mvnw dependency:copy-dependencies
+
       - name: Run tests
         run: ./mvnw clean test
 
