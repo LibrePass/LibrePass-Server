@@ -35,6 +35,6 @@ jobs:
       - name: Run tests
         run: ./mvnw clean test
 
-      - name: Log server output for debugging purposes
+      - name: Server logs for debugging purposes
         if: always()
-        run: cat librepass.log
+        run: cat logs/librepass.log
