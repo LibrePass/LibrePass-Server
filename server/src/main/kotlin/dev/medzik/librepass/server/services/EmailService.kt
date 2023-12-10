@@ -21,6 +21,9 @@ class EmailService
         private val emailVerificationTemplate =
             this::class.java.getResource("/templates/email-verification.html")?.readText()
                 ?: throw Exception("Failed to read `email verification` email template")
+        private val newLoginTemplate =
+            this::class.java.getResource("/templates/new-login.html")?.readText()
+                ?: throw Exception("Failed to read `new login` email template")
         private val passwordHintTemplate =
             this::class.java.getResource("/templates/password-hint.html")?.readText()
                 ?: throw Exception("Failed to read `password hint` email template")
@@ -58,6 +61,19 @@ class EmailService
             val body =
                 emailVerificationTemplate
                     .replace("{{url}}", url)
+
+            send(to, subject, body)
+        }
+
+        /** Email the given address with the new login. */
+        fun sendNewLogin(
+            to: String,
+            ip: String
+        ) {
+            val subject = "New Login Detected - LibrePass"
+            val body =
+                newLoginTemplate
+                    .replace("{{ipAddress}}", ip)
 
             send(to, subject, body)
         }

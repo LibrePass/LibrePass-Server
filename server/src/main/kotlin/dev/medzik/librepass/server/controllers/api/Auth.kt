@@ -180,6 +180,7 @@ class AuthController
                 "2fa" -> {
                     try {
                         return oauth2FA(
+                            ip = ip,
                             request = Gson().fromJson(request, TwoFactorRequest::class.java)
                         )
                     } catch (e: JsonSyntaxException) {
@@ -217,6 +218,13 @@ class AuthController
                     )
                 )
 
+            if (!user.twoFactorEnabled) {
+                emailService.sendNewLogin(
+                    to = user.email,
+                    ip = ip
+                )
+            }
+
             return ResponseHandler.generateResponse(
                 UserCredentialsResponse(
                     userId = user.id,
@@ -226,7 +234,10 @@ class AuthController
             )
         }
 
-        private fun oauth2FA(request: TwoFactorRequest): Response {
+        private fun oauth2FA(
+            ip: String,
+            request: TwoFactorRequest
+        ): Response {
             consumeRateLimit(request.apiKey)
 
             val token =
@@ -249,6 +260,11 @@ class AuthController
                 request.code != user.twoFactorRecoveryCode
             )
                 throw InvalidTwoFactorCodeException()
+
+            emailService.sendNewLogin(
+                to = user.email,
+                ip = ip
+            )
 
             tokenRepository.save(token.copy(confirmed = true))
 
