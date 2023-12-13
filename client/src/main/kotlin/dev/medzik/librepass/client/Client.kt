@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit
 /** LibrePass API Servers */
 object Server {
     /** Production server instance. */
-    const val PRODUCTION = "https://api.librepass.medzik.dev"
+    const val PRODUCTION = "https://api.librepass.org"
 
     /** Test server instance. The database from this instance can be deleted at any time! */
     @Suppress("UNUSED")
