@@ -29,9 +29,6 @@ jobs:
       - name: Run server for testing
         run: docker compose -f docker-compose.yml -f .github/mail.docker-compose.yml up -d
 
-      - name: Download maven dependencies
-        run: ./mvnw dependency:copy-dependencies
-
       - name: Run tests
         run: ./mvnw clean test
 
