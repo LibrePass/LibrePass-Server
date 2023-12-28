@@ -33,13 +33,13 @@ class CipherController
             @AuthorizedUser user: UserTable,
             @RequestBody encryptedCipher: EncryptedCipher
         ): Response {
+            if (encryptedCipher.protectedData.length > cipherMaxLength)
+                return ResponseError.CIPHER_TOO_LARGE.toResponse()
+
             if (!Validator.hexValidator(encryptedCipher.protectedData) ||
                 encryptedCipher.owner != user.id
             )
                 return ResponseError.INVALID_BODY.toResponse()
-
-            if (encryptedCipher.protectedData.length > cipherMaxLength)
-                return ResponseError.CIPHER_TOO_LARGE.toResponse()
 
             val cipher = cipherRepository.save(CipherTable(encryptedCipher))
 

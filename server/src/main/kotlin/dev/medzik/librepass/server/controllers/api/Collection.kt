@@ -28,6 +28,8 @@ class CollectionController
             @AuthorizedUser user: UserTable,
             @RequestBody collection: CreateCollectionRequest
         ): Response {
+            if (collection.name.length > 64) return ResponseError.INVALID_BODY.toResponse()
+
             collectionRepository.save(
                 CollectionTable(
                     id = collection.id,
@@ -89,6 +91,8 @@ class CollectionController
             @PathVariable id: UUID,
             @RequestBody collection: CreateCollectionRequest
         ): Response {
+            if (collection.name.length > 64) return ResponseError.INVALID_BODY.toResponse()
+
             collectionRepository.save(
                 CollectionTable(
                     id = id,
