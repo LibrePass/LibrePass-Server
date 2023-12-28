@@ -2,7 +2,6 @@ package dev.medzik.librepass.server.controllers.api
 
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
-import dev.medzik.libcrypto.Random
 import dev.medzik.libcrypto.X25519
 import dev.medzik.librepass.responses.ResponseError
 import dev.medzik.librepass.server.components.RequestIP
@@ -71,33 +70,40 @@ class AuthController
         ): Response {
             consumeRateLimit(ip)
 
-            if (!Validator.emailValidator(request.email) ||
+            // Validate request
+            if (
+                // RFC 2821 maximum email length
+                request.email.length > 256 ||
+                // password hint is limited to 256 characters
+                (request.passwordHint?.length ?: 0) > 256 ||
+                // validate shared key and public key (only hex and length)
                 !Validator.hexValidator(request.sharedKey, 32) ||
                 !Validator.hexValidator(request.publicKey, 32) ||
-                request.parallelism < 0 ||
-                request.memory < 19 * 1024 ||
-                request.iterations < 0
+                // Argon2 parallelism must not be less than 1
+                request.parallelism < 1 ||
+                // Argon2 parallelism must not be less than 20MB
+                request.memory < 20 * 1024 ||
+                // Argon2 iterations must not be less than 1
+                request.iterations < 1
             )
                 return ResponseError.INVALID_BODY.toResponse()
-
+            // validate shared key
             if (!validateSharedKey(request.publicKey, request.sharedKey))
                 return ResponseError.INVALID_CREDENTIALS.toResponse()
-
-            val verificationToken = Random.randBytes(16).toHexString()
 
             val user =
                 userRepository.save(
                     UserTable(
                         email = request.email.lowercase(),
                         passwordHint = request.passwordHint,
-                        // Argon2id parameters
+                        // Argon2 parameters
                         parallelism = request.parallelism,
                         memory = request.memory,
                         iterations = request.iterations,
-                        // Curve25519 key pair
+                        // X25519 key pair
                         publicKey = request.publicKey,
-                        // Email verification token
-                        emailVerificationCode = verificationToken,
+                        // Email verification code
+                        emailVerificationCode = UUID.randomUUID().toString(),
                         emailVerificationCodeExpiresAt =
                             Date.from(
                                 Calendar.getInstance().apply {
@@ -132,15 +138,18 @@ class AuthController
             if (email.isNullOrEmpty())
                 return ResponseHandler.generateResponse(
                     PreLoginResponse(
-                        // Default argon2id parameters
+                        // Default Argon2 parameters
                         parallelism = 3,
                         memory = 65536,
                         iterations = 4,
-                        // Server Curve25519 public key
+                        // Server X5519 public key
                         serverPublicKey = ServerPublicKey.toHexString()
                     ),
                     HttpStatus.OK
                 )
+
+            // validate email length
+            if (email.length > 256) return ResponseError.INVALID_BODY.toResponse()
 
             val user =
                 userRepository.findByEmail(email.lowercase())
@@ -196,10 +205,12 @@ class AuthController
             ip: String,
             request: LoginRequest
         ): Response {
-            consumeRateLimit(request.email.lowercase())
+            val emailAddress = request.email.lowercase()
+
+            consumeRateLimit(emailAddress)
 
             val user =
-                userRepository.findByEmail(request.email.lowercase())
+                userRepository.findByEmail(emailAddress)
                     ?: return ResponseError.INVALID_CREDENTIALS.toResponse()
 
             if (emailVerificationRequired && !user.emailVerified)

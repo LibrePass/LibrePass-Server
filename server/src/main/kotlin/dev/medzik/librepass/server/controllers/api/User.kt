@@ -6,6 +6,7 @@ import dev.medzik.librepass.server.controllers.advice.InvalidTwoFactorCodeExcept
 import dev.medzik.librepass.server.database.*
 import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseHandler
+import dev.medzik.librepass.server.utils.Validator
 import dev.medzik.librepass.server.utils.Validator.validateSharedKey
 import dev.medzik.librepass.server.utils.toResponse
 import dev.medzik.librepass.types.api.ChangePasswordRequest
@@ -31,14 +32,31 @@ class UserController
         @PatchMapping("/password")
         fun changePassword(
             @AuthorizedUser user: UserTable,
-            @RequestBody body: ChangePasswordRequest
+            @RequestBody request: ChangePasswordRequest
         ): Response {
+            // Validate request
+            if (
+                // password hint is limited to 256 characters
+                (request.newPasswordHint?.length ?: 0) > 256 ||
+                // validate shared key and public key (only hex and length)
+                !Validator.hexValidator(request.oldSharedKey, 32) ||
+                !Validator.hexValidator(request.newSharedKey, 32) ||
+                !Validator.hexValidator(request.newPublicKey, 32) ||
+                // Argon2 parallelism must not be less than 1
+                request.parallelism < 1 ||
+                // Argon2 parallelism must not be less than 20MB
+                request.memory < 20 * 1024 ||
+                // Argon2 iterations must not be less than 1
+                request.iterations < 1
+            )
+                return ResponseError.INVALID_BODY.toResponse()
+
             // validate shared key with an old public key
-            if (!validateSharedKey(user, body.oldSharedKey))
+            if (!validateSharedKey(user, request.oldSharedKey))
                 return ResponseError.INVALID_CREDENTIALS.toResponse()
 
             // validate shared key with a new public key
-            if (!validateSharedKey(body.newPublicKey, body.newSharedKey))
+            if (!validateSharedKey(request.newPublicKey, request.newSharedKey))
                 return ResponseError.INVALID_CREDENTIALS.toResponse()
 
             // get all user cipher ids
@@ -46,13 +64,13 @@ class UserController
 
             // check if all ciphers are present
             // by the way checks if they are owned by the user (because `cipherIds` is a list of user cipher ids)
-            body.ciphers.forEach { cipherData ->
+            request.ciphers.forEach { cipherData ->
                 if (!cipherIds.contains(cipherData.id))
                     return ResponseError.INVALID_BODY.toResponse()
             }
 
             // update ciphers data due to re-encryption with new password
-            body.ciphers.forEach { cipherData ->
+            request.ciphers.forEach { cipherData ->
                 cipherRepository.updateData(
                     cipherData.id,
                     cipherData.data
@@ -62,13 +80,13 @@ class UserController
             // update user in database
             userRepository.save(
                 user.copy(
-                    passwordHint = body.newPasswordHint,
+                    passwordHint = request.newPasswordHint,
                     // Argon2id parameters
-                    parallelism = body.parallelism,
-                    memory = body.memory,
-                    iterations = body.iterations,
+                    parallelism = request.parallelism,
+                    memory = request.memory,
+                    iterations = request.iterations,
                     // Curve25519 public key
-                    publicKey = body.newPublicKey,
+                    publicKey = request.newPublicKey,
                     // set the last password change date to now
                     lastPasswordChange = Date()
                 )
@@ -80,12 +98,12 @@ class UserController
         @PostMapping("/setup/2fa")
         fun setupTwoFactor(
             @AuthorizedUser user: UserTable,
-            @RequestBody body: SetupTwoFactorRequest
+            @RequestBody request: SetupTwoFactorRequest
         ): Response {
-            if (!validateSharedKey(user, body.sharedKey))
+            if (!validateSharedKey(user, request.sharedKey))
                 return ResponseError.INVALID_CREDENTIALS.toResponse()
 
-            if (body.code != TOTP.getTOTPCode(body.secret))
+            if (request.code != TOTP.getTOTPCode(request.secret))
                 throw InvalidTwoFactorCodeException()
 
             val recoveryCode = UUID.randomUUID().toString()
@@ -93,7 +111,7 @@ class UserController
             userRepository.save(
                 user.copy(
                     twoFactorEnabled = true,
-                    twoFactorSecret = body.secret,
+                    twoFactorSecret = request.secret,
                     twoFactorRecoveryCode = recoveryCode
                 )
             )
@@ -105,12 +123,12 @@ class UserController
         @DeleteMapping("/delete")
         fun deleteAccount(
             @AuthorizedUser user: UserTable,
-            @RequestBody body: DeleteAccountRequest
+            @RequestBody request: DeleteAccountRequest
         ): Response {
-            if (!validateSharedKey(user, body.sharedKey))
+            if (!validateSharedKey(user, request.sharedKey))
                 return ResponseError.INVALID_CREDENTIALS.toResponse()
 
-            if (user.twoFactorEnabled && body.code != TOTP.getTOTPCode(user.twoFactorSecret!!))
+            if (user.twoFactorEnabled && request.code != TOTP.getTOTPCode(user.twoFactorSecret!!))
                 throw InvalidTwoFactorCodeException()
 
             collectionRepository.deleteAllByOwner(user.id)
