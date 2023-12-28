@@ -85,7 +85,7 @@ class UserController
                     parallelism = request.parallelism,
                     memory = request.memory,
                     iterations = request.iterations,
-                    // Curve25519 public key
+                    // X25519 public key
                     publicKey = request.newPublicKey,
                     // set the last password change date to now
                     lastPasswordChange = Date()
