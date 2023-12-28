@@ -35,7 +35,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
-// The server's key pair is used for authentication using a shared key.
+// The server's X25519 key pair is used for authentication by doing a "handshake".
 //
 // It is not required that the key pair be the same all the time, so it
 // is generated when the server is started and each time it is restarted,
@@ -160,7 +160,7 @@ class AuthController
                     parallelism = user.parallelism,
                     memory = user.memory,
                     iterations = user.iterations,
-                    // Server Curve25519 public key
+                    // Server X25519 public key
                     serverPublicKey = ServerPublicKey.toHexString()
                 ),
                 HttpStatus.OK

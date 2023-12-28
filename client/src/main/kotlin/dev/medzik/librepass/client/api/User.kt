@@ -114,7 +114,7 @@ class UserClient(
                 parallelism = newPasswordHash.parallelism,
                 memory = newPasswordHash.memory,
                 iterations = newPasswordHash.iterations,
-                // Curve25519 public key
+                // X25519 public key
                 newPublicKey = newPublicKey.toHexString(),
                 // ciphers data re-encrypted with new password
                 ciphers = ciphers
