@@ -12,8 +12,8 @@ import dev.medzik.librepass.server.utils.toResponse
 import dev.medzik.librepass.types.api.CipherIdResponse
 import dev.medzik.librepass.types.api.SyncResponse
 import dev.medzik.librepass.types.cipher.EncryptedCipher
+import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.client.RestTemplate
@@ -24,18 +24,13 @@ import java.util.*
 class CipherController
     @Autowired
     constructor(
-        private val cipherRepository: CipherRepository,
-        @Value("\${cipher.max_length}")
-        private val cipherMaxLength: Int
+        private val cipherRepository: CipherRepository
     ) {
         @PutMapping
         fun insertCipher(
             @AuthorizedUser user: UserTable,
-            @RequestBody encryptedCipher: EncryptedCipher
+            @Valid @RequestBody encryptedCipher: EncryptedCipher
         ): Response {
-            if (encryptedCipher.protectedData.length > cipherMaxLength)
-                return ResponseError.CIPHER_TOO_LARGE.toResponse()
-
             if (!Validator.hexValidator(encryptedCipher.protectedData) ||
                 encryptedCipher.owner != user.id
             )
@@ -107,13 +102,15 @@ class CipherController
         fun updateCipher(
             @AuthorizedUser user: UserTable,
             @PathVariable id: UUID,
-            @RequestBody encryptedCipher: EncryptedCipher
+            @Valid @RequestBody encryptedCipher: EncryptedCipher
         ): Response {
             if (!checkIfCipherExists(id, user.id))
                 return ResponseError.NOT_FOUND.toResponse()
 
-            if (encryptedCipher.protectedData.length > cipherMaxLength)
-                return ResponseError.CIPHER_TOO_LARGE.toResponse()
+            if (!Validator.hexValidator(encryptedCipher.protectedData) ||
+                encryptedCipher.owner != user.id
+            )
+                return ResponseError.INVALID_BODY.toResponse()
 
             cipherRepository.save(CipherTable(encryptedCipher))
 

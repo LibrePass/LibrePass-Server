@@ -4,6 +4,8 @@ module dev.medzik.librepass.shared {
     requires kotlin.stdlib;
     requires org.apache.commons.codec;
     requires otp.java;
+    requires jakarta.validation;
+    requires org.hibernate.validator;
 
     exports dev.medzik.librepass.responses;
 

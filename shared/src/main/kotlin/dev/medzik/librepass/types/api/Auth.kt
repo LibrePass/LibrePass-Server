@@ -1,6 +1,8 @@
 package dev.medzik.librepass.types.api
 
 import dev.medzik.libcrypto.Argon2
+import jakarta.validation.constraints.Email
+import jakarta.validation.constraints.Max
 import java.util.*
 
 /**
@@ -15,7 +17,9 @@ import java.util.*
  * @property publicKey The X25519 public key.
  */
 data class RegisterRequest(
+    @Email
     val email: String,
+    @Max(100)
     val passwordHint: String? = null,
     val sharedKey: String,
     val parallelism: Int,
@@ -56,6 +60,7 @@ data class PreLoginResponse(
  * @property sharedKey The shared key with server, used for authentication.
  */
 data class LoginRequest(
+    @Email
     val email: String,
     val sharedKey: String
 )
