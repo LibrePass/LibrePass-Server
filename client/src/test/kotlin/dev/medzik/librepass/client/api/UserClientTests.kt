@@ -54,6 +54,71 @@ class UserClientTests {
     }
 
     @Test
+    fun changeEmail() {
+        val testCipher =
+            Cipher(
+                id = UUID.randomUUID(),
+                owner = userId,
+                type = CipherType.Login,
+                loginData =
+                    CipherLoginData(
+                        name = "test",
+                        username = "test",
+                        password = "test"
+                    )
+            )
+
+        fun insertTestCipher() {
+            cipherClient.insert(EncryptedCipher(testCipher, secretKey))
+        }
+
+        fun checkCipher(secretKey: ByteArray) {
+            val ciphers = cipherClient.getAll()
+
+            val cipher = Cipher(ciphers[0], secretKey)
+
+            assertEquals(testCipher.loginData, cipher.loginData)
+        }
+
+        insertTestCipher()
+
+        checkCipher(secretKey)
+
+        val newEmail = "newemail@example.com"
+
+        userClient.changeEmail(EMAIL, newEmail, PASSWORD)
+
+        // wait for 1 second to prevent unauthorized error
+        Thread.sleep(1000)
+
+        // login with new email
+        var authClient = AuthClient(API_URL)
+        var credentials = authClient.login(newEmail, PASSWORD)
+        userClient = UserClient(newEmail, credentials.apiKey, API_URL)
+        cipherClient = CipherClient(credentials.apiKey, API_URL)
+        secretKey = credentials.secretKey.fromHexString()
+
+        checkCipher(secretKey)
+
+        // wait for 1 second to prevent unauthorized error
+        Thread.sleep(1000)
+
+        // change email back
+        userClient.changeEmail(newEmail, EMAIL, PASSWORD)
+
+        // wait for 1 second to prevent unauthorized error
+        Thread.sleep(1000)
+
+        authClient = AuthClient(API_URL)
+        credentials = authClient.login(EMAIL, PASSWORD)
+        userClient = UserClient(EMAIL, credentials.apiKey, API_URL)
+        cipherClient = CipherClient(credentials.apiKey, API_URL)
+        secretKey = credentials.secretKey.fromHexString()
+
+        checkCipher(secretKey)
+    }
+
+    @Test
     fun changePassword() {
         val testCipher =
             Cipher(

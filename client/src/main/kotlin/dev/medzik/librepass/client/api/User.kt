@@ -34,6 +34,84 @@ class UserClient(
 
     private val client = Client(apiUrl, apiKey)
 
+    @Throws(ClientException::class, ApiException::class)
+    fun changeEmail(
+        email: String,
+        newEmail: String,
+        password: String
+    ) {
+        val preLogin = AuthClient(apiUrl).preLogin(email)
+
+        // compute old secret key
+        val oldSecretKey =
+            computeSecretKeyFromPassword(
+                email = email,
+                password = password,
+                argon2Function = preLogin.toArgon2()
+            )
+
+        val passwordHashWithOldEmail =
+            computePasswordHash(
+                email = email,
+                password = password,
+                argon2Function = preLogin.toArgon2()
+            )
+
+        val passwordHashWithNewEmail =
+            computePasswordHash(
+                email = email,
+                password = newEmail,
+                argon2Function = preLogin.toArgon2()
+            )
+
+        val newPublicKey = X25519.publicFromPrivate(passwordHashWithNewEmail.hash)
+
+        // get server public key
+        val serverPublicKey = preLogin.serverPublicKey.fromHexString()
+
+        // compute shared key with an old private key and server public key
+        val oldSharedKey = computeSharedKey(passwordHashWithOldEmail.hash, serverPublicKey)
+
+        // compute shared key with a new private key and server public key
+        val newSharedKey = computeSharedKey(passwordHashWithNewEmail.hash, serverPublicKey)
+
+        // compute new secret key
+        val newSecretKey = computeSecretKey(passwordHashWithNewEmail.hash)
+
+        // re-encrypt ciphers data with a secret key
+        val cipherClient = CipherClient(apiKey, apiUrl)
+        val ciphers = mutableListOf<ChangePasswordCipherData>()
+        cipherClient.getAll().forEach { cipher ->
+            // decrypt cipher data with an old secret key
+            val oldData = Aes.decrypt(Aes.GCM, oldSecretKey, cipher.protectedData)
+
+            // encrypt cipher data with a new secret key
+            val newData = Aes.encrypt(Aes.GCM, newSecretKey, oldData)
+
+            ciphers +=
+                ChangePasswordCipherData(
+                    id = cipher.id,
+                    data = newData
+                )
+        }
+
+        val request =
+            ChangeEmailRequest(
+                newEmail = newEmail,
+                oldSharedKey = oldSharedKey.toHexString(),
+                newSharedKey = newSharedKey.toHexString(),
+                // X25519 public key
+                newPublicKey = newPublicKey.toHexString(),
+                // ciphers data re-encrypted with new password
+                ciphers = ciphers
+            )
+
+        client.patch(
+            "$API_ENDPOINT/email",
+            JsonUtils.serialize(request)
+        )
+    }
+
     /**
      * Change user password.
      *
