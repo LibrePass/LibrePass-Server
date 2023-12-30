@@ -1,7 +1,5 @@
 package dev.medzik.librepass.utils
 
-import com.bastiaanjansen.otp.HMACAlgorithm
-import com.bastiaanjansen.otp.HOTPGenerator
 import com.bastiaanjansen.otp.SecretGenerator
 import com.bastiaanjansen.otp.TOTPGenerator
 import org.apache.commons.codec.binary.Base32
@@ -48,10 +46,6 @@ object TOTP {
 
         val totp =
             TOTPGenerator.Builder(bytes)
-                .withHOTPGenerator { builder: HOTPGenerator.Builder ->
-                    builder.withPasswordLength(6)
-                    builder.withAlgorithm(HMACAlgorithm.SHA1) // SHA256 and SHA512 are also supported
-                }
                 .withPeriod(Duration.ofSeconds(30))
 
         return totp.build()
