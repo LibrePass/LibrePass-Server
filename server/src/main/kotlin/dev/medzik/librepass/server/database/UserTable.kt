@@ -2,7 +2,6 @@ package dev.medzik.librepass.server.database
 
 import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp
-import org.hibernate.annotations.UpdateTimestamp
 import java.util.*
 
 @Entity
@@ -15,16 +14,14 @@ data class UserTable(
     val emailVerified: Boolean = false,
     val emailVerificationCode: String? = null,
     val emailVerificationCodeExpiresAt: Date? = null,
-    @Column(columnDefinition = "TEXT")
-    val passwordHint: String? = null,
     // Argon2id parameters
     val parallelism: Int,
     val memory: Int,
     val iterations: Int,
     // X25519 public key
+    @Column(columnDefinition = "TEXT")
+    val passwordHint: String? = null,
     val publicKey: String,
-    @Temporal(TemporalType.TIMESTAMP)
-    val lastPasswordChange: Date = Date(),
     // 2FA
     val twoFactorEnabled: Boolean = false,
     val twoFactorSecret: String? = null,
@@ -32,7 +29,6 @@ data class UserTable(
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
     val created: Date = Date(),
-    @UpdateTimestamp
     @Temporal(TemporalType.TIMESTAMP)
-    val lastModified: Date = Date()
+    val lastPasswordChange: Date = Date(),
 )
