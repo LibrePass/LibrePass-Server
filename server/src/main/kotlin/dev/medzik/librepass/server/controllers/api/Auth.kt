@@ -101,7 +101,7 @@ class AuthController
                 try {
                     emailService.sendEmailVerification(
                         to = request.email,
-                        user = user.id.toString(),
+                        userId = user.id.toString(),
                         code = user.emailVerificationCode.toString()
                     )
                 } catch (e: Throwable) {
@@ -364,7 +364,7 @@ class AuthController
                 try {
                     emailService.sendEmailVerification(
                         to = email,
-                        user = user.id.toString(),
+                        userId = user.id.toString(),
                         code = user.emailVerificationCode.toString()
                     )
                 } catch (e: Throwable) {
