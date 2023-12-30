@@ -1,20 +1,28 @@
 package dev.medzik.librepass.server.controllers.api
 
+import com.google.gson.Gson
 import dev.medzik.librepass.responses.ResponseError
 import dev.medzik.librepass.server.components.AuthorizedUser
+import dev.medzik.librepass.server.components.RequestIP
 import dev.medzik.librepass.server.controllers.advice.InvalidTwoFactorCodeException
+import dev.medzik.librepass.server.controllers.advice.RateLimitException
 import dev.medzik.librepass.server.database.*
+import dev.medzik.librepass.server.ratelimit.AuthControllerRateLimitConfig
+import dev.medzik.librepass.server.ratelimit.BaseRateLimitConfig
+import dev.medzik.librepass.server.services.EmailService
 import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseHandler
 import dev.medzik.librepass.server.utils.Validator.validateSharedKey
 import dev.medzik.librepass.server.utils.toResponse
-import dev.medzik.librepass.types.api.ChangePasswordRequest
-import dev.medzik.librepass.types.api.DeleteAccountRequest
-import dev.medzik.librepass.types.api.SetupTwoFactorRequest
-import dev.medzik.librepass.types.api.SetupTwoFactorResponse
+import dev.medzik.librepass.types.api.*
 import dev.medzik.librepass.utils.TOTP
 import jakarta.validation.Valid
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import java.util.*
@@ -27,29 +35,126 @@ class UserController
         private val userRepository: UserRepository,
         private val tokenRepository: TokenRepository,
         private val cipherRepository: CipherRepository,
-        private val collectionRepository: CollectionRepository
+        private val collectionRepository: CollectionRepository,
+        private val emailChangeRepository: EmailChangeRepository,
+        private val emailService: EmailService,
+        @Value("\${server.api.rateLimit.enabled}")
+        private val rateLimitEnabled: Boolean,
+        @Value("\${web.url}")
+        private val webUrl: String,
+        @Value("\${email.verification.required}")
+        private val emailVerificationRequired: Boolean,
     ) {
+        private val logger = LoggerFactory.getLogger(this::class.java)
+        private val rateLimit = AuthControllerRateLimitConfig()
+        private val coroutineScope = CoroutineScope(Dispatchers.IO)
+
+        @PatchMapping("/email")
+        fun changeEmail(
+            @AuthorizedUser user: UserTable,
+            @Valid @RequestBody request: ChangeEmailRequest
+        ): Response {
+            // validator
+            changeEmailPasswordValidator(
+                user = user,
+                oldSharedKey = request.oldSharedKey,
+                newPublicKey = request.newPublicKey,
+                newSharedKey = request.newSharedKey,
+                ciphers = request.ciphers
+            )?.let {
+                return it.toResponse()
+            }
+
+            val emailChangeTable =
+                emailChangeRepository.save(
+                    EmailChangeTable(
+                        owner = user.id,
+                        newEmail = request.newEmail,
+                        code = UUID.randomUUID().toString(),
+                        codeExpiresAt =
+                            Date.from(
+                                Calendar.getInstance().apply {
+                                    add(Calendar.HOUR, 24)
+                                }.toInstant()
+                            ),
+                        newCiphers = Gson().toJson(request.ciphers)
+                    )
+                )
+
+            if (!emailVerificationRequired) {
+                verifyNewEmail(
+                    internalCall = true,
+                    ip = "",
+                    userID = emailChangeTable.owner.toString(),
+                    verificationCode = emailChangeTable.code
+                )
+            } else {
+                coroutineScope.launch {
+                    try {
+                        emailService.sendChangeEmailVerification(
+                            oldEmail = user.email,
+                            newEmail = request.newEmail,
+                            userId = user.id.toString(),
+                            code = emailChangeTable.code
+                        )
+                    } catch (e: Throwable) {
+                        logger.error("Error sending email verification", e)
+                    }
+                }
+            }
+
+            return ResponseHandler.generateResponse(HttpStatus.OK)
+        }
+
+        @GetMapping("/verifyNewEmail")
+        fun verifyNewEmail(
+            internalCall: Boolean = false,
+            @RequestIP ip: String,
+            @RequestParam("user") userID: String,
+            @RequestParam("code") verificationCode: String
+        ): Response {
+            if (internalCall) {
+                consumeRateLimit(ip)
+                consumeRateLimit(userID)
+            }
+
+            val changeEmailTable =
+                emailChangeRepository.findById(UUID.fromString(userID)).orElse(null)
+                    ?: return ResponseError.INVALID_BODY.toResponse()
+
+            // check if the code is valid
+            if (changeEmailTable.code != verificationCode)
+                return ResponseError.INVALID_BODY.toResponse()
+
+            // check if the code is expired
+            if (changeEmailTable.codeExpiresAt.before(Date()))
+                return ResponseError.INVALID_BODY.toResponse()
+
+            val user = userRepository.findById(changeEmailTable.owner).get()
+
+            userRepository.save(
+                user.copy(email = changeEmailTable.newEmail)
+            )
+
+            emailChangeRepository.delete(changeEmailTable)
+
+            return ResponseHandler.redirectResponse("$webUrl/verification/email")
+        }
+
         @PatchMapping("/password")
         fun changePassword(
             @AuthorizedUser user: UserTable,
             @Valid @RequestBody request: ChangePasswordRequest
         ): Response {
-            // validate shared key with an old public key
-            if (!validateSharedKey(user, request.oldSharedKey))
-                return ResponseError.INVALID_CREDENTIALS.toResponse()
-
-            // validate shared key with a new public key
-            if (!validateSharedKey(request.newPublicKey, request.newSharedKey))
-                return ResponseError.INVALID_CREDENTIALS.toResponse()
-
-            // get all user cipher ids
-            val cipherIds = cipherRepository.getAllIds(user.id)
-
-            // check if all ciphers are present
-            // by the way checks if they are owned by the user (because `cipherIds` is a list of user cipher ids)
-            request.ciphers.forEach { cipherData ->
-                if (!cipherIds.contains(cipherData.id))
-                    return ResponseError.INVALID_BODY.toResponse()
+            // validator
+            changeEmailPasswordValidator(
+                user = user,
+                oldSharedKey = request.oldSharedKey,
+                newPublicKey = request.newPublicKey,
+                newSharedKey = request.newSharedKey,
+                ciphers = request.ciphers
+            )?.let {
+                return it.toResponse()
             }
 
             // update ciphers data due to re-encryption with new password
@@ -76,6 +181,35 @@ class UserController
             )
 
             return ResponseHandler.generateResponse(HttpStatus.OK)
+        }
+
+        private fun changeEmailPasswordValidator(
+            user: UserTable,
+            oldSharedKey: String,
+            newPublicKey: String,
+            newSharedKey: String,
+            ciphers: List<ChangePasswordCipherData>
+        ): ResponseError? {
+            // validate shared key with an old public key
+            if (!validateSharedKey(user, oldSharedKey))
+                return ResponseError.INVALID_CREDENTIALS
+
+            // validate shared key with a new public key
+            if (!validateSharedKey(newPublicKey, newSharedKey))
+                return ResponseError.INVALID_CREDENTIALS
+
+            // get all user cipher ids
+            val cipherIds = cipherRepository.getAllIds(user.id)
+
+            // check if all ciphers are present
+            // by the way checks if they are owned by the user
+            // (because `cipherIds` is a list of user cipher ids)
+            ciphers.forEach { cipherData ->
+                if (!cipherIds.contains(cipherData.id))
+                    return ResponseError.INVALID_BODY
+            }
+
+            return null
         }
 
         @PostMapping("/setup/2fa")
@@ -120,5 +254,15 @@ class UserController
             userRepository.delete(user)
 
             return ResponseHandler.generateResponse(HttpStatus.OK)
+        }
+
+        private fun consumeRateLimit(
+            key: String,
+            rateLimitConfig: BaseRateLimitConfig = rateLimit
+        ) {
+            if (!rateLimitEnabled) return
+
+            if (!rateLimitConfig.resolveBucket(key).tryConsume(1))
+                throw RateLimitException()
         }
     }

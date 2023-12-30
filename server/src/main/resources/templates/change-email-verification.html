@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        header {
+            text-align: center;
+        }
+
+        header svg {
+            width: 80px;
+        }
+
+        header h1 {
+            color: #ffb68d;
+        }
+
+        main {
+            margin-top: 20px;
+        }
+
+        p {
+            line-height: 1.6;
+        }
+
+        .cta-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #ffb68d;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        footer {
+            margin-top: 20px;
+            text-align: center;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M 11.591 2.101 C 9.743 3.245 6.877 3.92 4.63 3.04 C 4.192 2.867 3.637 3.219 3.606 3.689 C 3.092 11.307 4.523 15.475 6.442 17.938 C 8.362 20.402 10.743 21.185 11.474 21.825 C 11.752 22.067 12.215 22.056 12.482 21.802 C 13.388 21.26 16.227 19.458 17.458 17.938 C 19.419 15.479 20.917 11.312 20.396 3.689 C 20.365 3.219 19.81 2.867 19.373 3.039 C 17.14 3.919 14.268 3.25 12.38 2.101 C 12.071 1.947 11.883 1.986 11.591 2.101 Z M 11.981 3.571 C 13.923 4.652 16.496 5.32 18.935 4.737 C 19.252 11.479 17.89 14.995 16.286 17.007 C 15.11 18.573 13.396 19.319 11.958 20.339 C 10.713 19.466 9.068 18.87 7.622 17.015 C 6.056 15.007 4.742 11.483 5.059 4.736 C 7.5 5.321 10.061 4.65 11.982 3.571 L 11.981 3.571 Z M 11.599 5.104 C 10.403 5.843 8.514 6.278 7.091 5.722 C 6.655 5.556 6.107 5.906 6.075 6.371 C 5.724 11.555 6.698 14.44 8.044 16.163 C 9.39 17.885 11.074 18.465 11.481 18.822 C 11.761 19.068 12.229 19.057 12.497 18.798 C 13.137 18.51 15.052 17.199 15.888 16.171 C 17.261 14.452 18.282 11.559 17.927 6.371 C 17.896 5.902 17.341 5.55 16.904 5.722 C 15.49 6.277 13.605 5.848 12.38 5.104 C 12.072 4.951 11.888 4.989 11.599 5.104 Z M 12.747 6.919 C 13.866 7.367 15.156 7.58 16.443 7.349 C 16.499 8.897 16.422 10.178 16.255 11.251 L 12.747 11.251 L 12.747 6.919 Z M 8.044 12.753 L 11.247 12.753 L 11.247 16.882 C 10.58 16.487 9.871 16.061 9.223 15.232 C 8.769 14.651 8.351 13.855 8.044 12.753 Z"/></svg>
+        <h1>LibrePass Email Address Change Verification</h1>
+    </header>
+
+    <main>
+        <p>You have requested to change your email address on LibrePass from "{{oldEmail}}" to "{{newEmail}}". To complete this process, please click the button below:</p>
+        <a class="cta-button" href="{{url}}">Verify Email Address</a>
+    </main>
+
+    <footer>
+        <p>If you did not make this request, please ignore this email.</p>
+        <p>If you have any questions or need assistance, please contact at contact@librepass.org.</p>
+    </footer>
+</div>
+</body>
+</html>
