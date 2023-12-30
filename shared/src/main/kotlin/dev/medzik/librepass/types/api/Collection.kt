@@ -2,6 +2,7 @@ package dev.medzik.librepass.types.api
 
 import com.google.gson.annotations.JsonAdapter
 import dev.medzik.librepass.types.adapters.DateAdapter
+import jakarta.validation.constraints.Max
 import java.util.*
 
 /** Response from the API contains the Collection ID. */
@@ -17,6 +18,7 @@ data class CollectionIdResponse(
  */
 data class CreateCollectionRequest(
     val id: UUID = UUID.randomUUID(),
+    @Max(32)
     val name: String,
 )
 
