@@ -86,7 +86,7 @@ class UserClientTests {
 
         val newEmail = "newemail@example.com"
 
-        userClient.changeEmail(EMAIL, newEmail, PASSWORD)
+        userClient.changeEmail(newEmail, PASSWORD)
 
         // wait for 1 second to prevent unauthorized error
         Thread.sleep(1000)
@@ -104,7 +104,7 @@ class UserClientTests {
         Thread.sleep(1000)
 
         // change email back
-        userClient.changeEmail(newEmail, EMAIL, PASSWORD)
+        userClient.changeEmail(EMAIL, PASSWORD)
 
         // wait for 1 second to prevent unauthorized error
         Thread.sleep(1000)
