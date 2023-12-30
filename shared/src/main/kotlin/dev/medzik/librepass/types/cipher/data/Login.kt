@@ -12,7 +12,7 @@ import java.util.*
  * @property password The login password.
  * @property passwordHistory The history of passwords.
  * @property uris The list of uris.
- * @property twoFactor The two-factor secret.
+ * @property twoFactor The two-factor URI encoded.
  * @property notes The note for the cipher.
  * @property fields The custom fields for the cipher.
  */
