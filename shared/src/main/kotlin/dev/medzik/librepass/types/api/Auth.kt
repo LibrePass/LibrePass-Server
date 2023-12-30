@@ -3,6 +3,7 @@ package dev.medzik.librepass.types.api
 import dev.medzik.libcrypto.Argon2
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.Max
+import org.hibernate.validator.constraints.Range
 import java.util.*
 
 /**
@@ -22,8 +23,11 @@ data class RegisterRequest(
     @Max(100)
     val passwordHint: String? = null,
     val sharedKey: String,
+    @Range(min = 1, max = 10)
     val parallelism: Int,
+    @Range(min = 20 * 1024, max = 150 * 1024)
     val memory: Int,
+    @Range(min = 1, max = 10)
     val iterations: Int,
     val publicKey: String
 )
