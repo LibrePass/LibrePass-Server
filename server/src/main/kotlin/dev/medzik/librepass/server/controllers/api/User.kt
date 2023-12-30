@@ -34,17 +34,6 @@ class UserController
             @AuthorizedUser user: UserTable,
             @Valid @RequestBody request: ChangePasswordRequest
         ): Response {
-            // Validate request
-            if (
-                // Argon2 parallelism must not be less than 1
-                request.parallelism < 1 ||
-                // Argon2 parallelism must not be less than 20MB
-                request.memory < 20 * 1024 ||
-                // Argon2 iterations must not be less than 1
-                request.iterations < 1
-            )
-                return ResponseError.INVALID_BODY.toResponse()
-
             // validate shared key with an old public key
             if (!validateSharedKey(user, request.oldSharedKey))
                 return ResponseError.INVALID_CREDENTIALS.toResponse()
