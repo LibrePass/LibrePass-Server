@@ -16,5 +16,6 @@ data class EmailChangeTable(
     val code: String,
     val codeExpiresAt: Date,
     @Column(columnDefinition = "TEXT")
-    val newCiphers: String
+    val newCiphers: String,
+    val newPublicKey: String
 )

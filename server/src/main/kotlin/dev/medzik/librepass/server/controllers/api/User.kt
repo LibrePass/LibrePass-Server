@@ -78,7 +78,8 @@ class UserController
                                     add(Calendar.HOUR, 24)
                                 }.toInstant()
                             ),
-                        newCiphers = Gson().toJson(request.ciphers)
+                        newCiphers = Gson().toJson(request.ciphers),
+                        newPublicKey = request.newPublicKey
                     )
                 )
 
@@ -134,7 +135,10 @@ class UserController
             val user = userRepository.findById(changeEmailTable.owner).get()
 
             userRepository.save(
-                user.copy(email = changeEmailTable.newEmail)
+                user.copy(
+                    email = changeEmailTable.newEmail,
+                    publicKey = changeEmailTable.newPublicKey
+                )
             )
 
             val ciphers: List<ChangePasswordCipherData> =

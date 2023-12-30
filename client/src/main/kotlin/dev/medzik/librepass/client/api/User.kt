@@ -2,6 +2,7 @@ package dev.medzik.librepass.client.api
 
 import dev.medzik.libcrypto.Aes
 import dev.medzik.libcrypto.Argon2
+import dev.medzik.libcrypto.Argon2Hash
 import dev.medzik.libcrypto.X25519
 import dev.medzik.librepass.client.Client
 import dev.medzik.librepass.client.Server
@@ -9,7 +10,6 @@ import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
 import dev.medzik.librepass.client.utils.Cryptography.computePasswordHash
 import dev.medzik.librepass.client.utils.Cryptography.computeSecretKey
-import dev.medzik.librepass.client.utils.Cryptography.computeSecretKeyFromPassword
 import dev.medzik.librepass.client.utils.Cryptography.computeSharedKey
 import dev.medzik.librepass.client.utils.JsonUtils
 import dev.medzik.librepass.types.api.*
@@ -36,64 +36,40 @@ class UserClient(
 
     @Throws(ClientException::class, ApiException::class)
     fun changeEmail(
-        email: String,
         newEmail: String,
         password: String
     ) {
         val preLogin = AuthClient(apiUrl).preLogin(email)
 
-        // compute old secret key
-        val oldSecretKey =
-            computeSecretKeyFromPassword(
-                email = email,
-                password = password,
-                argon2Function = preLogin.toArgon2()
-            )
-
-        val passwordHashWithOldEmail =
+        val oldPasswordHash =
             computePasswordHash(
                 email = email,
                 password = password,
                 argon2Function = preLogin.toArgon2()
             )
-
-        val passwordHashWithNewEmail =
+        val newPasswordHash =
             computePasswordHash(
                 email = newEmail,
                 password = password,
                 argon2Function = preLogin.toArgon2()
             )
 
-        val newPublicKey = X25519.publicFromPrivate(passwordHashWithNewEmail.hash)
+        val newPublicKey = X25519.publicFromPrivate(newPasswordHash.hash)
 
         // get server public key
         val serverPublicKey = preLogin.serverPublicKey.fromHexString()
 
         // compute shared key with an old private key and server public key
-        val oldSharedKey = computeSharedKey(passwordHashWithOldEmail.hash, serverPublicKey)
+        val oldSharedKey = computeSharedKey(oldPasswordHash.hash, serverPublicKey)
 
         // compute shared key with a new private key and server public key
-        val newSharedKey = computeSharedKey(passwordHashWithNewEmail.hash, serverPublicKey)
+        val newSharedKey = computeSharedKey(newPasswordHash.hash, serverPublicKey)
 
-        // compute new secret key
-        val newSecretKey = computeSecretKey(passwordHashWithNewEmail.hash)
-
-        // re-encrypt ciphers data with a secret key
-        val cipherClient = CipherClient(apiKey, apiUrl)
-        val ciphers = mutableListOf<ChangePasswordCipherData>()
-        cipherClient.getAll().forEach { cipher ->
-            // decrypt cipher data with an old secret key
-            val oldData = Aes.decrypt(Aes.GCM, oldSecretKey, cipher.protectedData)
-
-            // encrypt cipher data with a new secret key
-            val newData = Aes.encrypt(Aes.GCM, newSecretKey, oldData)
-
-            ciphers +=
-                ChangePasswordCipherData(
-                    id = cipher.id,
-                    data = newData
-                )
-        }
+        val ciphers =
+            reEncodeCipher(
+                oldPasswordHash,
+                newPasswordHash
+            )
 
         val request =
             ChangeEmailRequest(
@@ -129,14 +105,6 @@ class UserClient(
     ) {
         val oldPreLogin = AuthClient(apiUrl).preLogin(email)
 
-        // compute old secret key
-        val oldSecretKey =
-            computeSecretKeyFromPassword(
-                email = email,
-                password = oldPassword,
-                argon2Function = oldPreLogin.toArgon2()
-            )
-
         val oldPasswordHash =
             computePasswordHash(
                 email = email,
@@ -163,25 +131,11 @@ class UserClient(
         // compute shared key with a new private key and server public key
         val newSharedKey = computeSharedKey(newPasswordHash.hash, serverPublicKey)
 
-        // compute new secret key
-        val newSecretKey = computeSecretKey(newPasswordHash.hash)
-
-        // re-encrypt ciphers data with new password
-        val cipherClient = CipherClient(apiKey, apiUrl)
-        val ciphers = mutableListOf<ChangePasswordCipherData>()
-        cipherClient.getAll().forEach { cipher ->
-            // decrypt cipher data with an old secret key
-            val oldData = Aes.decrypt(Aes.GCM, oldSecretKey, cipher.protectedData)
-
-            // encrypt cipher data with a new secret key
-            val newData = Aes.encrypt(Aes.GCM, newSecretKey, oldData)
-
-            ciphers +=
-                ChangePasswordCipherData(
-                    id = cipher.id,
-                    data = newData
-                )
-        }
+        val ciphers =
+            reEncodeCipher(
+                oldPasswordHash,
+                newPasswordHash
+            )
 
         val request =
             ChangePasswordRequest(
@@ -202,6 +156,36 @@ class UserClient(
             "$API_ENDPOINT/password",
             JsonUtils.serialize(request)
         )
+    }
+
+    private fun reEncodeCipher(
+        oldPasswordHash: Argon2Hash,
+        newPasswordHash: Argon2Hash
+    ): List<ChangePasswordCipherData> {
+        // compute old secret key
+        val oldSecretKey = computeSecretKey(oldPasswordHash.hash)
+
+        // compute new secret key
+        val newSecretKey = computeSecretKey(newPasswordHash.hash)
+
+        // re-encrypt ciphers data with new password
+        val cipherClient = CipherClient(apiKey, apiUrl)
+        val ciphers = mutableListOf<ChangePasswordCipherData>()
+        cipherClient.getAll().forEach { cipher ->
+            // decrypt cipher data with an old secret key
+            val oldData = Aes.decrypt(Aes.GCM, oldSecretKey, cipher.protectedData)
+
+            // encrypt cipher data with a new secret key
+            val newData = Aes.encrypt(Aes.GCM, newSecretKey, oldData)
+
+            ciphers +=
+                ChangePasswordCipherData(
+                    id = cipher.id,
+                    data = newData
+                )
+        }
+
+        return ciphers
     }
 
     /**
