@@ -1,5 +1,6 @@
 package dev.medzik.librepass.types.api
 
+import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.Max
 import org.hibernate.validator.constraints.Range
 import java.util.*
@@ -14,6 +15,24 @@ data class ChangePasswordCipherData(
     val id: UUID,
     @Max(5000)
     val data: String
+)
+
+/**
+ * Request for change email endpoint.
+ *
+ * @property newEmail The new email address.
+ * @property oldSharedKey The shared key with server, computed with the old public key,
+ * @property newPublicKey The new X25519 public key.
+ * @property newSharedKey The shared key with server, computed with the new public key.
+ * @property ciphers The re-encrypted all ciphers because the key to encrypt it changed.
+ */
+data class ChangeEmailRequest(
+    @Email
+    val newEmail: String,
+    val oldSharedKey: String,
+    val newPublicKey: String,
+    val newSharedKey: String,
+    val ciphers: List<ChangePasswordCipherData>
 )
 
 /**

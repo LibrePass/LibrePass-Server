@@ -21,6 +21,9 @@ class EmailService
         private val emailVerificationTemplate =
             this::class.java.getResource("/templates/email-verification.html")?.readText()
                 ?: throw Exception("Failed to read `email verification` email template")
+        private val changeEmailVerificationTemplate =
+            this::class.java.getResource("/templates/change-email-verification.html")?.readText()
+                ?: throw Exception("Failed to read `change email verification` email template")
         private val newLoginTemplate =
             this::class.java.getResource("/templates/new-login.html")?.readText()
                 ?: throw Exception("Failed to read `new login` email template")
@@ -49,13 +52,13 @@ class EmailService
             emailSender.send(message)
         }
 
-        /** Email the given address with the given verification code. */
+        /** Email the given address with the given email verification code. */
         fun sendEmailVerification(
             to: String,
-            user: String,
+            userId: String,
             code: String
         ) {
-            val url = "https://$apiDomain/api/auth/verifyEmail?user=$user&code=$code"
+            val url = "https://$apiDomain/api/auth/verifyEmail?user=$userId&code=$code"
 
             val subject = "Activate your LibrePass account"
             val body =
@@ -63,6 +66,25 @@ class EmailService
                     .replace("{{url}}", url)
 
             send(to, subject, body)
+        }
+
+        /** Email the given address with the given change email verification code. */
+        fun sendChangeEmailVerification(
+            oldEmail: String,
+            newEmail: String,
+            userId: String,
+            code: String
+        ) {
+            val url = "https://$apiDomain/api/user/verifyNewEmail?user=$userId&code=$code"
+
+            val subject = "LibrePass Email Address Change Verification"
+            val body =
+                changeEmailVerificationTemplate
+                    .replace("{{oldEmail}}", oldEmail)
+                    .replace("{{newEmail}}", newEmail)
+                    .replace("{{url}}", url)
+
+            send(newEmail, subject, body)
         }
 
         /** Email the given address with the new login. */
