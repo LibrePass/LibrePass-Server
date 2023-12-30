@@ -1,6 +1,7 @@
 package dev.medzik.librepass.server.controllers.api
 
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import dev.medzik.librepass.responses.ResponseError
 import dev.medzik.librepass.server.components.AuthorizedUser
 import dev.medzik.librepass.server.components.RequestIP
@@ -135,6 +136,16 @@ class UserController
             userRepository.save(
                 user.copy(email = changeEmailTable.newEmail)
             )
+
+            val ciphers: List<ChangePasswordCipherData> =
+                Gson().fromJson(
+                    changeEmailTable.newCiphers,
+                    object : TypeToken<List<ChangePasswordCipherData>>() {}.type
+                )
+
+            for (cipher in ciphers) {
+                cipherRepository.updateData(cipher.id, cipher.data)
+            }
 
             emailChangeRepository.delete(changeEmailTable)
 
