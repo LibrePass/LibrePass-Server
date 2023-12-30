@@ -4,6 +4,8 @@ import com.google.gson.Gson
 import com.google.gson.annotations.JsonAdapter
 import dev.medzik.libcrypto.Aes
 import dev.medzik.librepass.types.adapters.DateAdapter
+import jakarta.validation.constraints.Max
+import org.hibernate.validator.constraints.Range
 import java.util.*
 
 /**
@@ -25,10 +27,12 @@ data class EncryptedCipher(
     val id: UUID,
     val owner: UUID,
     val type: Int = CipherType.Login.ordinal,
+    @Max(5000)
     val protectedData: String,
     val collection: UUID? = null,
     val favorite: Boolean = false,
     val rePrompt: Boolean = false,
+    @Range(min = 1, max = 1)
     val version: Int = 1,
     @JsonAdapter(DateAdapter::class)
     val created: Date? = null,

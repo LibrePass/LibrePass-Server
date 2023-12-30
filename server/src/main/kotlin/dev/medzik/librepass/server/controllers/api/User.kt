@@ -6,7 +6,6 @@ import dev.medzik.librepass.server.controllers.advice.InvalidTwoFactorCodeExcept
 import dev.medzik.librepass.server.database.*
 import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseHandler
-import dev.medzik.librepass.server.utils.Validator
 import dev.medzik.librepass.server.utils.Validator.validateSharedKey
 import dev.medzik.librepass.server.utils.toResponse
 import dev.medzik.librepass.types.api.ChangePasswordRequest
@@ -14,6 +13,7 @@ import dev.medzik.librepass.types.api.DeleteAccountRequest
 import dev.medzik.librepass.types.api.SetupTwoFactorRequest
 import dev.medzik.librepass.types.api.SetupTwoFactorResponse
 import dev.medzik.librepass.utils.TOTP
+import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -32,16 +32,10 @@ class UserController
         @PatchMapping("/password")
         fun changePassword(
             @AuthorizedUser user: UserTable,
-            @RequestBody request: ChangePasswordRequest
+            @Valid @RequestBody request: ChangePasswordRequest
         ): Response {
             // Validate request
             if (
-                // password hint is limited to 256 characters
-                (request.newPasswordHint?.length ?: 0) > 256 ||
-                // validate shared key and public key (only hex and length)
-                !Validator.hexValidator(request.oldSharedKey, 32) ||
-                !Validator.hexValidator(request.newSharedKey, 32) ||
-                !Validator.hexValidator(request.newPublicKey, 32) ||
                 // Argon2 parallelism must not be less than 1
                 request.parallelism < 1 ||
                 // Argon2 parallelism must not be less than 20MB
@@ -98,7 +92,7 @@ class UserController
         @PostMapping("/setup/2fa")
         fun setupTwoFactor(
             @AuthorizedUser user: UserTable,
-            @RequestBody request: SetupTwoFactorRequest
+            @Valid @RequestBody request: SetupTwoFactorRequest
         ): Response {
             if (!validateSharedKey(user, request.sharedKey))
                 return ResponseError.INVALID_CREDENTIALS.toResponse()
@@ -123,7 +117,7 @@ class UserController
         @DeleteMapping("/delete")
         fun deleteAccount(
             @AuthorizedUser user: UserTable,
-            @RequestBody request: DeleteAccountRequest
+            @Valid @RequestBody request: DeleteAccountRequest
         ): Response {
             if (!validateSharedKey(user, request.sharedKey))
                 return ResponseError.INVALID_CREDENTIALS.toResponse()
