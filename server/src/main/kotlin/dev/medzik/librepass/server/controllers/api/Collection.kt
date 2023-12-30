@@ -11,6 +11,7 @@ import dev.medzik.librepass.server.utils.toResponse
 import dev.medzik.librepass.types.api.CipherCollection
 import dev.medzik.librepass.types.api.CollectionIdResponse
 import dev.medzik.librepass.types.api.CreateCollectionRequest
+import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -26,10 +27,8 @@ class CollectionController
         @PutMapping
         fun insertCollection(
             @AuthorizedUser user: UserTable,
-            @RequestBody collection: CreateCollectionRequest
+            @Valid @RequestBody collection: CreateCollectionRequest
         ): Response {
-            if (collection.name.length > 64) return ResponseError.INVALID_BODY.toResponse()
-
             collectionRepository.save(
                 CollectionTable(
                     id = collection.id,
@@ -89,10 +88,8 @@ class CollectionController
         fun updateCollection(
             @AuthorizedUser user: UserTable,
             @PathVariable id: UUID,
-            @RequestBody collection: CreateCollectionRequest
+            @Valid @RequestBody collection: CreateCollectionRequest
         ): Response {
-            if (collection.name.length > 64) return ResponseError.INVALID_BODY.toResponse()
-
             collectionRepository.save(
                 CollectionTable(
                     id = id,

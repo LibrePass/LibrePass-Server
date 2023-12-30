@@ -18,12 +18,13 @@ import dev.medzik.librepass.server.ratelimit.BaseRateLimitConfig
 import dev.medzik.librepass.server.services.EmailService
 import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseHandler
-import dev.medzik.librepass.server.utils.Validator
 import dev.medzik.librepass.server.utils.Validator.validateSharedKey
 import dev.medzik.librepass.server.utils.toResponse
 import dev.medzik.librepass.types.api.*
 import dev.medzik.librepass.utils.TOTP
 import dev.medzik.librepass.utils.toHexString
+import jakarta.validation.Valid
+import jakarta.validation.constraints.Email
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -66,19 +67,12 @@ class AuthController
         @PostMapping("/register")
         fun register(
             @RequestIP ip: String,
-            @RequestBody request: RegisterRequest
+            @Valid @RequestBody request: RegisterRequest
         ): Response {
             consumeRateLimit(ip)
 
             // Validate request
             if (
-                // RFC 2821 maximum email length
-                request.email.length > 256 ||
-                // password hint is limited to 256 characters
-                (request.passwordHint?.length ?: 0) > 256 ||
-                // validate shared key and public key (only hex and length)
-                !Validator.hexValidator(request.sharedKey, 32) ||
-                !Validator.hexValidator(request.publicKey, 32) ||
                 // Argon2 parallelism must not be less than 1
                 request.parallelism < 1 ||
                 // Argon2 parallelism must not be less than 20MB
@@ -131,7 +125,7 @@ class AuthController
         @GetMapping("/preLogin")
         fun preLogin(
             @RequestIP ip: String,
-            @RequestParam("email") email: String?
+            @Valid @Email @RequestParam("email") email: String?
         ): Response {
             consumeRateLimit(ip)
 
@@ -147,9 +141,6 @@ class AuthController
                     ),
                     HttpStatus.OK
                 )
-
-            // validate email length
-            if (email.length > 256) return ResponseError.INVALID_BODY.toResponse()
 
             val user =
                 userRepository.findByEmail(email.lowercase())
@@ -285,7 +276,7 @@ class AuthController
         @GetMapping("/passwordHint")
         fun requestPasswordHint(
             @RequestIP ip: String,
-            @RequestParam("email") emailParam: String?
+            @Valid @Email @RequestParam("email") emailParam: String?
         ): Response {
             val email =
                 emailParam?.lowercase()
@@ -355,7 +346,7 @@ class AuthController
         @GetMapping("/resendVerificationEmail")
         fun resendVerificationEmail(
             @RequestIP ip: String,
-            @RequestParam("email") emailParam: String
+            @Valid @Email @RequestParam("email") emailParam: String
         ): Response {
             val email = emailParam.lowercase()
 

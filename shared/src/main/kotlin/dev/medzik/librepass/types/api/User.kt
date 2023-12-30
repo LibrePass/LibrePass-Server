@@ -1,5 +1,6 @@
 package dev.medzik.librepass.types.api
 
+import jakarta.validation.constraints.Max
 import java.util.*
 
 /**
@@ -10,6 +11,7 @@ import java.util.*
  */
 data class ChangePasswordCipherData(
     val id: UUID,
+    @Max(5000)
     val data: String
 )
 
@@ -45,6 +47,7 @@ data class ChangePasswordRequest(
  */
 data class SetupTwoFactorRequest(
     val sharedKey: String,
+    @Max(32)
     val secret: String,
     val code: String
 )
@@ -53,7 +56,7 @@ data class SetupTwoFactorRequest(
  * Request for endpoint that setups two-factor authentication.
  *
  * @property sharedKey The shared key with server, to verify authentication.
- * @property code The OTP code (if 2fa is set)
+ * @property code The OTP code (if 2-fa is set)
  */
 data class DeleteAccountRequest(
     val sharedKey: String,
