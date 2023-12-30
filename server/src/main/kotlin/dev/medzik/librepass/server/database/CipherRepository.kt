@@ -21,13 +21,20 @@ interface CipherRepository : CrudRepository<CipherTable, UUID> {
     ): List<CipherTable>
 
     /**
+     * Get a number of ciphers owned by the user.
+     *
+     * @param owner The user identifier.
+     * @return A number of ciphers owned by the user.
+     */
+    fun countByOwner(owner: UUID): Long
+
+    /**
      * Check if a cipher exists and is owned by the user.
      * @param id The cipher identifier.
      * @param owner THe user identifier.
      * @return True if the cipher exists and is owned by the user, false otherwise.
      */
-    @Query("SELECT EXISTS(SELECT 1 FROM #{#entityName} c WHERE c.id = :id AND c.owner = :owner)")
-    fun checkIfCipherExists(
+    fun existsByIdAndOwner(
         @Param("id") id: UUID,
         @Param("owner") owner: UUID
     ): Boolean
