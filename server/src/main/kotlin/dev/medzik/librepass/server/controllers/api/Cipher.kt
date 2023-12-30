@@ -14,6 +14,7 @@ import dev.medzik.librepass.types.api.SyncResponse
 import dev.medzik.librepass.types.cipher.EncryptedCipher
 import jakarta.validation.Valid
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.client.RestTemplate
@@ -24,15 +25,22 @@ import java.util.*
 class CipherController
     @Autowired
     constructor(
-        private val cipherRepository: CipherRepository
+        private val cipherRepository: CipherRepository,
+        @Value("\${limits.user.cipher}")
+        private val userCiphersLimit: Long,
     ) {
         @PutMapping
         fun insertCipher(
             @AuthorizedUser user: UserTable,
             @Valid @RequestBody encryptedCipher: EncryptedCipher
         ): Response {
-            if (!Validator.hexValidator(encryptedCipher.protectedData) ||
-                encryptedCipher.owner != user.id
+            if (
+                // validates protected data
+                !Validator.hexValidator(encryptedCipher.protectedData) ||
+                // checks that the owner is correct
+                encryptedCipher.owner != user.id ||
+                // checks the user's cipher limit
+                cipherRepository.countByOwner(user.id) > userCiphersLimit
             )
                 return ResponseError.INVALID_BODY.toResponse()
 
@@ -87,7 +95,7 @@ class CipherController
             @AuthorizedUser user: UserTable,
             @PathVariable id: UUID
         ): Response {
-            if (!checkIfCipherExists(id, user.id))
+            if (!cipherRepository.existsByIdAndOwner(id, user.id))
                 return ResponseError.NOT_FOUND.toResponse()
 
             val cipher = cipherRepository.findById(id).get()
@@ -104,7 +112,7 @@ class CipherController
             @PathVariable id: UUID,
             @Valid @RequestBody encryptedCipher: EncryptedCipher
         ): Response {
-            if (!checkIfCipherExists(id, user.id))
+            if (!cipherRepository.existsByIdAndOwner(id, user.id))
                 return ResponseError.NOT_FOUND.toResponse()
 
             if (!Validator.hexValidator(encryptedCipher.protectedData) ||
@@ -122,22 +130,12 @@ class CipherController
             @AuthorizedUser user: UserTable,
             @PathVariable id: UUID
         ): Response {
-            if (!checkIfCipherExists(id, user.id))
+            if (!cipherRepository.existsByIdAndOwner(id, user.id))
                 return ResponseError.NOT_FOUND.toResponse()
 
             cipherRepository.deleteById(id)
 
             return ResponseHandler.generateResponse(CipherIdResponse(id), HttpStatus.OK)
-        }
-
-        /**
-         * Checks if cipher exists and is owned by user.
-         */
-        private fun checkIfCipherExists(
-            id: UUID,
-            owner: UUID
-        ): Boolean {
-            return cipherRepository.checkIfCipherExists(id, owner)
         }
 
         @GetMapping("/icon")
