@@ -59,8 +59,8 @@ class UserClient(
 
         val passwordHashWithNewEmail =
             computePasswordHash(
-                email = email,
-                password = newEmail,
+                email = newEmail,
+                password = password,
                 argon2Function = preLogin.toArgon2()
             )
 
