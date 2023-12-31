@@ -2,9 +2,12 @@ package dev.medzik.librepass.server.controllers.api
 
 import dev.medzik.librepass.responses.ResponseError
 import dev.medzik.librepass.server.components.AuthorizedUser
+import dev.medzik.librepass.server.controllers.advice.RateLimitException
 import dev.medzik.librepass.server.database.CipherRepository
 import dev.medzik.librepass.server.database.CipherTable
 import dev.medzik.librepass.server.database.UserTable
+import dev.medzik.librepass.server.ratelimit.BaseRateLimitConfig
+import dev.medzik.librepass.server.ratelimit.CipherControllerRateLimitConfig
 import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseHandler
 import dev.medzik.librepass.server.utils.Validator
@@ -26,14 +29,20 @@ class CipherController
     @Autowired
     constructor(
         private val cipherRepository: CipherRepository,
+        @Value("\${server.api.rateLimit.enabled}")
+        private val rateLimitEnabled: Boolean,
         @Value("\${limits.user.cipher}")
-        private val userCiphersLimit: Long,
+        private val userCiphersLimit: Long
     ) {
+        private val rateLimit = CipherControllerRateLimitConfig()
+
         @PutMapping
         fun insertCipher(
             @AuthorizedUser user: UserTable,
             @Valid @RequestBody encryptedCipher: EncryptedCipher
         ): Response {
+            consumeRateLimit(user.id.toString())
+
             if (
                 // validates protected data
                 !Validator.hexValidator(encryptedCipher.protectedData) ||
@@ -56,6 +65,8 @@ class CipherController
         fun getAllCiphers(
             @AuthorizedUser user: UserTable
         ): Response {
+            consumeRateLimit(user.id.toString())
+
             val ciphers = cipherRepository.getAll(owner = user.id)
 
             // convert to encrypted ciphers
@@ -69,6 +80,8 @@ class CipherController
             @AuthorizedUser user: UserTable,
             @RequestParam("lastSync") lastSyncUnixTimestamp: Long
         ): Response {
+            consumeRateLimit(user.id.toString())
+
             // convert timestamp to date
             val lastSyncDate = Date(lastSyncUnixTimestamp * 1000)
 
@@ -95,6 +108,8 @@ class CipherController
             @AuthorizedUser user: UserTable,
             @PathVariable id: UUID
         ): Response {
+            consumeRateLimit(user.id.toString())
+
             if (!cipherRepository.existsByIdAndOwner(id, user.id))
                 return ResponseError.NOT_FOUND.toResponse()
 
@@ -112,6 +127,8 @@ class CipherController
             @PathVariable id: UUID,
             @Valid @RequestBody encryptedCipher: EncryptedCipher
         ): Response {
+            consumeRateLimit(user.id.toString())
+
             if (!cipherRepository.existsByIdAndOwner(id, user.id))
                 return ResponseError.NOT_FOUND.toResponse()
 
@@ -130,6 +147,8 @@ class CipherController
             @AuthorizedUser user: UserTable,
             @PathVariable id: UUID
         ): Response {
+            consumeRateLimit(user.id.toString())
+
             if (!cipherRepository.existsByIdAndOwner(id, user.id))
                 return ResponseError.NOT_FOUND.toResponse()
 
@@ -162,5 +181,15 @@ class CipherController
             } catch (e: Exception) {
                 ResponseError.NOT_FOUND.toResponse()
             }
+        }
+
+        private fun consumeRateLimit(
+            key: String,
+            rateLimitConfig: BaseRateLimitConfig = rateLimit
+        ) {
+            if (!rateLimitEnabled) return
+
+            if (!rateLimitConfig.resolveBucket(key).tryConsume(1))
+                throw RateLimitException()
         }
     }
