@@ -38,7 +38,7 @@ class CipherClientTests {
         }
     }
 
-    private lateinit var secretKey: ByteArray
+    private lateinit var aesKey: ByteArray
 
     @BeforeEach
     fun beforeEach() {
@@ -48,7 +48,7 @@ class CipherClientTests {
 
         cipherClient = CipherClient(credentials.apiKey, API_URL)
         userId = credentials.userId
-        secretKey = credentials.secretKey.fromHexString()
+        aesKey = credentials.aesKey.fromHexString()
     }
 
     private lateinit var cipherId: UUID
@@ -66,7 +66,7 @@ class CipherClientTests {
                     )
             )
 
-        val response = cipherClient.insert(cipher, secretKey)
+        val response = cipherClient.insert(cipher, aesKey)
 
         cipherId = response.id
     }
