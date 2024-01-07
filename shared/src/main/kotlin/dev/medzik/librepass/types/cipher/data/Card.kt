@@ -16,8 +16,8 @@ data class CipherCardData(
     val name: String,
     val cardholderName: String,
     val number: String,
-    val expMonth: Int? = null,
-    val expYear: Int? = null,
+    val expMonth: String? = null,
+    val expYear: String? = null,
     val code: String? = null,
     val notes: String? = null,
     val fields: List<CipherField>? = null

@@ -13,7 +13,7 @@ data class CipherField(
     val value: String
 )
 
-/** CipherFieldType is an enum class that represents the type of cipher field. */
+/** CipherFieldType represents the type of cipher field. */
 enum class CipherFieldType {
     Text,
 
