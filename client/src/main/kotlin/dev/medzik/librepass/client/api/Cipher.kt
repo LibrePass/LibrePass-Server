@@ -39,18 +39,18 @@ class CipherClient(
     private val client = Client(apiUrl, apiKey)
 
     /**
-     * Inserts a new cipher.
+     * Save the cipher.
      *
-     * @param cipher The cipher to insert.
+     * @param cipher The cipher to save.
      * @param aesKey The secret key to use for encryption.
      * @return ID of the cipher.
      */
     @Throws(ClientException::class, ApiException::class)
-    fun insert(
+    fun save(
         cipher: Cipher,
         aesKey: ByteArray
     ): CipherIdResponse {
-        return insert(
+        return save(
             EncryptedCipher(
                 cipher = cipher,
                 aesKey = aesKey
@@ -59,16 +59,40 @@ class CipherClient(
     }
 
     /**
-     * Inserts a new cipher.
+     * Save the cipher.
      *
      * @param cipher The encrypted cipher to insert.
      * @return ID of the cipher.
      */
     @Throws(ClientException::class, ApiException::class)
-    fun insert(cipher: EncryptedCipher): CipherIdResponse {
+    fun save(cipher: EncryptedCipher): CipherIdResponse {
         val response = client.put(API_ENDPOINT, cipher.toJson())
         return JsonUtils.deserialize(response)
     }
+
+    /**
+     * Inserts a new cipher.
+     *
+     * @param cipher The cipher to insert.
+     * @param aesKey The secret key to use for encryption.
+     * @return ID of the cipher.
+     */
+    @Deprecated("Use save() instead", ReplaceWith("save(cipher, aesKey)"))
+    @Throws(ClientException::class, ApiException::class)
+    fun insert(
+        cipher: Cipher,
+        aesKey: ByteArray
+    ) = save(cipher, aesKey)
+
+    /**
+     * Inserts a new cipher.
+     *
+     * @param cipher The encrypted cipher to insert.
+     * @return ID of the cipher.
+     */
+    @Deprecated("Use save() instead", ReplaceWith("save(cipher)"))
+    @Throws(ClientException::class, ApiException::class)
+    fun insert(cipher: EncryptedCipher) = save(cipher)
 
     /**
      * Gets a cipher by its ID.
@@ -123,18 +147,12 @@ class CipherClient(
      * @param aesKey The secret key to use for encryption.
      * @return ID of the cipher.
      */
+    @Deprecated("Use save() instead", ReplaceWith("save(cipher, aesKey)"))
     @Throws(ClientException::class, ApiException::class)
     fun update(
         cipher: Cipher,
         aesKey: ByteArray
-    ): CipherIdResponse {
-        return update(
-            EncryptedCipher(
-                cipher = cipher,
-                aesKey = aesKey
-            )
-        )
-    }
+    ) = save(cipher, aesKey)
 
     /**
      * Updates a cipher.
@@ -142,11 +160,9 @@ class CipherClient(
      * @param cipher The cipher to update.
      * @return ID of the cipher.
      */
+    @Deprecated("Use save() instead", ReplaceWith("save(cipher)"))
     @Throws(ClientException::class, ApiException::class)
-    fun update(cipher: EncryptedCipher): CipherIdResponse {
-        val response = client.patch("$API_ENDPOINT/${cipher.id}", cipher.toJson())
-        return JsonUtils.deserialize(response)
-    }
+    fun update(cipher: EncryptedCipher) = save(cipher)
 
     /**
      * Deletes a cipher.

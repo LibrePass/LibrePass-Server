@@ -66,7 +66,7 @@ class CipherClientTests {
                     )
             )
 
-        val response = cipherClient.insert(cipher, aesKey)
+        val response = cipherClient.save(cipher, aesKey)
 
         cipherId = response.id
     }
@@ -109,7 +109,7 @@ class CipherClientTests {
         Thread.sleep(1000)
 
         val newCipher = cipher.copy(type = 1)
-        cipherClient.update(newCipher)
+        cipherClient.save(newCipher)
 
         val updatedCipher = cipherClient.get(cipherId)
         assertEquals(1, updatedCipher.type)

@@ -37,7 +37,7 @@ class CipherController
         private val rateLimit = CipherControllerRateLimitConfig()
 
         @PutMapping
-        fun insertCipher(
+        fun saveCipher(
             @AuthorizedUser user: UserTable,
             @Valid @RequestBody encryptedCipher: EncryptedCipher
         ): Response {
@@ -49,7 +49,10 @@ class CipherController
                 // checks that the owner is correct
                 encryptedCipher.owner != user.id ||
                 // checks the user's cipher limit
-                cipherRepository.countByOwner(user.id) > userCiphersLimit
+                (
+                    !cipherRepository.existsByIdAndOwner(encryptedCipher.id, user.id) &&
+                        cipherRepository.countByOwner(user.id) > userCiphersLimit
+                )
             )
                 return ResponseError.INVALID_BODY.toResponse()
 
@@ -122,24 +125,13 @@ class CipherController
         }
 
         @PatchMapping("/{id}")
+        @Deprecated("Use `/save` instead", ReplaceWith("saveCipher(user, encryptedCipher)"))
         fun updateCipher(
             @AuthorizedUser user: UserTable,
             @PathVariable id: UUID,
             @Valid @RequestBody encryptedCipher: EncryptedCipher
         ): Response {
-            consumeRateLimit(user.id.toString())
-
-            if (!cipherRepository.existsByIdAndOwner(id, user.id))
-                return ResponseError.NOT_FOUND.toResponse()
-
-            if (!Validator.hexValidator(encryptedCipher.protectedData) ||
-                encryptedCipher.owner != user.id
-            )
-                return ResponseError.INVALID_BODY.toResponse()
-
-            cipherRepository.save(CipherTable(encryptedCipher))
-
-            return ResponseHandler.generateResponse(CipherIdResponse(id), HttpStatus.OK)
+            return saveCipher(user, encryptedCipher)
         }
 
         @DeleteMapping("/{id}")
