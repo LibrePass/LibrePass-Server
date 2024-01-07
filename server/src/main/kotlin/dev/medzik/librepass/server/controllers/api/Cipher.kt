@@ -69,7 +69,7 @@ class CipherController
 
             val ciphers = cipherRepository.getAll(owner = user.id)
 
-            // convert to encrypted ciphers
+            // convert cipher table to encrypted ciphers
             val response = ciphers.map { it.toEncryptedCipher() }
 
             return ResponseHandler.generateResponse(response, HttpStatus.OK)
