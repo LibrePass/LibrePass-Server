@@ -69,7 +69,7 @@ class UserClientTests {
             )
 
         fun insertTestCipher() {
-            cipherClient.insert(EncryptedCipher(testCipher, aesKey))
+            cipherClient.save(EncryptedCipher(testCipher, aesKey))
         }
 
         fun checkCipher(aesKey: ByteArray) {
@@ -134,7 +134,7 @@ class UserClientTests {
             )
 
         fun insertTestCipher() {
-            cipherClient.insert(EncryptedCipher(testCipher, aesKey))
+            cipherClient.save(EncryptedCipher(testCipher, aesKey))
         }
 
         fun checkCipher(aesKey: ByteArray) {
