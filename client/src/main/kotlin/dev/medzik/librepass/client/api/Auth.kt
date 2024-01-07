@@ -6,11 +6,11 @@ import dev.medzik.librepass.client.Client
 import dev.medzik.librepass.client.Server
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
-import dev.medzik.librepass.client.utils.Cryptography.computePasswordHash
-import dev.medzik.librepass.client.utils.Cryptography.computeSecretKey
-import dev.medzik.librepass.client.utils.Cryptography.computeSharedKey
 import dev.medzik.librepass.client.utils.JsonUtils
 import dev.medzik.librepass.types.api.*
+import dev.medzik.librepass.utils.Cryptography.computeAesKey
+import dev.medzik.librepass.utils.Cryptography.computePasswordHash
+import dev.medzik.librepass.utils.Cryptography.computeSharedKey
 import dev.medzik.librepass.utils.fromHexString
 import dev.medzik.librepass.utils.toHexString
 import java.util.*
@@ -128,7 +128,7 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
 
         val responseBody = client.post("$API_ENDPOINT/oauth?grantType=login", JsonUtils.serialize(request))
         val userCredentialsResponse = JsonUtils.deserialize<UserCredentialsResponse>(responseBody)
-        val secretKey = computeSecretKey(privateKey)
+        val aesKey = computeAesKey(privateKey)
 
         return UserCredentials(
             userId = userCredentialsResponse.userId,
@@ -136,7 +136,7 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
             apiKeyVerified = userCredentialsResponse.verified,
             publicKey = publicKey.toHexString(),
             privateKey = privateKey.toHexString(),
-            secretKey = secretKey.toHexString()
+            aesKey = aesKey.toHexString()
         )
     }
 
@@ -190,7 +190,7 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
  *  (Only if the user enabled 2FA authentication)
  * @property publicKey The user's public key.
  * @property privateKey The user's private key.
- * @property secretKey The user's secret key.
+ * @property aesKey The user's secret key.
  */
 data class UserCredentials(
     val userId: UUID,
@@ -198,5 +198,5 @@ data class UserCredentials(
     val apiKeyVerified: Boolean,
     val publicKey: String,
     val privateKey: String,
-    val secretKey: String
+    val aesKey: String
 )

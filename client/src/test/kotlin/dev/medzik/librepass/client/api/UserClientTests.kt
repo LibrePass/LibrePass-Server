@@ -36,7 +36,7 @@ class UserClientTests {
     }
 
     private lateinit var userId: UUID
-    private lateinit var secretKey: ByteArray
+    private lateinit var aesKey: ByteArray
 
     private lateinit var userClient: UserClient
     private lateinit var cipherClient: CipherClient
@@ -47,7 +47,7 @@ class UserClientTests {
         val credentials = authClient.login(EMAIL, PASSWORD)
 
         userId = credentials.userId
-        secretKey = credentials.secretKey.fromHexString()
+        aesKey = credentials.aesKey.fromHexString()
 
         userClient = UserClient(EMAIL, credentials.apiKey, API_URL)
         cipherClient = CipherClient(credentials.apiKey, API_URL)
@@ -69,20 +69,20 @@ class UserClientTests {
             )
 
         fun insertTestCipher() {
-            cipherClient.insert(EncryptedCipher(testCipher, secretKey))
+            cipherClient.insert(EncryptedCipher(testCipher, aesKey))
         }
 
-        fun checkCipher(secretKey: ByteArray) {
+        fun checkCipher(aesKey: ByteArray) {
             val ciphers = cipherClient.getAll()
 
-            val cipher = Cipher(ciphers[0], secretKey)
+            val cipher = Cipher(ciphers[0], aesKey)
 
             assertEquals(testCipher.loginData, cipher.loginData)
         }
 
         insertTestCipher()
 
-        checkCipher(secretKey)
+        checkCipher(aesKey)
 
         val newEmail = "newemail@example.com"
 
@@ -96,9 +96,9 @@ class UserClientTests {
         var credentials = authClient.login(newEmail, PASSWORD)
         userClient = UserClient(newEmail, credentials.apiKey, API_URL)
         cipherClient = CipherClient(credentials.apiKey, API_URL)
-        secretKey = credentials.secretKey.fromHexString()
+        aesKey = credentials.aesKey.fromHexString()
 
-        checkCipher(secretKey)
+        checkCipher(aesKey)
 
         // wait for 1 second to prevent unauthorized error
         Thread.sleep(1000)
@@ -113,9 +113,9 @@ class UserClientTests {
         credentials = authClient.login(EMAIL, PASSWORD)
         userClient = UserClient(EMAIL, credentials.apiKey, API_URL)
         cipherClient = CipherClient(credentials.apiKey, API_URL)
-        secretKey = credentials.secretKey.fromHexString()
+        aesKey = credentials.aesKey.fromHexString()
 
-        checkCipher(secretKey)
+        checkCipher(aesKey)
     }
 
     @Test
@@ -134,20 +134,20 @@ class UserClientTests {
             )
 
         fun insertTestCipher() {
-            cipherClient.insert(EncryptedCipher(testCipher, secretKey))
+            cipherClient.insert(EncryptedCipher(testCipher, aesKey))
         }
 
-        fun checkCipher(secretKey: ByteArray) {
+        fun checkCipher(aesKey: ByteArray) {
             val ciphers = cipherClient.getAll()
 
-            val cipher = Cipher(ciphers[0], secretKey)
+            val cipher = Cipher(ciphers[0], aesKey)
 
             assertEquals(testCipher.loginData, cipher.loginData)
         }
 
         insertTestCipher()
 
-        checkCipher(secretKey)
+        checkCipher(aesKey)
 
         userClient.changePassword(PASSWORD, "test2")
 
@@ -159,9 +159,9 @@ class UserClientTests {
         var credentials = authClient.login(EMAIL, "test2")
         userClient = UserClient(EMAIL, credentials.apiKey, API_URL)
         cipherClient = CipherClient(credentials.apiKey, API_URL)
-        secretKey = credentials.secretKey.fromHexString()
+        aesKey = credentials.aesKey.fromHexString()
 
-        checkCipher(secretKey)
+        checkCipher(aesKey)
 
         // wait for 1 second to prevent unauthorized error
         Thread.sleep(1000)
@@ -176,8 +176,8 @@ class UserClientTests {
         credentials = authClient.login(EMAIL, PASSWORD)
         userClient = UserClient(EMAIL, credentials.apiKey, API_URL)
         cipherClient = CipherClient(credentials.apiKey, API_URL)
-        secretKey = credentials.secretKey.fromHexString()
+        aesKey = credentials.aesKey.fromHexString()
 
-        checkCipher(secretKey)
+        checkCipher(aesKey)
     }
 }

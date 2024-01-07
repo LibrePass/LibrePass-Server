@@ -14,7 +14,7 @@ import java.util.*
 
 class CipherTests {
     // example secret key
-    private val secretKey = "1234567890123456789012345678901212345678901234567890123456789012".fromHexString()
+    private val aesKey = "1234567890123456789012345678901212345678901234567890123456789012".fromHexString()
 
     // example cipher
     private val cipher =
@@ -51,7 +51,7 @@ class CipherTests {
 
     @Test
     fun `encrypt cipher`() {
-        val encryptedCipher = EncryptedCipher(cipher, secretKey)
+        val encryptedCipher = EncryptedCipher(cipher, aesKey)
 
         assertEquals(cipher.id, encryptedCipher.id)
         assertEquals(cipher.owner, encryptedCipher.owner)
@@ -64,8 +64,8 @@ class CipherTests {
 
     @Test
     fun `encrypt and decrypt cipher`() {
-        val encryptedCipher = EncryptedCipher(cipher, secretKey)
-        val decryptedCipher = Cipher(encryptedCipher, secretKey)
+        val encryptedCipher = EncryptedCipher(cipher, aesKey)
+        val decryptedCipher = Cipher(encryptedCipher, aesKey)
 
         assertEquals(cipher.id, decryptedCipher.id)
         assertEquals(cipher.owner, decryptedCipher.owner)
@@ -78,7 +78,7 @@ class CipherTests {
 
     @Test
     fun `encrypt cipher to json`() {
-        val encryptedCipher = EncryptedCipher(cipher, secretKey)
+        val encryptedCipher = EncryptedCipher(cipher, aesKey)
         val cipherJson = encryptedCipher.toJson()
 
         assert(cipherJson.isNotEmpty())
@@ -86,9 +86,9 @@ class CipherTests {
 
     @Test
     fun `encrypt and decrypt cipher from json`() {
-        val cipherJson = EncryptedCipher(cipher, secretKey).toJson()
+        val cipherJson = EncryptedCipher(cipher, aesKey).toJson()
         val encryptedCipher = EncryptedCipher.from(cipherJson)
-        val decryptedCipher = Cipher(encryptedCipher, secretKey)
+        val decryptedCipher = Cipher(encryptedCipher, aesKey)
 
         assertEquals(cipher.id, decryptedCipher.id)
         assertEquals(cipher.owner, decryptedCipher.owner)
