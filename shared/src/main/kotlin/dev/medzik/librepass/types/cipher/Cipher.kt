@@ -59,14 +59,14 @@ data class Cipher(
     /** Creates a new [Cipher] object from the [EncryptedCipher]. */
     constructor(
         encryptedCipher: EncryptedCipher,
-        secretKeyBytes: ByteArray
+        aesKey: ByteArray
     ) : this(
         id = encryptedCipher.id,
         owner = encryptedCipher.owner,
         type = CipherType.from(encryptedCipher.type),
-        loginData = decryptData(CipherType.Login, encryptedCipher, secretKeyBytes),
-        secureNoteData = decryptData(CipherType.SecureNote, encryptedCipher, secretKeyBytes),
-        cardData = decryptData(CipherType.Card, encryptedCipher, secretKeyBytes),
+        loginData = decryptData(CipherType.Login, encryptedCipher, aesKey),
+        secureNoteData = decryptData(CipherType.SecureNote, encryptedCipher, aesKey),
+        cardData = decryptData(CipherType.Card, encryptedCipher, aesKey),
         collection = encryptedCipher.collection,
         favorite = encryptedCipher.favorite,
         rePrompt = encryptedCipher.rePrompt,
@@ -81,16 +81,16 @@ data class Cipher(
          *
          * @param type The type of the cipher.
          * @param encryptedCipher The encrypted cipher to decrypt.
-         * @param secretKey The secret key to use for decrypting
+         * @param aesKey The secret key to use for decrypting
          * @return The decrypted data or null if the type doesn't match.
          */
         private inline fun <reified T> decryptData(
             type: CipherType,
             encryptedCipher: EncryptedCipher,
-            secretKey: ByteArray
+            aesKey: ByteArray
         ): T? =
             if (type.ordinal == encryptedCipher.type) {
-                Gson().fromJson(encryptedCipher.decryptData(secretKey), T::class.java)
+                Gson().fromJson(encryptedCipher.decryptData(aesKey), T::class.java)
             } else {
                 null
             }

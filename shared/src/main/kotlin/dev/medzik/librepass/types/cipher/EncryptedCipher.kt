@@ -43,12 +43,12 @@ data class EncryptedCipher(
      * Creates a new [EncryptedCipher] object from the [Cipher].
      *
      * @param cipher The [Cipher] to encrypt.
-     * @param secretKey The key to use for encryption.
+     * @param aesKey The key to use for encryption.
      * @return The encrypted cipher.
      */
     constructor(
         cipher: Cipher,
-        secretKey: ByteArray
+        aesKey: ByteArray
     ) : this(
         id = cipher.id,
         owner = cipher.owner,
@@ -56,7 +56,7 @@ data class EncryptedCipher(
         protectedData =
             Aes.encrypt(
                 Aes.GCM,
-                secretKey,
+                aesKey,
                 Gson().toJson(
                     when (cipher.type) {
                         CipherType.Login -> cipher.loginData
@@ -80,8 +80,8 @@ data class EncryptedCipher(
     }
 
     /** Decrypts the cipher data. */
-    fun decryptData(secretKey: ByteArray): String {
-        return String(Aes.decrypt(Aes.GCM, secretKey, this.protectedData))
+    fun decryptData(aesKey: ByteArray): String {
+        return String(Aes.decrypt(Aes.GCM, aesKey, this.protectedData))
     }
 
     /** Converts the cipher to a JSON string. */

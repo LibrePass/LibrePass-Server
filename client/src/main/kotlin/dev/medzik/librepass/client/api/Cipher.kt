@@ -42,18 +42,18 @@ class CipherClient(
      * Inserts a new cipher.
      *
      * @param cipher The cipher to insert.
-     * @param secretKey The secret key to use for encryption.
+     * @param aesKey The secret key to use for encryption.
      * @return ID of the cipher.
      */
     @Throws(ClientException::class, ApiException::class)
     fun insert(
         cipher: Cipher,
-        secretKey: ByteArray
+        aesKey: ByteArray
     ): CipherIdResponse {
         return insert(
             EncryptedCipher(
                 cipher = cipher,
-                secretKey = secretKey
+                aesKey = aesKey
             )
         )
     }
@@ -120,18 +120,18 @@ class CipherClient(
      * Updates a cipher.
      *
      * @param cipher The cipher to update.
-     * @param secretKey The secret key to use for encryption.
+     * @param aesKey The secret key to use for encryption.
      * @return ID of the cipher.
      */
     @Throws(ClientException::class, ApiException::class)
     fun update(
         cipher: Cipher,
-        secretKey: ByteArray
+        aesKey: ByteArray
     ): CipherIdResponse {
         return update(
             EncryptedCipher(
                 cipher = cipher,
-                secretKey = secretKey
+                aesKey = aesKey
             )
         )
     }

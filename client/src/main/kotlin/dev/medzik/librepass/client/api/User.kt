@@ -8,11 +8,11 @@ import dev.medzik.librepass.client.Client
 import dev.medzik.librepass.client.Server
 import dev.medzik.librepass.client.errors.ApiException
 import dev.medzik.librepass.client.errors.ClientException
-import dev.medzik.librepass.client.utils.Cryptography.computePasswordHash
-import dev.medzik.librepass.client.utils.Cryptography.computeSecretKey
-import dev.medzik.librepass.client.utils.Cryptography.computeSharedKey
 import dev.medzik.librepass.client.utils.JsonUtils
 import dev.medzik.librepass.types.api.*
+import dev.medzik.librepass.utils.Cryptography.computeAesKey
+import dev.medzik.librepass.utils.Cryptography.computePasswordHash
+import dev.medzik.librepass.utils.Cryptography.computeSharedKey
 import dev.medzik.librepass.utils.fromHexString
 import dev.medzik.librepass.utils.toHexString
 
@@ -162,21 +162,21 @@ class UserClient(
         oldPasswordHash: Argon2Hash,
         newPasswordHash: Argon2Hash
     ): List<ChangePasswordCipherData> {
-        // compute old secret key
-        val oldSecretKey = computeSecretKey(oldPasswordHash.hash)
+        // compute an old aes key
+        val oldAesKey = computeAesKey(oldPasswordHash.hash)
 
-        // compute new secret key
-        val newSecretKey = computeSecretKey(newPasswordHash.hash)
+        // compute a new aes key
+        val newAesKey = computeAesKey(newPasswordHash.hash)
 
         // re-encrypt ciphers data with new password
         val cipherClient = CipherClient(apiKey, apiUrl)
         val ciphers = mutableListOf<ChangePasswordCipherData>()
         cipherClient.getAll().forEach { cipher ->
             // decrypt cipher data with an old secret key
-            val oldData = Aes.decrypt(Aes.GCM, oldSecretKey, cipher.protectedData)
+            val oldData = Aes.decrypt(Aes.GCM, oldAesKey, cipher.protectedData)
 
             // encrypt cipher data with a new secret key
-            val newData = Aes.encrypt(Aes.GCM, newSecretKey, oldData)
+            val newData = Aes.encrypt(Aes.GCM, newAesKey, oldData)
 
             ciphers +=
                 ChangePasswordCipherData(
