@@ -2,6 +2,7 @@ package dev.medzik.librepass.server.database
 
 import dev.medzik.librepass.types.cipher.EncryptedCipher
 import jakarta.persistence.*
+import jakarta.validation.constraints.Max
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
 import java.util.*
@@ -14,6 +15,7 @@ data class CipherTable(
     val owner: UUID,
     val type: Int,
     @Column(columnDefinition = "TEXT")
+    @Max(5000)
     val data: String,
     val favorite: Boolean = false,
     val collection: UUID? = null,
