@@ -12,6 +12,6 @@ enum class CipherType {
          *
          * @param type The type of the cipher.
          */
-        fun from(type: Int) = values()[type]
+        fun from(type: Int) = entries[type]
     }
 }
