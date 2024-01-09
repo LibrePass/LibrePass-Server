@@ -1,8 +1,5 @@
 package dev.medzik.librepass.types.api
 
-import jakarta.validation.constraints.Email
-import jakarta.validation.constraints.Max
-import org.hibernate.validator.constraints.Range
 import java.util.*
 
 /**
@@ -13,7 +10,6 @@ import java.util.*
  */
 data class ChangePasswordCipherData(
     val id: UUID,
-    @Max(5000)
     val data: String
 )
 
@@ -27,7 +23,6 @@ data class ChangePasswordCipherData(
  * @property ciphers The re-encrypted all ciphers because the key to encrypt it changed.
  */
 data class ChangeEmailRequest(
-    @Email
     val newEmail: String,
     val oldSharedKey: String,
     val newPublicKey: String,
@@ -49,15 +44,11 @@ data class ChangeEmailRequest(
  */
 data class ChangePasswordRequest(
     val oldSharedKey: String,
-    @Max(100)
     val newPasswordHint: String?,
     val newPublicKey: String,
     val newSharedKey: String,
-    @Range(min = 1, max = 10)
     val parallelism: Int,
-    @Range(min = 20 * 1024, max = 150 * 1024)
     val memory: Int,
-    @Range(min = 1, max = 10)
     val iterations: Int,
     val ciphers: List<ChangePasswordCipherData>
 )
@@ -71,7 +62,6 @@ data class ChangePasswordRequest(
  */
 data class SetupTwoFactorRequest(
     val sharedKey: String,
-    @Max(32)
     val secret: String,
     val code: String
 )
