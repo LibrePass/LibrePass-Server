@@ -1,6 +1,8 @@
 package dev.medzik.librepass.types.cipher
 
 import com.google.gson.Gson
+import dev.medzik.librepass.EncryptedString
+import dev.medzik.librepass.encrypt
 import dev.medzik.librepass.types.cipher.data.CipherCardData
 import dev.medzik.librepass.types.cipher.data.CipherLoginData
 import dev.medzik.librepass.types.cipher.data.CipherSecureNoteData
@@ -75,15 +77,22 @@ data class Cipher(
         lastModified = encryptedCipher.lastModified
     )
 
+    /** Encrypts the cipher data. */
+    fun encryptData(aesKey: ByteArray): EncryptedString {
+        val cipherText =
+            Gson().toJson(
+                when (type) {
+                    CipherType.Login -> loginData
+                    CipherType.Card -> cardData
+                    CipherType.SecureNote -> secureNoteData
+                }
+            )
+
+        return cipherText.encrypt(aesKey)
+    }
+
     companion object {
-        /**
-         * Decrypts the data of the [EncryptedCipher] if the type matches.
-         *
-         * @param type The type of the cipher.
-         * @param encryptedCipher The encrypted cipher to decrypt.
-         * @param aesKey The secret key to use for decrypting
-         * @return The decrypted data or null if the type doesn't match.
-         */
+        /** Decrypts the data of the [EncryptedCipher] if the type matches. */
         private inline fun <reified T> decryptData(
             type: CipherType,
             encryptedCipher: EncryptedCipher,

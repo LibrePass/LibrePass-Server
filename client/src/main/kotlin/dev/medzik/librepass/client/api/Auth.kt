@@ -190,7 +190,7 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
  *  (Only if the user enabled 2FA authentication)
  * @property publicKey The user's public key.
  * @property privateKey The user's private key.
- * @property aesKey The user's secret key.
+ * @property aesKey The user's aes key.
  */
 data class UserCredentials(
     val userId: UUID,

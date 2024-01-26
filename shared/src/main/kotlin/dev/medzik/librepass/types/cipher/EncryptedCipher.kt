@@ -2,13 +2,14 @@ package dev.medzik.librepass.types.cipher
 
 import com.google.gson.Gson
 import com.google.gson.annotations.JsonAdapter
-import dev.medzik.libcrypto.Aes
+import dev.medzik.librepass.EncryptedString
+import dev.medzik.librepass.decrypt
 import dev.medzik.librepass.types.adapters.DateAdapter
 import java.util.*
 
 /**
  * EncryptedCipher is a representation of cipher stored in the database.
- * The data is encrypted and can only be decrypted with the encryption key.
+ * The data is encrypted and can only be decrypted with the aes key.
  *
  * @property id The cipher identifier.
  * @property owner The owner identifier of the cipher.
@@ -25,7 +26,7 @@ data class EncryptedCipher(
     val id: UUID,
     val owner: UUID,
     val type: Int = CipherType.Login.ordinal,
-    val protectedData: String,
+    val protectedData: EncryptedString,
     val collection: UUID? = null,
     val favorite: Boolean = false,
     val rePrompt: Boolean = false,
@@ -49,18 +50,7 @@ data class EncryptedCipher(
         id = cipher.id,
         owner = cipher.owner,
         type = cipher.type.ordinal,
-        protectedData =
-            Aes.encrypt(
-                Aes.GCM,
-                aesKey,
-                Gson().toJson(
-                    when (cipher.type) {
-                        CipherType.Login -> cipher.loginData
-                        CipherType.Card -> cipher.cardData
-                        CipherType.SecureNote -> cipher.secureNoteData
-                    },
-                ).toByteArray()
-            ),
+        protectedData = cipher.encryptData(aesKey),
         collection = cipher.collection,
         favorite = cipher.favorite,
         rePrompt = cipher.rePrompt,
@@ -76,9 +66,7 @@ data class EncryptedCipher(
     }
 
     /** Decrypts the cipher data. */
-    fun decryptData(aesKey: ByteArray): String {
-        return String(Aes.decrypt(Aes.GCM, aesKey, this.protectedData))
-    }
+    fun decryptData(aesKey: ByteArray): String = protectedData.decrypt(aesKey)
 
     /** Converts the cipher to a JSON string. */
     fun toJson(): String = Gson().toJson(this)
