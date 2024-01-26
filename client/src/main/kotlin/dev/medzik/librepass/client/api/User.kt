@@ -172,10 +172,10 @@ class UserClient(
         val cipherClient = CipherClient(apiKey, apiUrl)
         val ciphers = mutableListOf<ChangePasswordCipherData>()
         cipherClient.getAll().forEach { cipher ->
-            // decrypt cipher data with an old secret key
+            // decrypt cipher data with an old aes key
             val oldData = Aes.decrypt(Aes.GCM, oldAesKey, cipher.protectedData)
 
-            // encrypt cipher data with a new secret key
+            // encrypt cipher data with a new aes key
             val newData = Aes.encrypt(Aes.GCM, newAesKey, oldData)
 
             ciphers +=

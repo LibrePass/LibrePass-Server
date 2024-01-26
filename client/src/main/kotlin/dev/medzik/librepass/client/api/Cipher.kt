@@ -42,7 +42,7 @@ class CipherClient(
      * Save the cipher.
      *
      * @param cipher The cipher to save.
-     * @param aesKey The secret key to use for encryption.
+     * @param aesKey The key to use for encryption.
      * @return ID of the cipher.
      */
     @Throws(ClientException::class, ApiException::class)
@@ -74,7 +74,7 @@ class CipherClient(
      * Inserts a new cipher.
      *
      * @param cipher The cipher to insert.
-     * @param aesKey The secret key to use for encryption.
+     * @param aesKey The key to use for encryption.
      * @return ID of the cipher.
      */
     @Deprecated("Use save() instead", ReplaceWith("save(cipher, aesKey)"))
@@ -144,7 +144,7 @@ class CipherClient(
      * Updates a cipher.
      *
      * @param cipher The cipher to update.
-     * @param aesKey The secret key to use for encryption.
+     * @param aesKey The key to use for encryption.
      * @return ID of the cipher.
      */
     @Deprecated("Use save() instead", ReplaceWith("save(cipher, aesKey)"))
