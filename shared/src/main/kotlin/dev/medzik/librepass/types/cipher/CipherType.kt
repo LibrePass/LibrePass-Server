@@ -1,17 +1,13 @@
 package dev.medzik.librepass.types.cipher
 
-/** CipherType represents the type of cipher. */
+/** The type of cipher. */
 enum class CipherType {
     Login,
     SecureNote,
     Card;
 
     companion object {
-        /**
-         * Returns the [CipherType] from the given type integer.
-         *
-         * @param type The type of the cipher.
-         */
+        /** Returns the [CipherType] from the given [type] integer. */
         fun from(type: Int) = entries[type]
     }
 }

@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test
 import java.util.*
 
 class CipherTests {
-    // example secret key
+    // example aes key
     private val aesKey = "1234567890123456789012345678901212345678901234567890123456789012".fromHexString()
 
     // example cipher
