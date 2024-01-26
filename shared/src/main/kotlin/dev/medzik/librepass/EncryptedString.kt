@@ -7,7 +7,7 @@ typealias EncryptedString = String
 
 /** Decrypts the [EncryptedString]. */
 fun EncryptedString.decrypt(key: ByteArray): String {
-    return Aes.decrypt(Aes.GCM, key, this).toString()
+    return String(Aes.decrypt(Aes.GCM, key, this))
 }
 
 // Encrypts the [EncryptedString].
