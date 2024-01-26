@@ -88,7 +88,6 @@ class CipherTests {
     fun `encrypt and decrypt cipher from json`() {
         val cipherJson = EncryptedCipher(cipher, aesKey).toJson()
         val encryptedCipher = EncryptedCipher.from(cipherJson)
-        println(encryptedCipher)
         val decryptedCipher = Cipher(encryptedCipher, aesKey)
 
         assertEquals(cipher.id, decryptedCipher.id)
