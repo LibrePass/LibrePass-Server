@@ -35,12 +35,6 @@
     </dependencyManagement>
 
     <dependencies>
-        <dependency>
-            <groupId>commons-validator</groupId>
-            <artifactId>commons-validator</artifactId>
-            <version>1.8.0</version>
-        </dependency>
-
         <!-- Spring Boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -140,7 +134,15 @@
                         <goals>
                             <!-- Re-package the application to produce a single executable JAR file -->
                             <goal>repackage</goal>
+                            <goal>build-info</goal>
                         </goals>
+
+                        <configuration>
+                            <excludeInfoProperties>
+                                <infoProperty>artifact</infoProperty>
+                                <infoProperty>time</infoProperty>
+                            </excludeInfoProperties>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
