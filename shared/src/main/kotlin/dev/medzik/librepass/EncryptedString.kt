@@ -10,7 +10,7 @@ fun EncryptedString.decrypt(key: ByteArray): String {
     return String(Aes.decrypt(Aes.GCM, key, this))
 }
 
-// Encrypts the [EncryptedString].
+/** Encrypts the [EncryptedString]. */
 fun String.encrypt(key: ByteArray): EncryptedString {
     return Aes.encrypt(Aes.GCM, key, this.toByteArray())
 }

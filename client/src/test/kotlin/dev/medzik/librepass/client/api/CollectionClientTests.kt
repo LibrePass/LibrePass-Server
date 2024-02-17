@@ -42,15 +42,15 @@ class CollectionClientTests {
 
     @Test
     fun `create collection`() {
-        val collection = collectionClient.createCollection(API_URL)
+        val collection = collectionClient.save(API_URL)
 
         assertNotNull(collection.id)
     }
 
     @Test
     fun `get collections`() {
-        val insertedCollection = collectionClient.createCollection("test")
-        val collections = collectionClient.getCollections()
+        val insertedCollection = collectionClient.save("test")
+        val collections = collectionClient.get()
 
         val collection = collections.first { it.id == insertedCollection.id }
 
@@ -61,8 +61,8 @@ class CollectionClientTests {
 
     @Test
     fun `get collection by id`() {
-        val collection = collectionClient.createCollection("test")
-        val fetchedCollection = collectionClient.getCollection(collection.id)
+        val collection = collectionClient.save("test")
+        val fetchedCollection = collectionClient.get(collection.id)
 
         assertNotNull(fetchedCollection)
         assertEquals(collection.id, fetchedCollection.id)
@@ -71,17 +71,17 @@ class CollectionClientTests {
 
     @Test
     fun `update collection`() {
-        val collection = collectionClient.createCollection("test")
-        collectionClient.updateCollection(collection.id, "test2")
+        val collection = collectionClient.save("test")
+        collectionClient.save(collection.id, "test2")
 
-        val fetchedCollection = collectionClient.getCollection(collection.id)
+        val fetchedCollection = collectionClient.get(collection.id)
 
         assertEquals("test2", fetchedCollection.name)
     }
 
     @Test
     fun `delete collection`() {
-        val collection = collectionClient.createCollection("test")
-        collectionClient.deleteCollection(collection.id)
+        val collection = collectionClient.save("test")
+        collectionClient.delete(collection.id)
     }
 }

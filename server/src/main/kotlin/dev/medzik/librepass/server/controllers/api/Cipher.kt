@@ -1,8 +1,10 @@
 package dev.medzik.librepass.server.controllers.api
 
-import dev.medzik.librepass.responses.ResponseError
+import dev.medzik.librepass.errors.CipherNotFoundException
+import dev.medzik.librepass.errors.InvalidCipherException
+import dev.medzik.librepass.errors.NotFoundException
+import dev.medzik.librepass.errors.RateLimitException
 import dev.medzik.librepass.server.components.AuthorizedUser
-import dev.medzik.librepass.server.controllers.advice.RateLimitException
 import dev.medzik.librepass.server.database.CipherRepository
 import dev.medzik.librepass.server.database.CipherTable
 import dev.medzik.librepass.server.database.UserTable
@@ -11,7 +13,6 @@ import dev.medzik.librepass.server.ratelimit.CipherControllerRateLimitConfig
 import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseHandler
 import dev.medzik.librepass.server.utils.Validator
-import dev.medzik.librepass.server.utils.toResponse
 import dev.medzik.librepass.types.api.CipherIdResponse
 import dev.medzik.librepass.types.api.SyncResponse
 import dev.medzik.librepass.types.cipher.EncryptedCipher
@@ -53,8 +54,9 @@ class CipherController
                     !cipherRepository.existsByIdAndOwner(encryptedCipher.id, user.id) &&
                         cipherRepository.countByOwner(user.id) > userCiphersLimit
                 )
-            )
-                return ResponseError.INVALID_BODY.toResponse()
+            ) {
+                throw InvalidCipherException()
+            }
 
             val cipher = cipherRepository.save(CipherTable(encryptedCipher))
 
@@ -114,7 +116,7 @@ class CipherController
             consumeRateLimit(user.id.toString())
 
             if (!cipherRepository.existsByIdAndOwner(id, user.id))
-                return ResponseError.NOT_FOUND.toResponse()
+                throw CipherNotFoundException()
 
             val cipher = cipherRepository.findById(id).get()
 
@@ -142,7 +144,7 @@ class CipherController
             consumeRateLimit(user.id.toString())
 
             if (!cipherRepository.existsByIdAndOwner(id, user.id))
-                return ResponseError.NOT_FOUND.toResponse()
+                throw CipherNotFoundException()
 
             cipherRepository.deleteById(id)
 
@@ -171,7 +173,7 @@ class CipherController
             return try {
                 restTemplate.exchange(uri, HttpMethod.GET, entity, ByteArray::class.java)
             } catch (e: Exception) {
-                ResponseError.NOT_FOUND.toResponse()
+                throw NotFoundException()
             }
         }
 
