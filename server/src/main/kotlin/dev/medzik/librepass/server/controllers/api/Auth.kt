@@ -3,11 +3,8 @@ package dev.medzik.librepass.server.controllers.api
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import dev.medzik.libcrypto.X25519
-import dev.medzik.librepass.responses.ResponseError
+import dev.medzik.librepass.errors.*
 import dev.medzik.librepass.server.components.RequestIP
-import dev.medzik.librepass.server.controllers.advice.AuthorizedUserException
-import dev.medzik.librepass.server.controllers.advice.InvalidTwoFactorCodeException
-import dev.medzik.librepass.server.controllers.advice.RateLimitException
 import dev.medzik.librepass.server.database.TokenRepository
 import dev.medzik.librepass.server.database.TokenTable
 import dev.medzik.librepass.server.database.UserRepository
@@ -19,7 +16,6 @@ import dev.medzik.librepass.server.services.EmailService
 import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseHandler
 import dev.medzik.librepass.server.utils.Validator.validateSharedKey
-import dev.medzik.librepass.server.utils.toResponse
 import dev.medzik.librepass.types.api.*
 import dev.medzik.librepass.utils.TOTP
 import dev.medzik.librepass.utils.toHexString
@@ -71,9 +67,8 @@ class AuthController
         ): Response {
             consumeRateLimit(ip)
 
-            // validate shared key
             if (!validateSharedKey(request.publicKey, request.sharedKey))
-                return ResponseError.INVALID_CREDENTIALS.toResponse()
+                throw InvalidSharedKeyException()
 
             val user =
                 userRepository.save(
@@ -128,13 +123,12 @@ class AuthController
                         iterations = 4,
                         // Server X5519 public key
                         serverPublicKey = ServerPublicKey.toHexString()
-                    ),
-                    HttpStatus.OK
+                    )
                 )
 
             val user =
                 userRepository.findByEmail(email.lowercase())
-                    ?: return ResponseError.INVALID_CREDENTIALS.toResponse()
+                    ?: throw UserNotFoundException()
 
             return ResponseHandler.generateResponse(
                 PreLoginResponse(
@@ -143,8 +137,7 @@ class AuthController
                     iterations = user.iterations,
                     // Server X25519 public key
                     serverPublicKey = ServerPublicKey.toHexString()
-                ),
-                HttpStatus.OK
+                )
             )
         }
 
@@ -164,7 +157,7 @@ class AuthController
                             request = Gson().fromJson(request, LoginRequest::class.java)
                         )
                     } catch (e: JsonSyntaxException) {
-                        ResponseError.INVALID_CREDENTIALS.toResponse()
+                        throw InvalidBodyException()
                     }
                 }
                 "2fa" -> {
@@ -174,12 +167,12 @@ class AuthController
                             request = Gson().fromJson(request, TwoFactorRequest::class.java)
                         )
                     } catch (e: JsonSyntaxException) {
-                        ResponseError.INVALID_CREDENTIALS.toResponse()
+                        throw InvalidBodyException()
                     }
                 }
             }
 
-            return ResponseError.INVALID_BODY.toResponse()
+            throw InvalidBodyException()
         }
 
         private fun oauthLogin(
@@ -192,13 +185,13 @@ class AuthController
 
             val user =
                 userRepository.findByEmail(emailAddress)
-                    ?: return ResponseError.INVALID_CREDENTIALS.toResponse()
+                    ?: throw UserNotFoundException()
 
             if (emailVerificationRequired && !user.emailVerified)
-                return ResponseError.EMAIL_NOT_VERIFIED.toResponse()
+                throw EmailNotVerifiedException()
 
             if (!validateSharedKey(user, request.sharedKey))
-                return ResponseError.INVALID_CREDENTIALS.toResponse()
+                throw InvalidSharedKeyException()
 
             val apiToken =
                 tokenRepository.save(
@@ -234,14 +227,14 @@ class AuthController
 
             val token =
                 tokenRepository.findByIdOrNull(request.apiKey)
-                    ?: throw AuthorizedUserException()
+                    ?: throw InvalidTokenException()
 
             if (token.confirmed)
                 return ResponseHandler.generateResponse(HttpStatus.OK)
 
             val user =
                 userRepository.findByIdOrNull(token.owner)
-                    ?: throw UnsupportedOperationException()
+                    ?: throw IllegalStateException()
 
             if (user.twoFactorSecret == null)
                 return ResponseHandler.generateResponse(HttpStatus.OK)
@@ -251,7 +244,7 @@ class AuthController
             if (!TOTP.validate(user.twoFactorSecret, request.code) &&
                 request.code != user.twoFactorRecoveryCode
             )
-                throw InvalidTwoFactorCodeException()
+                throw InvalidTwoFactorException()
 
             coroutineScope.launch(Dispatchers.IO) {
                 emailService.sendNewLogin(
@@ -272,7 +265,7 @@ class AuthController
         ): Response {
             val email =
                 emailParam?.lowercase()
-                    ?: return ResponseError.INVALID_BODY.toResponse()
+                    ?: throw InvalidBodyException()
 
             consumeRateLimit(ip)
             consumeRateLimit(email)
@@ -282,18 +275,19 @@ class AuthController
 
             val user =
                 userRepository.findByEmail(email)
-                    ?: return ResponseError.INVALID_CREDENTIALS.toResponse()
+                    ?: throw UserNotFoundException()
 
-            try {
-                emailService.sendPasswordHint(
-                    to = user.email,
-                    hint = user.passwordHint
-                )
-            } catch (e: Exception) {
-                logger.error("Failed to send password hint", e)
-
-                return ResponseError.UNEXPECTED_SERVER_ERROR.toResponse()
-            }
+            // TODO
+//            try {
+            emailService.sendPasswordHint(
+                to = user.email,
+                hint = user.passwordHint
+            )
+//            } catch (e: Exception) {
+//                logger.error("Failed to send password hint", e)
+//
+//                return ResponseError.UNEXPECTED_SERVER_ERROR.toResponse()
+//            }
 
             return ResponseHandler.generateResponse(HttpStatus.OK)
         }
@@ -309,7 +303,7 @@ class AuthController
 
             val user =
                 userRepository.findById(UUID.fromString(userID)).orElse(null)
-                    ?: return ResponseError.INVALID_BODY.toResponse()
+                    ?: throw UserNotFoundException()
 
             // check if user email is already verified
             if (user.emailVerified)
@@ -317,11 +311,11 @@ class AuthController
 
             // check if the code is valid
             if (user.emailVerificationCode.toString() != verificationCode)
-                return ResponseError.INVALID_BODY.toResponse()
+                throw EmailInvalidCodeException()
 
             // check if the code is expired
             if (user.emailVerificationCodeExpiresAt?.before(Date()) == true)
-                return ResponseError.INVALID_BODY.toResponse()
+                throw EmailInvalidCodeException()
 
             // set email as verified
             userRepository.save(
@@ -350,11 +344,11 @@ class AuthController
 
             val user =
                 userRepository.findByEmail(email)
-                    ?: return ResponseError.INVALID_BODY.toResponse()
+                    ?: throw UserNotFoundException()
 
             // check if user email is already verified
             if (user.emailVerified)
-                return ResponseError.INVALID_BODY.toResponse()
+                throw InvalidBodyException()
 
             userRepository.save(
                 user.copy(

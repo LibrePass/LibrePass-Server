@@ -5,6 +5,8 @@ module dev.medzik.librepass.shared {
     requires org.apache.commons.codec;
     requires otp.java;
 
+    exports dev.medzik.librepass.errors;
+
     exports dev.medzik.librepass.responses;
 
     exports dev.medzik.librepass.types.adapters;
