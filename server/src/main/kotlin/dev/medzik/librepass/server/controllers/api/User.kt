@@ -2,11 +2,9 @@ package dev.medzik.librepass.server.controllers.api
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import dev.medzik.librepass.responses.ResponseError
+import dev.medzik.librepass.errors.*
 import dev.medzik.librepass.server.components.AuthorizedUser
 import dev.medzik.librepass.server.components.RequestIP
-import dev.medzik.librepass.server.controllers.advice.InvalidTwoFactorCodeException
-import dev.medzik.librepass.server.controllers.advice.RateLimitException
 import dev.medzik.librepass.server.database.*
 import dev.medzik.librepass.server.ratelimit.AuthControllerRateLimitConfig
 import dev.medzik.librepass.server.ratelimit.BaseRateLimitConfig
@@ -14,7 +12,6 @@ import dev.medzik.librepass.server.services.EmailService
 import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseHandler
 import dev.medzik.librepass.server.utils.Validator.validateSharedKey
-import dev.medzik.librepass.server.utils.toResponse
 import dev.medzik.librepass.types.api.*
 import dev.medzik.librepass.utils.TOTP
 import jakarta.validation.Valid
@@ -55,16 +52,13 @@ class UserController
             @AuthorizedUser user: UserTable,
             @Valid @RequestBody request: ChangeEmailRequest
         ): Response {
-            // validator
             changeEmailPasswordValidator(
                 user = user,
                 oldSharedKey = request.oldSharedKey,
                 newPublicKey = request.newPublicKey,
                 newSharedKey = request.newSharedKey,
                 ciphers = request.ciphers
-            )?.let {
-                return it.toResponse()
-            }
+            )
 
             val emailChangeTable =
                 emailChangeRepository.save(
@@ -122,15 +116,15 @@ class UserController
 
             val changeEmailTable =
                 emailChangeRepository.findById(UUID.fromString(userID)).orElse(null)
-                    ?: return ResponseError.INVALID_BODY.toResponse()
+                    ?: throw UserNotFoundException()
 
             // check if the code is valid
             if (changeEmailTable.code != verificationCode)
-                return ResponseError.INVALID_BODY.toResponse()
+                throw EmailInvalidCodeException()
 
             // check if the code is expired
             if (changeEmailTable.codeExpiresAt.before(Date()))
-                return ResponseError.INVALID_BODY.toResponse()
+                throw EmailInvalidCodeException()
 
             val user = userRepository.findById(changeEmailTable.owner).get()
 
@@ -161,16 +155,13 @@ class UserController
             @AuthorizedUser user: UserTable,
             @Valid @RequestBody request: ChangePasswordRequest
         ): Response {
-            // validator
             changeEmailPasswordValidator(
                 user = user,
                 oldSharedKey = request.oldSharedKey,
                 newPublicKey = request.newPublicKey,
                 newSharedKey = request.newSharedKey,
                 ciphers = request.ciphers
-            )?.let {
-                return it.toResponse()
-            }
+            )
 
             // update ciphers data due to re-encryption with new password
             request.ciphers.forEach { cipherData ->
@@ -204,14 +195,14 @@ class UserController
             newPublicKey: String,
             newSharedKey: String,
             ciphers: List<ChangePasswordCipherData>
-        ): ResponseError? {
+        ) {
             // validate shared key with an old public key
             if (!validateSharedKey(user, oldSharedKey))
-                return ResponseError.INVALID_CREDENTIALS
+                throw InvalidSharedKeyException()
 
             // validate shared key with a new public key
             if (!validateSharedKey(newPublicKey, newSharedKey))
-                return ResponseError.INVALID_CREDENTIALS
+                throw InvalidSharedKeyException()
 
             // get all user cipher ids
             val cipherIds = cipherRepository.getAllIds(user.id)
@@ -221,10 +212,8 @@ class UserController
             // (because `cipherIds` is a list of user cipher ids)
             ciphers.forEach { cipherData ->
                 if (!cipherIds.contains(cipherData.id))
-                    return ResponseError.INVALID_BODY
+                    throw MissingCipherException()
             }
-
-            return null
         }
 
         @PostMapping("/setup/2fa")
@@ -233,10 +222,10 @@ class UserController
             @Valid @RequestBody request: SetupTwoFactorRequest
         ): Response {
             if (!validateSharedKey(user, request.sharedKey))
-                return ResponseError.INVALID_CREDENTIALS.toResponse()
+                throw InvalidSharedKeyException()
 
             if (request.code != TOTP.getTOTPCode(request.secret))
-                throw InvalidTwoFactorCodeException()
+                throw InvalidTwoFactorException()
 
             val recoveryCode = UUID.randomUUID().toString()
 
@@ -258,10 +247,10 @@ class UserController
             @Valid @RequestBody request: DeleteAccountRequest
         ): Response {
             if (!validateSharedKey(user, request.sharedKey))
-                return ResponseError.INVALID_CREDENTIALS.toResponse()
+                throw InvalidSharedKeyException()
 
             if (user.twoFactorEnabled && request.code != TOTP.getTOTPCode(user.twoFactorSecret!!))
-                throw InvalidTwoFactorCodeException()
+                throw InvalidTwoFactorException()
 
             collectionRepository.deleteAllByOwner(user.id)
             cipherRepository.deleteAllByOwner(user.id)

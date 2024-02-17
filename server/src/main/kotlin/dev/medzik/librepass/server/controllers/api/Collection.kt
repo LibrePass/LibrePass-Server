@@ -1,13 +1,13 @@
 package dev.medzik.librepass.server.controllers.api
 
-import dev.medzik.librepass.responses.ResponseError
+import dev.medzik.librepass.errors.CollectionNotFoundException
+import dev.medzik.librepass.errors.InvalidCollectionException
 import dev.medzik.librepass.server.components.AuthorizedUser
 import dev.medzik.librepass.server.database.CollectionRepository
 import dev.medzik.librepass.server.database.CollectionTable
 import dev.medzik.librepass.server.database.UserTable
 import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseHandler
-import dev.medzik.librepass.server.utils.toResponse
 import dev.medzik.librepass.types.api.CipherCollection
 import dev.medzik.librepass.types.api.CollectionIdResponse
 import dev.medzik.librepass.types.api.CreateCollectionRequest
@@ -25,10 +25,13 @@ class CollectionController
         private val collectionRepository: CollectionRepository
     ) {
         @PutMapping
-        fun insertCollection(
+        fun saveCollection(
             @AuthorizedUser user: UserTable,
             @Valid @RequestBody collection: CreateCollectionRequest
         ): Response {
+            if (collection.name.length > 32)
+                throw InvalidCollectionException()
+
             collectionRepository.save(
                 CollectionTable(
                     id = collection.id,
@@ -70,7 +73,7 @@ class CollectionController
         ): Response {
             val collection =
                 collectionRepository.findByIdAndOwner(id, user.id)
-                    ?: return ResponseError.NOT_FOUND.toResponse()
+                    ?: throw CollectionNotFoundException()
 
             val cipherCollection =
                 CipherCollection(
@@ -84,23 +87,6 @@ class CollectionController
             return ResponseHandler.generateResponse(cipherCollection, HttpStatus.OK)
         }
 
-        @PatchMapping("/{id}")
-        fun updateCollection(
-            @AuthorizedUser user: UserTable,
-            @PathVariable id: UUID,
-            @Valid @RequestBody collection: CreateCollectionRequest
-        ): Response {
-            collectionRepository.save(
-                CollectionTable(
-                    id = id,
-                    name = collection.name,
-                    owner = user.id
-                )
-            )
-
-            return ResponseHandler.generateResponse(CollectionIdResponse(collection.id), HttpStatus.OK)
-        }
-
         @DeleteMapping("/{id}")
         fun deleteCollection(
             @AuthorizedUser user: UserTable,
@@ -108,7 +94,7 @@ class CollectionController
         ): Response {
             val collection =
                 collectionRepository.findByIdAndOwner(id, user.id)
-                    ?: return ResponseError.NOT_FOUND.toResponse()
+                    ?: throw CollectionNotFoundException()
 
             collectionRepository.delete(collection)
 
