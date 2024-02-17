@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit
 
 /** Version of the LibrePass API Client library. */
 const val VERSION = "1.4.1"
+
 /** Supported API version. */
 const val API_VERSION = "1"
 

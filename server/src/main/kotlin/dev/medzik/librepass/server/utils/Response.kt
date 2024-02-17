@@ -1,6 +1,5 @@
 package dev.medzik.librepass.server.utils
 
-import dev.medzik.librepass.responses.ResponseError
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import java.net.URI
@@ -48,5 +47,3 @@ object ResponseHandler {
             .status(status)
             .body(data)
 }
-
-fun ResponseError.toResponse() = ResponseHandler.generateErrorResponse(this.name, this.statusCode.code)
