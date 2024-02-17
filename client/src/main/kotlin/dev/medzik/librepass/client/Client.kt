@@ -7,9 +7,15 @@ import dev.medzik.librepass.types.api.ResponseError
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
 import java.util.concurrent.TimeUnit
+
+/** Version of the LibrePass API Client library. */
+const val VERSION = "1.4.1"
+/** Supported API version. */
+const val API_VERSION = "1"
 
 /** LibrePass API Servers */
 object Server {
@@ -24,21 +30,17 @@ object Server {
 /**
  * HTTP Client for sending requests to the API.
  *
- * @param apiURL The API URL to use.
+ * @param apiURL The URL of the API.
  * @param accessToken The access token to use for authorization.
  */
 class Client(
     private val apiURL: String,
-    private val accessToken: String? = null,
+    private val accessToken: String? = null
 ) {
     private val httpClient =
         OkHttpClient.Builder()
             .callTimeout(30, TimeUnit.SECONDS)
             .build()
-    private val httpMediaTypeJson = "application/json; charset=utf-8".toMediaType()
-
-    // create authorization header if access token is provided
-    private val authorizationHeader = if (accessToken.isNullOrEmpty()) "" else "Bearer $accessToken"
 
     /**
      * Send a GET request to the API.
@@ -50,8 +52,8 @@ class Client(
     fun get(endpoint: String): String {
         val request =
             Request.Builder()
+                .addLibrePassParameters()
                 .url(apiURL + endpoint)
-                .addHeader("Authorization", authorizationHeader)
                 .get()
                 .build()
 
@@ -68,8 +70,8 @@ class Client(
     fun delete(endpoint: String): String {
         val request =
             Request.Builder()
+                .addLibrePassParameters()
                 .url(apiURL + endpoint)
-                .addHeader("Authorization", authorizationHeader)
                 .delete()
                 .build()
 
@@ -88,13 +90,11 @@ class Client(
         endpoint: String,
         json: String
     ): String {
-        val body = json.toRequestBody(httpMediaTypeJson)
-
         val request =
             Request.Builder()
+                .addLibrePassParameters()
                 .url(apiURL + endpoint)
-                .addHeader("Authorization", authorizationHeader)
-                .delete(body)
+                .delete(makeRequestBodyFromJson(json))
                 .build()
 
         return executeAndExtractBody(request)
@@ -112,13 +112,11 @@ class Client(
         endpoint: String,
         json: String
     ): String {
-        val body = json.toRequestBody(httpMediaTypeJson)
-
         val request =
             Request.Builder()
+                .addLibrePassParameters()
                 .url(apiURL + endpoint)
-                .addHeader("Authorization", authorizationHeader)
-                .post(body)
+                .post(makeRequestBodyFromJson(json))
                 .build()
 
         return executeAndExtractBody(request)
@@ -136,13 +134,11 @@ class Client(
         endpoint: String,
         json: String
     ): String {
-        val body = json.toRequestBody(httpMediaTypeJson)
-
         val request =
             Request.Builder()
+                .addLibrePassParameters()
                 .url(apiURL + endpoint)
-                .addHeader("Authorization", authorizationHeader)
-                .patch(body)
+                .patch(makeRequestBodyFromJson(json))
                 .build()
 
         return executeAndExtractBody(request)
@@ -160,16 +156,29 @@ class Client(
         endpoint: String,
         json: String
     ): String {
-        val body = json.toRequestBody(httpMediaTypeJson)
-
         val request =
             Request.Builder()
+                .addLibrePassParameters()
                 .url(apiURL + endpoint)
-                .addHeader("Authorization", authorizationHeader)
-                .put(body)
+                .put(makeRequestBodyFromJson(json))
                 .build()
 
         return executeAndExtractBody(request)
+    }
+
+    private fun Request.Builder.addLibrePassParameters(): Request.Builder {
+        if (accessToken.isNullOrEmpty()) {
+            addHeader("Authorization", "Bearer $accessToken")
+        }
+
+        addHeader("X-Client", "Java/$VERSION")
+        addHeader("X-API", API_VERSION)
+
+        return this
+    }
+
+    private fun makeRequestBodyFromJson(json: String): RequestBody {
+        return json.toRequestBody("application/json; charset=utf-8".toMediaType())
     }
 
     /** Execute a request and extract the body from the response. */
