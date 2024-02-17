@@ -253,10 +253,12 @@ class AuthController
             )
                 throw InvalidTwoFactorCodeException()
 
-            emailService.sendNewLogin(
-                to = user.email,
-                ip = ip
-            )
+            coroutineScope.launch(Dispatchers.IO) {
+                emailService.sendNewLogin(
+                    to = user.email,
+                    ip = ip
+                )
+            }
 
             tokenRepository.save(token.copy(confirmed = true))
 
