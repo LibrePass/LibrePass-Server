@@ -168,7 +168,7 @@ class Client(
     }
 
     private fun Request.Builder.addLibrePassParameters(): Request.Builder {
-        if (accessToken.isNullOrEmpty()) {
+        if (!accessToken.isNullOrEmpty()) {
             addHeader("Authorization", "Bearer $accessToken")
         }
 
