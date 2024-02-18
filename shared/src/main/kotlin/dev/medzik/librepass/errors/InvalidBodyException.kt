@@ -1,3 +1,3 @@
 package dev.medzik.librepass.errors
 
-class InvalidBodyException : LibrePassException(LibrePassExceptions.InvalidBody)
+class InvalidBodyException : BaseException(ServerError.InvalidBody)

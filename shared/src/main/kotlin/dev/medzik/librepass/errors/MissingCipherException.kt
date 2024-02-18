@@ -1,3 +1,3 @@
 package dev.medzik.librepass.errors
 
-class MissingCipherException : LibrePassException(LibrePassExceptions.MissingCipher)
+class MissingCipherException : BaseException(ServerError.MissingCipher)

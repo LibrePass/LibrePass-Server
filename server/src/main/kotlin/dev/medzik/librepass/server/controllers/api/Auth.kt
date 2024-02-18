@@ -21,6 +21,7 @@ import dev.medzik.librepass.utils.TOTP
 import dev.medzik.librepass.utils.toHexString
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Email
+import jakarta.validation.constraints.NotBlank
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -265,7 +266,7 @@ class AuthController
         @GetMapping("/passwordHint")
         fun requestPasswordHint(
             @RequestIP ip: String,
-            @Valid @Email @RequestParam("email") emailParam: String?
+            @Valid @NotBlank @Email @RequestParam("email") emailParam: String?
         ): Response {
             val email =
                 emailParam?.lowercase()
@@ -299,14 +300,14 @@ class AuthController
         @GetMapping("/verifyEmail")
         fun verifyEmail(
             @RequestIP ip: String,
-            @RequestParam("user") userID: String,
-            @RequestParam("code") verificationCode: String
+            @Valid @NotBlank @RequestParam("user") userId: String,
+            @Valid @NotBlank @RequestParam("code") verificationCode: String
         ): Response {
             consumeRateLimit(ip)
-            consumeRateLimit(userID)
+            consumeRateLimit(userId)
 
             val user =
-                userRepository.findById(UUID.fromString(userID)).orElse(null)
+                userRepository.findById(UUID.fromString(userId)).orElse(null)
                     ?: throw UserNotFoundException()
 
             // check if user email is already verified
@@ -336,7 +337,7 @@ class AuthController
         @GetMapping("/resendVerificationEmail")
         fun resendVerificationEmail(
             @RequestIP ip: String,
-            @Valid @Email @RequestParam("email") emailParam: String
+            @Valid @NotBlank @Email @RequestParam("email") emailParam: String
         ): Response {
             val email = emailParam.lowercase()
 
