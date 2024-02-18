@@ -112,9 +112,7 @@ class AuthController
             @RequestIP ip: String,
             @Valid @Email @RequestParam("email") email: String?
         ): Response {
-            consumeRateLimit(ip)
-
-            if (email.isNullOrEmpty())
+            fun preLoginDefaultResponse(): Response {
                 return ResponseHandler.generateResponse(
                     PreLoginResponse(
                         // Default Argon2 parameters
@@ -125,10 +123,16 @@ class AuthController
                         serverPublicKey = ServerPublicKey.toHexString()
                     )
                 )
+            }
+
+            consumeRateLimit(ip)
+
+            if (email.isNullOrEmpty())
+                return preLoginDefaultResponse()
 
             val user =
                 userRepository.findByEmail(email.lowercase())
-                    ?: throw UserNotFoundException()
+                    ?: return preLoginDefaultResponse()
 
             return ResponseHandler.generateResponse(
                 PreLoginResponse(
