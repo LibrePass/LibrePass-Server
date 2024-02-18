@@ -1,3 +1,3 @@
 package dev.medzik.librepass.errors
 
-class InvalidCipherException : LibrePassException(LibrePassExceptions.InvalidCipher)
+class InvalidCipherException : BaseException(ServerError.InvalidCipher)

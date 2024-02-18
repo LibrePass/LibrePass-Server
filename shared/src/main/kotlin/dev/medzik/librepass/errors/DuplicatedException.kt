@@ -1,3 +1,3 @@
 package dev.medzik.librepass.errors
 
-class DuplicatedException : LibrePassException(LibrePassExceptions.Duplicated)
+class DuplicatedException : BaseException(ServerError.Duplicated)

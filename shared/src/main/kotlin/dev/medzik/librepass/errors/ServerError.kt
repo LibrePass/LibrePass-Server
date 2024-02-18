@@ -2,7 +2,7 @@ package dev.medzik.librepass.errors
 
 import dev.medzik.librepass.responses.HttpStatus
 
-enum class LibrePassExceptions(val statusCode: HttpStatus) {
+enum class ServerError(val statusCode: HttpStatus) {
     CipherNotFound(HttpStatus.NOT_FOUND),
     CollectionNotFound(HttpStatus.NOT_FOUND),
     Database(HttpStatus.INTERNAL_SERVER_ERROR),
@@ -19,5 +19,11 @@ enum class LibrePassExceptions(val statusCode: HttpStatus) {
     NotFound(HttpStatus.NOT_FOUND),
     RateLimit(HttpStatus.TOO_MANY_REQUESTS),
     SendEmail(HttpStatus.INTERNAL_SERVER_ERROR),
-    UserNotFound(HttpStatus.BAD_REQUEST)
+    UserNotFound(HttpStatus.BAD_REQUEST);
+
+    companion object {
+        fun get(name: String): ServerError? {
+            return ServerError.entries.firstOrNull { it.name == name }
+        }
+    }
 }

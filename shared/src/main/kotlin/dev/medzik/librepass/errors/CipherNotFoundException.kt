@@ -1,3 +1,3 @@
 package dev.medzik.librepass.errors
 
-class CipherNotFoundException : LibrePassException(LibrePassExceptions.CipherNotFound)
+class CipherNotFoundException : BaseException(ServerError.CipherNotFound)

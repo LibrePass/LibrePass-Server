@@ -1,5 +1,7 @@
 package dev.medzik.librepass.client.api
 
+import dev.medzik.librepass.client.api.utils.assertApiError
+import dev.medzik.librepass.errors.ServerError
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -40,5 +42,20 @@ class AuthClientTests {
     @Test
     fun resendVerificationEmail() {
         authClient.resendVerificationEmail(EMAIL)
+    }
+
+    @Test
+    fun testValidationErrors() {
+        assertApiError(ServerError.InvalidBody) {
+            authClient.resendVerificationEmail("")
+        }
+
+        assertApiError(ServerError.InvalidBody) {
+            authClient.resendVerificationEmail("test")
+        }
+
+        assertApiError(ServerError.UserNotFound) {
+            authClient.resendVerificationEmail("invalid_user@example.com")
+        }
     }
 }

@@ -1,3 +1,3 @@
 package dev.medzik.librepass.errors
 
-class InvalidCollectionException : LibrePassException(LibrePassExceptions.InvalidCollection)
+class InvalidCollectionException : BaseException(ServerError.InvalidCollection)

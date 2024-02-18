@@ -1,3 +1,3 @@
 package dev.medzik.librepass.errors
 
-class InvalidTwoFactorException : LibrePassException(LibrePassExceptions.InvalidTwoFactor)
+class InvalidTwoFactorException : BaseException(ServerError.InvalidTwoFactor)
