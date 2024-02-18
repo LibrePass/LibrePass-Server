@@ -3,7 +3,7 @@ package dev.medzik.librepass.server.utils
 import dev.medzik.libcrypto.X25519
 import dev.medzik.librepass.server.controllers.api.ServerPrivateKey
 import dev.medzik.librepass.server.database.UserTable
-import dev.medzik.librepass.utils.fromHexString
+import dev.medzik.librepass.utils.fromHex
 import java.util.regex.Pattern
 
 object Validator {
@@ -23,7 +23,7 @@ object Validator {
         publicKey: String,
         sharedKey: String
     ): Boolean {
-        val oldSharedKey = X25519.computeSharedSecret(ServerPrivateKey, publicKey.fromHexString())
-        return sharedKey.fromHexString().contentEquals(oldSharedKey)
+        val oldSharedKey = X25519.computeSharedSecret(ServerPrivateKey, publicKey.fromHex())
+        return sharedKey.fromHex().contentEquals(oldSharedKey)
     }
 }
