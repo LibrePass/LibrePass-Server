@@ -2,8 +2,8 @@ package dev.medzik.librepass.utils
 
 import dev.medzik.libcrypto.Hex
 
-/** Encodes a byte array into a hex string. */
-fun ByteArray.toHexString(): String = Hex.encode(this)
+/** Encodes an array of into a hex string. */
+fun ByteArray.toHex(): String = Hex.encode(this)
 
-/** Decodes a hex string to a byte array. */
-fun String.fromHexString(): ByteArray = Hex.decode(this)
+/** Decodes a hex string into a byte array. */
+fun String.fromHex(): ByteArray = Hex.decode(this)

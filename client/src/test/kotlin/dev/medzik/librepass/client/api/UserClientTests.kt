@@ -4,7 +4,7 @@ import dev.medzik.librepass.types.cipher.Cipher
 import dev.medzik.librepass.types.cipher.CipherType
 import dev.medzik.librepass.types.cipher.EncryptedCipher
 import dev.medzik.librepass.types.cipher.data.CipherLoginData
-import dev.medzik.librepass.utils.fromHexString
+import dev.medzik.librepass.utils.fromHex
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
@@ -47,7 +47,7 @@ class UserClientTests {
         val credentials = authClient.login(EMAIL, PASSWORD)
 
         userId = credentials.userId
-        aesKey = credentials.aesKey.fromHexString()
+        aesKey = credentials.aesKey.fromHex()
 
         userClient = UserClient(EMAIL, credentials.apiKey, API_URL)
         cipherClient = CipherClient(credentials.apiKey, API_URL)
@@ -96,7 +96,7 @@ class UserClientTests {
         var credentials = authClient.login(newEmail, PASSWORD)
         userClient = UserClient(newEmail, credentials.apiKey, API_URL)
         cipherClient = CipherClient(credentials.apiKey, API_URL)
-        aesKey = credentials.aesKey.fromHexString()
+        aesKey = credentials.aesKey.fromHex()
 
         checkCipher(aesKey)
 
@@ -113,7 +113,7 @@ class UserClientTests {
         credentials = authClient.login(EMAIL, PASSWORD)
         userClient = UserClient(EMAIL, credentials.apiKey, API_URL)
         cipherClient = CipherClient(credentials.apiKey, API_URL)
-        aesKey = credentials.aesKey.fromHexString()
+        aesKey = credentials.aesKey.fromHex()
 
         checkCipher(aesKey)
     }
@@ -159,7 +159,7 @@ class UserClientTests {
         var credentials = authClient.login(EMAIL, "test2")
         userClient = UserClient(EMAIL, credentials.apiKey, API_URL)
         cipherClient = CipherClient(credentials.apiKey, API_URL)
-        aesKey = credentials.aesKey.fromHexString()
+        aesKey = credentials.aesKey.fromHex()
 
         checkCipher(aesKey)
 
@@ -176,7 +176,7 @@ class UserClientTests {
         credentials = authClient.login(EMAIL, PASSWORD)
         userClient = UserClient(EMAIL, credentials.apiKey, API_URL)
         cipherClient = CipherClient(credentials.apiKey, API_URL)
-        aesKey = credentials.aesKey.fromHexString()
+        aesKey = credentials.aesKey.fromHex()
 
         checkCipher(aesKey)
     }

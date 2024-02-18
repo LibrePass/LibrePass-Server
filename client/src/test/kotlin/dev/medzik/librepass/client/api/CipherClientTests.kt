@@ -3,7 +3,7 @@ package dev.medzik.librepass.client.api
 import dev.medzik.librepass.types.cipher.Cipher
 import dev.medzik.librepass.types.cipher.CipherType
 import dev.medzik.librepass.types.cipher.data.CipherLoginData
-import dev.medzik.librepass.utils.fromHexString
+import dev.medzik.librepass.utils.fromHex
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -48,7 +48,7 @@ class CipherClientTests {
 
         cipherClient = CipherClient(credentials.apiKey, API_URL)
         userId = credentials.userId
-        aesKey = credentials.aesKey.fromHexString()
+        aesKey = credentials.aesKey.fromHex()
     }
 
     private lateinit var cipherId: UUID

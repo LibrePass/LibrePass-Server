@@ -13,8 +13,8 @@ import dev.medzik.librepass.types.api.*
 import dev.medzik.librepass.utils.Cryptography.computeAesKey
 import dev.medzik.librepass.utils.Cryptography.computePasswordHash
 import dev.medzik.librepass.utils.Cryptography.computeSharedKey
-import dev.medzik.librepass.utils.fromHexString
-import dev.medzik.librepass.utils.toHexString
+import dev.medzik.librepass.utils.fromHex
+import dev.medzik.librepass.utils.toHex
 
 /**
  * User Client for manage user settings.
@@ -57,7 +57,7 @@ class UserClient(
         val newPublicKey = X25519.publicFromPrivate(newPasswordHash.hash)
 
         // get server public key
-        val serverPublicKey = preLogin.serverPublicKey.fromHexString()
+        val serverPublicKey = preLogin.serverPublicKey.fromHex()
 
         // compute shared key with an old private key and server public key
         val oldSharedKey = computeSharedKey(oldPasswordHash.hash, serverPublicKey)
@@ -74,10 +74,10 @@ class UserClient(
         val request =
             ChangeEmailRequest(
                 newEmail = newEmail,
-                oldSharedKey = oldSharedKey.toHexString(),
-                newSharedKey = newSharedKey.toHexString(),
+                oldSharedKey = oldSharedKey.toHex(),
+                newSharedKey = newSharedKey.toHex(),
                 // X25519 public key
-                newPublicKey = newPublicKey.toHexString(),
+                newPublicKey = newPublicKey.toHex(),
                 // ciphers data re-encrypted with new password
                 ciphers = ciphers
             )
@@ -123,7 +123,7 @@ class UserClient(
         val newPublicKey = X25519.publicFromPrivate(newPasswordHash.hash)
 
         // get server public key
-        val serverPublicKey = oldPreLogin.serverPublicKey.fromHexString()
+        val serverPublicKey = oldPreLogin.serverPublicKey.fromHex()
 
         // compute shared key with an old private key and server public key
         val oldSharedKey = computeSharedKey(oldPasswordHash.hash, serverPublicKey)
@@ -139,15 +139,15 @@ class UserClient(
 
         val request =
             ChangePasswordRequest(
-                oldSharedKey = oldSharedKey.toHexString(),
+                oldSharedKey = oldSharedKey.toHex(),
                 newPasswordHint = newPasswordHint,
-                newSharedKey = newSharedKey.toHexString(),
+                newSharedKey = newSharedKey.toHex(),
                 // Argon2id parameters
                 parallelism = newPasswordHash.parallelism,
                 memory = newPasswordHash.memory,
                 iterations = newPasswordHash.iterations,
                 // X25519 public key
-                newPublicKey = newPublicKey.toHexString(),
+                newPublicKey = newPublicKey.toHex(),
                 // ciphers data re-encrypted with new password
                 ciphers = ciphers
             )
@@ -210,12 +210,12 @@ class UserClient(
                 argon2Function = preLogin.toArgon2()
             )
 
-        val serverPublicKey = preLogin.serverPublicKey.fromHexString()
+        val serverPublicKey = preLogin.serverPublicKey.fromHex()
         val sharedKey = computeSharedKey(passwordHash.hash, serverPublicKey)
 
         val request =
             SetupTwoFactorRequest(
-                sharedKey = sharedKey.toHexString(),
+                sharedKey = sharedKey.toHex(),
                 secret = secret,
                 code = code
             )
@@ -242,12 +242,12 @@ class UserClient(
                 argon2Function = preLogin.toArgon2()
             )
 
-        val serverPublicKey = preLogin.serverPublicKey.fromHexString()
+        val serverPublicKey = preLogin.serverPublicKey.fromHex()
         val sharedKey = computeSharedKey(passwordHash.hash, serverPublicKey)
 
         val request =
             DeleteAccountRequest(
-                sharedKey = sharedKey.toHexString(),
+                sharedKey = sharedKey.toHex(),
                 code = tfaCode
             )
 

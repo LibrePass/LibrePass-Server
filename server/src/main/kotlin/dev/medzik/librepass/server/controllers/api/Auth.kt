@@ -18,7 +18,7 @@ import dev.medzik.librepass.server.utils.ResponseHandler
 import dev.medzik.librepass.server.utils.Validator.validateSharedKey
 import dev.medzik.librepass.types.api.*
 import dev.medzik.librepass.utils.TOTP
-import dev.medzik.librepass.utils.toHexString
+import dev.medzik.librepass.utils.toHex
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
@@ -40,7 +40,6 @@ import java.util.*
 // the key is different.
 val ServerPrivateKey: ByteArray = X25519.generatePrivateKey()
 val ServerPublicKey: ByteArray = X25519.publicFromPrivate(ServerPrivateKey)
-
 @RestController
 @RequestMapping("/api/auth")
 class AuthController
@@ -121,7 +120,7 @@ class AuthController
                         memory = 65536,
                         iterations = 4,
                         // Server X5519 public key
-                        serverPublicKey = ServerPublicKey.toHexString()
+                        serverPublicKey = ServerPublicKey.toHex()
                     )
                 )
             }
@@ -141,7 +140,7 @@ class AuthController
                     memory = user.memory,
                     iterations = user.iterations,
                     // Server X25519 public key
-                    serverPublicKey = ServerPublicKey.toHexString()
+                    serverPublicKey = ServerPublicKey.toHex()
                 )
             )
         }
