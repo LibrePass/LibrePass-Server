@@ -1,3 +1,3 @@
 package dev.medzik.librepass.errors
 
-class RateLimitException : LibrePassException(LibrePassExceptions.RateLimit)
+class RateLimitException : BaseException(ServerError.RateLimit)
