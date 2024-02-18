@@ -1,3 +1,3 @@
 package dev.medzik.librepass.errors
 
-class EmailInvalidCodeException : LibrePassException(LibrePassExceptions.EmailInvalidCode)
+class EmailInvalidCodeException : BaseException(ServerError.EmailInvalidCode)

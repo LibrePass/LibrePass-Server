@@ -1,3 +1,3 @@
 package dev.medzik.librepass.errors
 
-class UserNotFoundException : LibrePassException(LibrePassExceptions.UserNotFound)
+class UserNotFoundException : BaseException(ServerError.UserNotFound)

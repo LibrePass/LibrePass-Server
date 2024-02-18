@@ -1,3 +1,3 @@
 package dev.medzik.librepass.errors
 
-class InvalidTokenException : LibrePassException(LibrePassExceptions.InvalidToken)
+class InvalidTokenException : BaseException(ServerError.InvalidToken)
