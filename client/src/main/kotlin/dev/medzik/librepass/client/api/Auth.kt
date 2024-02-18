@@ -11,8 +11,8 @@ import dev.medzik.librepass.types.api.*
 import dev.medzik.librepass.utils.Cryptography.computeAesKey
 import dev.medzik.librepass.utils.Cryptography.computePasswordHash
 import dev.medzik.librepass.utils.Cryptography.computeSharedKey
-import dev.medzik.librepass.utils.fromHexString
-import dev.medzik.librepass.utils.toHexString
+import dev.medzik.librepass.utils.fromHex
+import dev.medzik.librepass.utils.toHex
 import java.util.*
 
 /**
@@ -48,8 +48,8 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
         val privateKey = passwordArgon2Hash.hash
         val publicKey = X25519.publicFromPrivate(privateKey)
 
-        val serverPublicKey = serverPreLogin.serverPublicKey.fromHexString()
-        val sharedKey = computeSharedKey(privateKey, serverPublicKey).toHexString()
+        val serverPublicKey = serverPreLogin.serverPublicKey.fromHex()
+        val sharedKey = computeSharedKey(privateKey, serverPublicKey).toHex()
 
         val request =
             RegisterRequest(
@@ -59,7 +59,7 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
                 parallelism = passwordArgon2Hash.parallelism,
                 memory = passwordArgon2Hash.memory,
                 iterations = passwordArgon2Hash.iterations,
-                publicKey = publicKey.toHexString()
+                publicKey = publicKey.toHex()
             )
 
         client.post("$API_ENDPOINT/register", JsonUtils.serialize(request))
@@ -118,12 +118,12 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
         val serverPublicKey = preLogin?.serverPublicKey ?: preLogin(email).serverPublicKey
         val privateKey = passwordHash.hash
         val publicKey = X25519.publicFromPrivate(privateKey)
-        val sharedKey = computeSharedKey(privateKey, serverPublicKey.fromHexString())
+        val sharedKey = computeSharedKey(privateKey, serverPublicKey.fromHex())
 
         val request =
             LoginRequest(
                 email = email,
-                sharedKey = sharedKey.toHexString(),
+                sharedKey = sharedKey.toHex(),
             )
 
         val responseBody = client.post("$API_ENDPOINT/oauth?grantType=login", JsonUtils.serialize(request))
@@ -134,9 +134,9 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
             userId = userCredentialsResponse.userId,
             apiKey = userCredentialsResponse.apiKey,
             apiKeyVerified = userCredentialsResponse.verified,
-            publicKey = publicKey.toHexString(),
-            privateKey = privateKey.toHexString(),
-            aesKey = aesKey.toHexString()
+            publicKey = publicKey.toHex(),
+            privateKey = privateKey.toHex(),
+            aesKey = aesKey.toHex()
         )
     }
 

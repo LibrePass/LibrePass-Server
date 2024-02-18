@@ -1,7 +1,7 @@
 package dev.medzik.librepass.server.database
 
 import dev.medzik.libcrypto.Random
-import dev.medzik.librepass.utils.toHexString
+import dev.medzik.librepass.utils.toHex
 import jakarta.persistence.*
 import org.hibernate.annotations.CreationTimestamp
 import java.util.*
@@ -21,6 +21,6 @@ data class TokenTable(
     val lastUsed: Date = Date()
 ) {
     companion object {
-        fun generateToken() = "lp_" + Random.randBytes(32).toHexString()
+        fun generateToken() = "lp_" + Random.randBytes(32).toHex()
     }
 }
