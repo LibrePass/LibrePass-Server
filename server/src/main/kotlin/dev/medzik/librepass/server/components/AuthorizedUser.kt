@@ -58,7 +58,7 @@ class AuthorizedUserArgumentResolver
                 userRepository
                     .findById(tokenTable.owner)
                     .orElse(null)
-                    ?: throw InvalidTokenException()
+                    ?: throw IllegalStateException()
 
             // check if user changed password after the token was created
             if (user.lastPasswordChange > tokenTable.created)
