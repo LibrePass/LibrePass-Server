@@ -13,7 +13,9 @@ import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseHandler
 import dev.medzik.librepass.server.utils.Validator.validateSharedKey
 import dev.medzik.librepass.types.api.*
-import dev.medzik.librepass.utils.TOTP
+import dev.medzik.otp.OTPParameters
+import dev.medzik.otp.OTPType
+import dev.medzik.otp.TOTPGenerator
 import jakarta.validation.Valid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -224,7 +226,14 @@ class UserController
             if (!validateSharedKey(user, request.sharedKey))
                 throw InvalidSharedKeyException()
 
-            if (request.code != TOTP.getTOTPCode(request.secret))
+            val totpParameters =
+                OTPParameters.builder()
+                    .type(OTPType.TOTP)
+                    .secret(OTPParameters.Secret(request.secret))
+                    .label(OTPParameters.Label(""))
+                    .build()
+
+            if (!TOTPGenerator.verify(totpParameters, request.code))
                 throw InvalidTwoFactorException()
 
             val recoveryCode = UUID.randomUUID().toString()
@@ -249,8 +258,20 @@ class UserController
             if (!validateSharedKey(user, request.sharedKey))
                 throw InvalidSharedKeyException()
 
-            if (user.twoFactorEnabled && request.code != TOTP.getTOTPCode(user.twoFactorSecret!!))
-                throw InvalidTwoFactorException()
+            if (user.twoFactorEnabled) {
+                if (request.code.isNullOrBlank())
+                    throw InvalidTwoFactorException()
+
+                val totpParameters =
+                    OTPParameters.builder()
+                        .type(OTPType.TOTP)
+                        .secret(OTPParameters.Secret(user.twoFactorSecret))
+                        .label(OTPParameters.Label(""))
+                        .build()
+
+                if (!TOTPGenerator.verify(totpParameters, request.code))
+                    throw InvalidTwoFactorException()
+            }
 
             collectionRepository.deleteAllByOwner(user.id)
             cipherRepository.deleteAllByOwner(user.id)
