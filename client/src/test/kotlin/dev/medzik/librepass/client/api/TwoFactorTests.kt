@@ -1,6 +1,8 @@
 package dev.medzik.librepass.client.api
 
-import dev.medzik.librepass.utils.TOTP
+import dev.medzik.otp.OTPParameters
+import dev.medzik.otp.OTPType
+import dev.medzik.otp.TOTPGenerator
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
@@ -13,7 +15,13 @@ class TwoFactorTests {
         private const val EMAIL = "_test_2fa@example.com"
         private const val PASSWORD = "_test_2fa@example.com"
 
-        private val twoFactorSecret = TOTP.generateSecretKey()
+        private val twoFactorSecret = OTPParameters.Secret.generate().encoded
+        private val otpParameters =
+            OTPParameters.builder()
+                .type(OTPType.TOTP)
+                .secret(OTPParameters.Secret(twoFactorSecret))
+                .issuer(OTPParameters.Issuer(""))
+                .build()
 
         @BeforeAll
         @JvmStatic
@@ -24,7 +32,7 @@ class TwoFactorTests {
 
             // setup 2fa
             val auth = authClient.login(EMAIL, PASSWORD)
-            val code = TOTP.getTOTPCode(twoFactorSecret)
+            val code = TOTPGenerator.now(otpParameters)
             UserClient(EMAIL, auth.apiKey, API_URL).setupTwoFactor(PASSWORD, twoFactorSecret, code)
         }
 
@@ -33,7 +41,7 @@ class TwoFactorTests {
         fun delete() {
             val credentials = authClient.login(EMAIL, PASSWORD)
 
-            val code = TOTP.getTOTPCode(twoFactorSecret)
+            val code = TOTPGenerator.now(otpParameters)
             authClient.loginTwoFactor(credentials.apiKey, code)
 
             UserClient(EMAIL, credentials.apiKey, API_URL).deleteAccount(PASSWORD, code)
@@ -48,7 +56,7 @@ class TwoFactorTests {
 
         Thread.sleep(30 * 1000)
 
-        val code = TOTP.getTOTPCode(twoFactorSecret)
+        val code = TOTPGenerator.now(otpParameters)
 
         Thread.sleep(5 * 1000)
 
