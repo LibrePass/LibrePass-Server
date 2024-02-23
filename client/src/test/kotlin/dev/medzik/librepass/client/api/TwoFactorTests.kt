@@ -20,7 +20,7 @@ class TwoFactorTests {
             OTPParameters.builder()
                 .type(OTPType.TOTP)
                 .secret(OTPParameters.Secret(twoFactorSecret))
-                .issuer(OTPParameters.Issuer(""))
+                .label(OTPParameters.Label(""))
                 .build()
 
         @BeforeAll
