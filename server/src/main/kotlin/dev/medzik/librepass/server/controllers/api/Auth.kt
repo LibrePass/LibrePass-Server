@@ -13,6 +13,7 @@ import dev.medzik.librepass.server.ratelimit.AuthControllerEmailRateLimitConfig
 import dev.medzik.librepass.server.ratelimit.AuthControllerRateLimitConfig
 import dev.medzik.librepass.server.ratelimit.BaseRateLimitConfig
 import dev.medzik.librepass.server.services.EmailService
+import dev.medzik.librepass.server.utils.LOOM
 import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseHandler
 import dev.medzik.librepass.server.utils.Validator.validateSharedKey
@@ -61,7 +62,7 @@ class AuthController
         private val logger = LoggerFactory.getLogger(this::class.java)
         private val rateLimit = AuthControllerRateLimitConfig()
         private val rateLimitEmail = AuthControllerEmailRateLimitConfig()
-        private val coroutineScope = CoroutineScope(Dispatchers.IO)
+        private val coroutineScope = CoroutineScope(Dispatchers.LOOM)
 
         @PostMapping("/register")
         fun register(
@@ -260,7 +261,7 @@ class AuthController
             )
                 throw InvalidTwoFactorException()
 
-            coroutineScope.launch(Dispatchers.IO) {
+            coroutineScope.launch {
                 emailService.sendNewLogin(
                     to = user.email,
                     ip = ip
