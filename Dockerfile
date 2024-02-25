@@ -1,23 +1,23 @@
-FROM eclipse-temurin:21-jdk as build
+FROM maven:latest as build
 
-WORKDIR /workspace/app
+WORKDIR /workspace/build
 
-COPY . .
+ADD pom.xml /workspace/build
+ADD client/pom.xml /workspace/build/client/pom.xml
+ADD server/pom.xml /workspace/build/server/pom.xml
+ADD shared/pom.xml /workspace/build/shared/pom.xml
 
-RUN ./mvnw install -DskipTests -Dgpg.skip=true
-RUN rm -r server/target/server-*-sources.jar
-RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../../server/target/*.jar)
+RUN mvn dependency:go-offline
+
+ADD . /workspace/build
+
+RUN mvn install -DskipTests -Dgpg.skip=true
+RUN cp server/target/server-*.jar /workspace/server.jar
 
 FROM eclipse-temurin:21-jre
 
-VOLUME /tmp
-
-ARG DEPENDENCY=/workspace/app/target/dependency
-
-COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
-COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
-COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
-
 WORKDIR /app
 
-ENTRYPOINT ["java", "-cp", ".:lib/*", "dev.medzik.librepass.server.ServerApplicationKt"]
+COPY --from=build /workspace/server.jar /app
+
+ENTRYPOINT ["java", "-jar", "/app/server.jar"]
