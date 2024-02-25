@@ -17,6 +17,8 @@
 
         <spring-boot.version>3.2.2</spring-boot.version>
         <spring-dotenv.version>4.0.0</spring-dotenv.version>
+
+        <maven.source.skip>true</maven.source.skip>
     </properties>
 
     <dependencyManagement>
