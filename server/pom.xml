@@ -106,6 +106,13 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Two-Factor Authentication -->
+        <dependency>
+            <groupId>dev.medzik</groupId>
+            <artifactId>otp</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
         <!-- LibrePass Shared -->
         <dependency>
             <groupId>dev.medzik.librepass</groupId>

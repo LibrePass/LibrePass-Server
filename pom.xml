@@ -79,13 +79,6 @@
             <version>1.2.0</version>
         </dependency>
 
-        <!-- Two-Factor Authentication -->
-        <dependency>
-            <groupId>dev.medzik</groupId>
-            <artifactId>otp</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-
         <!-- Gson -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
