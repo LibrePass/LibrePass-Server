@@ -2,7 +2,6 @@ module dev.medzik.librepass.shared {
     requires dev.medzik.libcrypto;
     requires com.google.gson;
     requires kotlin.stdlib;
-    requires org.apache.commons.codec;
 
     exports dev.medzik.librepass.errors;
 
