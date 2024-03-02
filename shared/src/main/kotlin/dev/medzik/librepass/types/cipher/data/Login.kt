@@ -9,6 +9,7 @@ import java.util.*
  *
  * @property name The name of the cipher.
  * @property username The login username.
+ * @property email The email address.
  * @property password The login password.
  * @property passwordHistory The history of passwords.
  * @property uris The list of uris.
@@ -19,6 +20,7 @@ import java.util.*
 data class CipherLoginData(
     val name: String,
     val username: String? = null,
+    val email: String? = null,
     val password: String? = null,
     val passwordHistory: List<PasswordHistory>? = null,
     val uris: List<String>? = null,
