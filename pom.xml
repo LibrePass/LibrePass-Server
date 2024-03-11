@@ -46,7 +46,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
-        <kotlin.version>1.9.22</kotlin.version>
+        <kotlin.version>1.9.23</kotlin.version>
         <coroutines.version>1.8.0</coroutines.version>
 
         <junit.jupiter.version>5.10.2</junit.jupiter.version>
