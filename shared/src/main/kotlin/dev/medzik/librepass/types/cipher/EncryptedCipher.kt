@@ -1,6 +1,5 @@
 package dev.medzik.librepass.types.cipher
 
-import com.google.gson.Gson
 import com.google.gson.annotations.JsonAdapter
 import dev.medzik.librepass.EncryptedString
 import dev.medzik.librepass.decrypt
@@ -59,15 +58,6 @@ data class EncryptedCipher(
         lastModified = cipher.lastModified
     )
 
-    companion object {
-        /** Creates a new [EncryptedCipher] object from the JSON string. */
-        @JvmStatic
-        fun from(cipher: String): EncryptedCipher = Gson().fromJson(cipher, EncryptedCipher::class.java)
-    }
-
     /** Decrypts the cipher data. */
     fun decryptData(aesKey: ByteArray): String = protectedData.decrypt(aesKey)
-
-    /** Converts the cipher to a JSON string. */
-    fun toJson(): String = Gson().toJson(this)
 }

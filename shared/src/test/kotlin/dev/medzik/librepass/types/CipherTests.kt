@@ -1,5 +1,6 @@
 package dev.medzik.librepass.types
 
+import com.google.gson.Gson
 import dev.medzik.librepass.types.cipher.Cipher
 import dev.medzik.librepass.types.cipher.CipherType
 import dev.medzik.librepass.types.cipher.EncryptedCipher
@@ -79,15 +80,16 @@ class CipherTests {
     @Test
     fun `encrypt cipher to json`() {
         val encryptedCipher = EncryptedCipher(cipher, aesKey)
-        val cipherJson = encryptedCipher.toJson()
+        val cipherJson = Gson().toJson(encryptedCipher)
 
         assert(cipherJson.isNotEmpty())
     }
 
     @Test
     fun `encrypt and decrypt cipher from json`() {
-        val cipherJson = EncryptedCipher(cipher, aesKey).toJson()
-        val encryptedCipher = EncryptedCipher.from(cipherJson)
+        val gson = Gson()
+        val cipherJson = gson.toJson(EncryptedCipher(cipher, aesKey))
+        val encryptedCipher = gson.fromJson(cipherJson, EncryptedCipher::class.java)
         val decryptedCipher = Cipher(encryptedCipher, aesKey)
 
         assertEquals(cipher.id, decryptedCipher.id)
