@@ -66,7 +66,7 @@ class CipherClient(
      */
     @Throws(ClientException::class, ApiException::class)
     fun save(cipher: EncryptedCipher): CipherIdResponse {
-        val response = client.put(API_ENDPOINT, cipher.toJson())
+        val response = client.put(API_ENDPOINT, JsonUtils.serialize(cipher))
         return JsonUtils.deserialize(response)
     }
 
