@@ -18,7 +18,7 @@ import java.util.*
 /**
  * Auth Client for authenticating users with the LibrePass API.
  *
- * @param apiUrl The API url address (default official production server)
+ * @param apiUrl The API url address (default: official production server)
  */
 class AuthClient(apiUrl: String = Server.PRODUCTION) {
     companion object {
