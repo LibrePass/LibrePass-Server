@@ -30,6 +30,7 @@ class CipherClient(
          * @param domain The website domain.
          * @return URL to the favicon image.
          */
+        @Suppress("unused")
         fun getFavicon(
             apiUrl: String = Server.PRODUCTION,
             domain: String
