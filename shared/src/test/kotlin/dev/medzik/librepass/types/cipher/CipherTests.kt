@@ -1,9 +1,6 @@
-package dev.medzik.librepass.types
+package dev.medzik.librepass.types.cipher
 
 import com.google.gson.Gson
-import dev.medzik.librepass.types.cipher.Cipher
-import dev.medzik.librepass.types.cipher.CipherType
-import dev.medzik.librepass.types.cipher.EncryptedCipher
 import dev.medzik.librepass.types.cipher.data.CipherField
 import dev.medzik.librepass.types.cipher.data.CipherFieldType
 import dev.medzik.librepass.types.cipher.data.CipherLoginData
