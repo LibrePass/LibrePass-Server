@@ -59,5 +59,5 @@ data class EncryptedCipher(
     )
 
     /** Decrypts the cipher data. */
-    fun decryptData(aesKey: ByteArray): String = protectedData.decrypt(aesKey)
+    internal fun decryptData(aesKey: ByteArray): String = protectedData.decrypt(aesKey)
 }
