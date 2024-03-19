@@ -103,7 +103,7 @@ class CipherClientTests {
 
         val encryptedCipher = cipherClient.get(cipherId)
         val cipher = Cipher(encryptedCipher, aesKey)
-        assertEquals(0, cipher.type)
+        assertEquals(CipherType.Login, cipher.type)
         val beforeUpdate = cipherClient.get(cipherId)
 
         // wait 1 second to make the date different
