@@ -30,8 +30,10 @@ data class EncryptedCipher(
     val favorite: Boolean = false,
     val rePrompt: Boolean = false,
     val version: Int = 1,
+    // TODO: remove null after some time when users updates application
     @JsonAdapter(DateAdapter::class)
     val created: Date? = null,
+    // TODO: the same as above
     @JsonAdapter(DateAdapter::class)
     val lastModified: Date? = null
 ) {

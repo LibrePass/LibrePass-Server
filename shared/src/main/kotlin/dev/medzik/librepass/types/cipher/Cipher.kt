@@ -35,8 +35,8 @@ data class Cipher(
     val favorite: Boolean = false,
     val rePrompt: Boolean = false,
     val version: Int = 1,
-    val created: Date? = null,
-    val lastModified: Date? = null
+    val created: Date = Date(),
+    val lastModified: Date = Date()
 ) {
     init {
         if (type == CipherType.Login && loginData == null)
@@ -73,8 +73,10 @@ data class Cipher(
         favorite = encryptedCipher.favorite,
         rePrompt = encryptedCipher.rePrompt,
         version = encryptedCipher.version,
-        created = encryptedCipher.created,
-        lastModified = encryptedCipher.lastModified
+        // TODO: remove null after some time when users updates application
+        created = encryptedCipher.created ?: Date(),
+        // TODO: the same as above
+        lastModified = encryptedCipher.lastModified ?: Date()
     )
 
     /** Encrypts the cipher data. */
