@@ -13,9 +13,9 @@ import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 /** Version of the LibrePass API Client library. */
-const val VERSION = "1.4.1"
+const val CLIENT_VERSION = "1.5.0"
 
-/** Supported API version. */
+/** Supported version of the API. */
 const val API_VERSION = "1"
 
 /** LibrePass API Servers */
@@ -172,7 +172,7 @@ class Client(
             addHeader("Authorization", "Bearer $accessToken")
         }
 
-        addHeader("X-Client", "Java/$VERSION")
+        addHeader("X-Client", "Java/$CLIENT_VERSION")
         addHeader("X-API", API_VERSION)
 
         return this
