@@ -106,7 +106,7 @@ data class Cipher(
     companion object {
         private fun currentUnixSeconds(): Long = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis())
 
-        internal fun currentFixedDate(): Date = Date(TimeUnit.SECONDS.toMillis(currentUnixSeconds()))
+        fun currentFixedDate(): Date = Date(TimeUnit.SECONDS.toMillis(currentUnixSeconds()))
 
         /** Decrypts the data of the [EncryptedCipher] if the type matches. */
         private inline fun <reified T> decryptData(
