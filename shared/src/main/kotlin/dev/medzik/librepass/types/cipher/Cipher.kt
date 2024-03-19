@@ -7,6 +7,7 @@ import dev.medzik.librepass.types.cipher.data.CipherCardData
 import dev.medzik.librepass.types.cipher.data.CipherLoginData
 import dev.medzik.librepass.types.cipher.data.CipherSecureNoteData
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 /**
  * Cipher is a representation of a single cipher entry.
@@ -35,8 +36,8 @@ data class Cipher(
     val favorite: Boolean = false,
     val rePrompt: Boolean = false,
     val version: Int = 1,
-    val created: Date = Date(),
-    val lastModified: Date = Date()
+    val created: Date = currentFixedDate(),
+    val lastModified: Date = currentFixedDate()
 ) {
     init {
         if (type == CipherType.Login && loginData == null)
@@ -74,9 +75,9 @@ data class Cipher(
         rePrompt = encryptedCipher.rePrompt,
         version = encryptedCipher.version,
         // TODO: remove null after some time when users updates application
-        created = encryptedCipher.created ?: Date(),
+        created = encryptedCipher.created ?: currentFixedDate(),
         // TODO: the same as above
-        lastModified = encryptedCipher.lastModified ?: Date()
+        lastModified = encryptedCipher.lastModified ?: currentFixedDate()
     )
 
     /** Encrypts the cipher data. */
@@ -93,7 +94,20 @@ data class Cipher(
         return cipherText.encrypt(aesKey)
     }
 
+    /**
+     * Clones the cipher and sets the [lastModified] property to the current time.
+     *
+     * @return A new [Cipher] object with the same properties as the original, except for the [lastModified] property.
+     */
+    fun withUpdatedLastModified(): Cipher {
+        return copy(lastModified = currentFixedDate())
+    }
+
     companion object {
+        private fun currentUnixSeconds(): Long = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis())
+
+        internal fun currentFixedDate(): Date = Date(TimeUnit.SECONDS.toMillis(currentUnixSeconds()))
+
         /** Decrypts the data of the [EncryptedCipher] if the type matches. */
         private inline fun <reified T> decryptData(
             type: CipherType,
