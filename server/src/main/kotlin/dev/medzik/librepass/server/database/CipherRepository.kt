@@ -10,23 +10,23 @@ import java.util.*
 /** Repository for the [CipherTable]. */
 interface CipherRepository : CrudRepository<CipherTable, UUID> {
     /**
-     * Get a list of all ciphers owned by the user.
-     *
-     * @param owner The user identifier.
-     * @return A list of all ciphers owned by the user.
+     * Get a list of all ciphers owned by the [user].
      */
-    @Query("SELECT c FROM #{#entityName} c WHERE c.owner = :owner ORDER BY c.lastModified DESC")
-    fun getAll(
-        @Param("owner") owner: UUID
+    fun getAllByOwner(user: UUID): List<CipherTable>
+
+    /**
+     * Get a list of all cipher owned by the [user] that has been updated after the given [date].
+     */
+    @Query("SELECT c FROM CipherTable c WHERE c.owner = :user AND c.lastServerSync >= :date")
+    fun getAllByOwnerAndLastServerSync(
+        user: UUID,
+        date: Date
     ): List<CipherTable>
 
     /**
-     * Get a number of ciphers owned by the user.
-     *
-     * @param owner The user identifier.
-     * @return A number of ciphers owned by the user.
+     * Get a number of ciphers owned by the [user].
      */
-    fun countByOwner(owner: UUID): Long
+    fun countByOwner(user: UUID): Long
 
     /**
      * Check if a cipher exists and is owned by the user.
@@ -40,14 +40,13 @@ interface CipherRepository : CrudRepository<CipherTable, UUID> {
     ): Boolean
 
     /**
-     * Get all user cipher ids.
+     * Get all cipher ids owned by the [user].
      *
-     * @param owner The user identifier.
-     * @return A list of all user cipher IDs.
+     * @return A IDs list of all cipher owned by the user.
      */
-    @Query("SELECT c.id FROM #{#entityName} c WHERE c.owner = :owner")
-    fun getAllIds(
-        @Param("owner") owner: UUID
+    @Query("SELECT c.id FROM #{#entityName} c WHERE c.owner = :user")
+    fun getAllIDs(
+        @Param("user") user: UUID
     ): List<UUID>
 
     /**
@@ -65,11 +64,9 @@ interface CipherRepository : CrudRepository<CipherTable, UUID> {
     )
 
     /**
-     * Delete all tokens owned by the user.
-     *
-     * @param owner The user identifier.
+     * Delete all tokens owned by the [user].
      */
     @Transactional
     @Modifying
-    fun deleteAllByOwner(owner: UUID)
+    fun deleteAllByOwner(user: UUID)
 }

@@ -208,7 +208,7 @@ class UserController
                 throw InvalidSharedKeyException()
 
             // get all user cipher ids
-            val cipherIds = cipherRepository.getAllIds(user.id)
+            val cipherIds = cipherRepository.getAllIDs(user.id)
 
             // check if all ciphers are present
             // by the way checks if they are owned by the user
