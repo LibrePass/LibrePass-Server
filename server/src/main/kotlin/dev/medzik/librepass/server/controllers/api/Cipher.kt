@@ -23,6 +23,7 @@ import org.springframework.http.*
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.client.RestTemplate
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 @RestController
 @RequestMapping("/api/cipher")
@@ -72,7 +73,7 @@ class CipherController
         ): Response {
             consumeRateLimit(user.id.toString())
 
-            val ciphers = cipherRepository.getAll(owner = user.id)
+            val ciphers = cipherRepository.getAllByOwner(user.id)
 
             // convert cipher table to encrypted ciphers
             val response = ciphers.map { it.toEncryptedCipher() }
@@ -87,20 +88,21 @@ class CipherController
         ): Response {
             consumeRateLimit(user.id.toString())
 
-            // convert timestamp to date
-            val lastSyncDate = Date(lastSyncUnixTimestamp * 1000)
+            val cipherIDs = cipherRepository.getAllIDs(user.id)
 
-            val ciphers = cipherRepository.getAll(owner = user.id)
+            val ciphers =
+                cipherRepository.getAllByOwnerAndLastServerSync(
+                    user = user.id,
+                    date = Date(TimeUnit.SECONDS.toMillis(lastSyncUnixTimestamp))
+                )
 
             val syncResponse =
                 SyncResponse(
                     // get ids of all ciphers
-                    ids = ciphers.map { it.id },
+                    ids = cipherIDs,
                     // get all ciphers that were updated after timestamp
                     ciphers =
                         ciphers
-                            // get all ciphers that were updated after timestamp
-                            .filter { it.lastModified.after(lastSyncDate) }
                             // convert to encrypted ciphers
                             .map { it.toEncryptedCipher() }
                 )

@@ -9,9 +9,7 @@ import java.util.*
 /** Repository for the [UserTable]. */
 interface UserRepository : CrudRepository<UserTable, UUID> {
     /**
-     * Find user by email.
-     *
-     * @param email The email address of the user.
+     * Find user by [email].
      */
     fun findByEmail(email: String): UserTable?
 
