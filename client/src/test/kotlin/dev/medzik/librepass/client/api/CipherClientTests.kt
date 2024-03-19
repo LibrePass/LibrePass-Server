@@ -3,6 +3,7 @@ package dev.medzik.librepass.client.api
 import dev.medzik.librepass.types.cipher.Cipher
 import dev.medzik.librepass.types.cipher.CipherType
 import dev.medzik.librepass.types.cipher.data.CipherLoginData
+import dev.medzik.librepass.types.cipher.data.CipherSecureNoteData
 import dev.medzik.librepass.utils.fromHex
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -109,7 +110,16 @@ class CipherClientTests {
         // wait 1 second to make the date different
         Thread.sleep(1000)
 
-        val newCipher = cipher.copy(type = CipherType.SecureNote)
+        val newCipher =
+            cipher.copy(
+                type = CipherType.SecureNote,
+                loginData = null,
+                secureNoteData =
+                    CipherSecureNoteData(
+                        title = "test_cipher",
+                        note = "test"
+                    )
+            )
         cipherClient.save(newCipher.withUpdatedLastModified(), aesKey)
 
         val updatedCipher = cipherClient.get(cipherId)
