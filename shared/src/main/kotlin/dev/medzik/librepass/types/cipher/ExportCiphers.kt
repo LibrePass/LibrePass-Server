@@ -23,7 +23,10 @@ object ExportCiphers {
      * @return The JSON string representation of the list of [EncryptedCipher]s.
      */
     @JvmStatic
-    fun export(ciphers: List<Cipher>, aesKey: ByteArray): String {
+    fun export(
+        ciphers: List<Cipher>,
+        aesKey: ByteArray
+    ): String {
         val encryptedCiphers = mutableListOf<EncryptedCipher>()
 
         for (cipher in ciphers) {
@@ -52,7 +55,10 @@ object ExportCiphers {
      * @return The list of [Cipher]s represented by the JSON string.
      */
     @JvmStatic
-    fun import(json: String, aesKey: ByteArray): List<Cipher> {
+    fun import(
+        json: String,
+        aesKey: ByteArray
+    ): List<Cipher> {
         return import(json).map {
             Cipher(it, aesKey)
         }
