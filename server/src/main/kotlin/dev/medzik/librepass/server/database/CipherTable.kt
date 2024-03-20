@@ -37,7 +37,6 @@ data class CipherTable(
         favorite = cipher.favorite,
         collection = cipher.collection,
         rePrompt = cipher.rePrompt,
-        version = cipher.version,
         created = cipher.created ?: currentFixedDate(),
         lastModified = cipher.lastModified ?: currentFixedDate()
     )
@@ -52,7 +51,6 @@ data class CipherTable(
             favorite = favorite,
             collection = collection,
             rePrompt = rePrompt,
-            version = version,
             created = created,
             lastModified = lastModified
         )
