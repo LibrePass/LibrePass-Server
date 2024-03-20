@@ -1,9 +1,9 @@
 package dev.medzik.librepass.types.cipher
 
 import com.google.gson.annotations.JsonAdapter
-import dev.medzik.librepass.EncryptedString
-import dev.medzik.librepass.decrypt
 import dev.medzik.librepass.types.adapters.DateAdapter
+import dev.medzik.librepass.utils.EncryptedString
+import dev.medzik.librepass.utils.decrypt
 import java.util.*
 
 /**
