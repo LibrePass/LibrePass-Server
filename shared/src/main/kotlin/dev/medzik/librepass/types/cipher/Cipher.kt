@@ -21,7 +21,6 @@ import java.util.concurrent.TimeUnit
  * @property collection The identifier of collection,
  * @property favorite Whether the cipher is a favorite cipher.
  * @property rePrompt Whether the cipher should be re-prompted. (Only UI feature)
- * @property version The version of the cipher object. (the current version is 1)
  * @property created The date when the cipher was created.
  * @property lastModified The date when the cipher was last modified.
  */
@@ -35,7 +34,6 @@ data class Cipher(
     val collection: UUID? = null,
     val favorite: Boolean = false,
     val rePrompt: Boolean = false,
-    val version: Int = 1,
     val created: Date = currentFixedDate(),
     val lastModified: Date = currentFixedDate()
 ) {
@@ -73,7 +71,6 @@ data class Cipher(
         collection = encryptedCipher.collection,
         favorite = encryptedCipher.favorite,
         rePrompt = encryptedCipher.rePrompt,
-        version = encryptedCipher.version,
         // TODO: remove null after some time when users updates application
         created = encryptedCipher.created ?: currentFixedDate(),
         // TODO: the same as above
