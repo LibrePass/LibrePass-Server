@@ -17,7 +17,6 @@ import java.util.*
  * @property collection The identifier of the collection to which the cipher belongs.
  * @property favorite Whether the cipher is marked as favorite.
  * @property rePrompt Whether the password should be re-prompted. (Only UI-related)
- * @property version The version of the cipher. (the current version is 1)
  * @property created The date when the cipher was created.
  * @property lastModified The date when the cipher was last modified
  */
@@ -29,7 +28,6 @@ data class EncryptedCipher(
     val collection: UUID? = null,
     val favorite: Boolean = false,
     val rePrompt: Boolean = false,
-    val version: Int = 1,
     // TODO: remove null after some time when users updates application
     @JsonAdapter(DateAdapter::class)
     val created: Date? = null,
@@ -55,7 +53,6 @@ data class EncryptedCipher(
         collection = cipher.collection,
         favorite = cipher.favorite,
         rePrompt = cipher.rePrompt,
-        version = cipher.version,
         created = cipher.created,
         lastModified = cipher.lastModified
     )
