@@ -1,4 +1,4 @@
-package dev.medzik.librepass
+package dev.medzik.librepass.utils
 
 import dev.medzik.libcrypto.Aes
 

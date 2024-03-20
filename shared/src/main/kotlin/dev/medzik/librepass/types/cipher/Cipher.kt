@@ -1,11 +1,11 @@
 package dev.medzik.librepass.types.cipher
 
 import com.google.gson.Gson
-import dev.medzik.librepass.EncryptedString
-import dev.medzik.librepass.encrypt
 import dev.medzik.librepass.types.cipher.data.CipherCardData
 import dev.medzik.librepass.types.cipher.data.CipherLoginData
 import dev.medzik.librepass.types.cipher.data.CipherSecureNoteData
+import dev.medzik.librepass.utils.EncryptedString
+import dev.medzik.librepass.utils.encrypt
 import java.util.*
 import java.util.concurrent.TimeUnit
 
