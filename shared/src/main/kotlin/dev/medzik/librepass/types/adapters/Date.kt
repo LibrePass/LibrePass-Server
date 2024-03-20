@@ -3,6 +3,7 @@ package dev.medzik.librepass.types.adapters
 import com.google.gson.*
 import java.lang.reflect.Type
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 class DateAdapter : JsonSerializer<Date>, JsonDeserializer<Date> {
     override fun serialize(
@@ -11,7 +12,7 @@ class DateAdapter : JsonSerializer<Date>, JsonDeserializer<Date> {
         context: JsonSerializationContext?
     ): JsonElement {
         return if (src != null) {
-            JsonPrimitive(src.time / 1000) // Convert milliseconds to seconds
+            JsonPrimitive(TimeUnit.MILLISECONDS.toSeconds(src.time))
         } else {
             JsonNull.INSTANCE
         }
@@ -23,7 +24,7 @@ class DateAdapter : JsonSerializer<Date>, JsonDeserializer<Date> {
         context: JsonDeserializationContext?
     ): Date {
         return if (json != null) {
-            Date(json.asLong * 1000) // Convert seconds to milliseconds
+            Date(TimeUnit.SECONDS.toMillis(json.asLong))
         } else {
             Date()
         }
