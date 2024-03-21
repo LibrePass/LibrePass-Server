@@ -1,19 +1,30 @@
 package dev.medzik.librepass.client.errors
 
 import dev.medzik.librepass.errors.ServerError
+import dev.medzik.librepass.types.api.ResponseError
 
 /**
- * API Error exception.
+ * Thrown when the server returns an error.
  *
- * @property status The HTTP Status code returned by the API.
- * @property error The error returned by the API.
+ * @param status The HTTP status code returned by the server.
+ * @param response The response returned by the server.
  */
 class ApiException(
     val status: Number,
-    val error: String
+    val response: ResponseError
 ) : Exception() {
-    override val message: String = "HTTP $status: $error"
+    override val message: String = "HTTP $status: $response"
 
-    /** Returns the [ServerError]. */
-    fun getServerError() = ServerError.get(error)
+    /**
+     * Returns the error as [ServerError].
+     */
+    fun getServerError(): ServerError? {
+        for (x in ServerError.entries) {
+            if (x.error == response.error) {
+                return x
+            }
+        }
+
+        return null
+    }
 }

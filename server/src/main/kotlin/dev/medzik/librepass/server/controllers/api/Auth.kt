@@ -3,8 +3,8 @@ package dev.medzik.librepass.server.controllers.api
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import dev.medzik.libcrypto.X25519
-import dev.medzik.librepass.errors.*
 import dev.medzik.librepass.server.components.RequestIP
+import dev.medzik.librepass.server.controllers.advice.ServerException
 import dev.medzik.librepass.server.database.TokenRepository
 import dev.medzik.librepass.server.database.TokenTable
 import dev.medzik.librepass.server.database.UserRepository
@@ -72,7 +72,7 @@ class AuthController
             consumeRateLimit(ip)
 
             if (!validateSharedKey(request.publicKey, request.sharedKey))
-                throw InvalidSharedKeyException()
+                throw ServerException.InvalidSharedKey()
 
             val user =
                 userRepository.save(
@@ -165,7 +165,7 @@ class AuthController
                             request = Gson().fromJson(request, LoginRequest::class.java)
                         )
                     } catch (e: JsonSyntaxException) {
-                        throw InvalidBodyException()
+                        throw ServerException.InvalidBody("json syntax error")
                     }
                 }
                 "2fa" -> {
@@ -175,12 +175,12 @@ class AuthController
                             request = Gson().fromJson(request, TwoFactorRequest::class.java)
                         )
                     } catch (e: JsonSyntaxException) {
-                        throw InvalidBodyException()
+                        throw ServerException.InvalidBody("json syntax error")
                     }
                 }
             }
 
-            throw InvalidBodyException()
+            throw ServerException.InvalidBody("invalid grant_type")
         }
 
         private fun oauthLogin(
@@ -193,13 +193,13 @@ class AuthController
 
             val user =
                 userRepository.findByEmail(emailAddress)
-                    ?: throw UserNotFoundException()
+                    ?: throw ServerException.UserNotFound()
 
             if (emailVerificationRequired && !user.emailVerified)
-                throw EmailNotVerifiedException()
+                throw ServerException.EmailNotVerified()
 
             if (!validateSharedKey(user, request.sharedKey))
-                throw InvalidSharedKeyException()
+                throw ServerException.InvalidSharedKey()
 
             val apiToken =
                 tokenRepository.save(
@@ -235,7 +235,7 @@ class AuthController
 
             val token =
                 tokenRepository.findByIdOrNull(request.apiKey)
-                    ?: throw InvalidTokenException()
+                    ?: throw ServerException.InvalidToken()
 
             if (token.confirmed)
                 return ResponseHandler.generateResponse(HttpStatus.OK)
@@ -259,7 +259,7 @@ class AuthController
             if (!TOTPGenerator.verify(totpParameters, request.code) &&
                 request.code != user.twoFactorRecoveryCode
             )
-                throw InvalidTwoFactorException()
+                throw ServerException.InvalidTwoFactor()
 
             coroutineScope.launch {
                 emailService.sendNewLogin(
@@ -280,7 +280,7 @@ class AuthController
         ): Response {
             val email =
                 emailParam?.lowercase()
-                    ?: throw InvalidBodyException()
+                    ?: throw ServerException.InvalidBody("email is required")
 
             consumeRateLimit(ip)
             consumeRateLimit(email)
@@ -290,7 +290,7 @@ class AuthController
 
             val user =
                 userRepository.findByEmail(email)
-                    ?: throw UserNotFoundException()
+                    ?: throw ServerException.UserNotFound()
 
             // TODO
 //            try {
@@ -318,7 +318,7 @@ class AuthController
 
             val user =
                 userRepository.findById(UUID.fromString(userId)).orElse(null)
-                    ?: throw UserNotFoundException()
+                    ?: throw ServerException.UserNotFound()
 
             // check if user email is already verified
             if (user.emailVerified)
@@ -326,11 +326,11 @@ class AuthController
 
             // check if the code is valid
             if (user.emailVerificationCode.toString() != verificationCode)
-                throw EmailInvalidCodeException()
+                throw ServerException.EmailInvalidCode()
 
             // check if the code is expired
             if (user.emailVerificationCodeExpiresAt?.before(Date()) == true)
-                throw EmailInvalidCodeException()
+                throw ServerException.EmailInvalidCode()
 
             // set email as verified
             userRepository.save(
@@ -359,11 +359,11 @@ class AuthController
 
             val user =
                 userRepository.findByEmail(email)
-                    ?: throw UserNotFoundException()
+                    ?: throw ServerException.UserNotFound()
 
             // check if user email is already verified
             if (user.emailVerified)
-                throw InvalidBodyException()
+                throw ServerException.InvalidBody("email is already verified")
 
             userRepository.save(
                 user.copy(
@@ -393,6 +393,6 @@ class AuthController
             if (!rateLimitEnabled) return
 
             if (!rateLimitConfig.resolveBucket(key).tryConsume(1))
-                throw RateLimitException()
+                throw ServerException.RateLimit()
         }
     }

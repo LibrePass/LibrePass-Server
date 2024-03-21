@@ -1,10 +1,7 @@
 package dev.medzik.librepass.server.controllers.api
 
-import dev.medzik.librepass.errors.CipherNotFoundException
-import dev.medzik.librepass.errors.InvalidCipherException
-import dev.medzik.librepass.errors.NotFoundException
-import dev.medzik.librepass.errors.RateLimitException
 import dev.medzik.librepass.server.components.AuthorizedUser
+import dev.medzik.librepass.server.controllers.advice.ServerException
 import dev.medzik.librepass.server.database.CipherRepository
 import dev.medzik.librepass.server.database.CipherTable
 import dev.medzik.librepass.server.database.UserTable
@@ -56,7 +53,7 @@ class CipherController
                         cipherRepository.countByOwner(user.id) > userCiphersLimit
                 )
             ) {
-                throw InvalidCipherException()
+                throw ServerException.InvalidCipher("validation failed")
             }
 
             val cipher = cipherRepository.save(CipherTable(encryptedCipher))
@@ -118,7 +115,7 @@ class CipherController
             consumeRateLimit(user.id.toString())
 
             if (!cipherRepository.existsByIdAndOwner(id, user.id))
-                throw CipherNotFoundException()
+                throw ServerException.CipherNotFound()
 
             val cipher = cipherRepository.findById(id).get()
 
@@ -146,7 +143,7 @@ class CipherController
             consumeRateLimit(user.id.toString())
 
             if (!cipherRepository.existsByIdAndOwner(id, user.id))
-                throw CipherNotFoundException()
+                throw ServerException.CipherNotFound()
 
             cipherRepository.deleteById(id)
 
@@ -175,7 +172,7 @@ class CipherController
             return try {
                 restTemplate.exchange(uri, HttpMethod.GET, entity, ByteArray::class.java)
             } catch (e: Exception) {
-                throw NotFoundException()
+                throw ServerException.NotFound()
             }
         }
 
@@ -186,6 +183,6 @@ class CipherController
             if (!rateLimitEnabled) return
 
             if (!rateLimitConfig.resolveBucket(key).tryConsume(1))
-                throw RateLimitException()
+                throw ServerException.RateLimit()
         }
     }
