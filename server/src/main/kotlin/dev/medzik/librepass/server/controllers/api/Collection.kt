@@ -1,8 +1,7 @@
 package dev.medzik.librepass.server.controllers.api
 
-import dev.medzik.librepass.errors.CollectionNotFoundException
-import dev.medzik.librepass.errors.InvalidCollectionException
 import dev.medzik.librepass.server.components.AuthorizedUser
+import dev.medzik.librepass.server.controllers.advice.ServerException
 import dev.medzik.librepass.server.database.CollectionRepository
 import dev.medzik.librepass.server.database.CollectionTable
 import dev.medzik.librepass.server.database.UserTable
@@ -30,7 +29,7 @@ class CollectionController
             @Valid @RequestBody collection: CreateCollectionRequest
         ): Response {
             if (collection.name.length > 32)
-                throw InvalidCollectionException()
+                throw ServerException.InvalidCollection("name is too long")
 
             collectionRepository.save(
                 CollectionTable(
@@ -73,7 +72,7 @@ class CollectionController
         ): Response {
             val collection =
                 collectionRepository.findByIdAndOwner(id, user.id)
-                    ?: throw CollectionNotFoundException()
+                    ?: throw ServerException.CollectionNotFound()
 
             val cipherCollection =
                 CipherCollection(
@@ -94,7 +93,7 @@ class CollectionController
         ): Response {
             val collection =
                 collectionRepository.findByIdAndOwner(id, user.id)
-                    ?: throw CollectionNotFoundException()
+                    ?: throw ServerException.CollectionNotFound()
 
             collectionRepository.delete(collection)
 

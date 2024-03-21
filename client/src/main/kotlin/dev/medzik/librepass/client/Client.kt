@@ -194,10 +194,10 @@ class Client(
             val body = response.body.string()
 
             // error handling
-            if (statusCode >= 300) {
+            if (statusCode >= 400) {
                 throw ApiException(
                     status = statusCode,
-                    error = JsonUtils.deserialize<ResponseError>(body).error
+                    response = JsonUtils.deserialize<ResponseError>(body)
                 )
             }
 

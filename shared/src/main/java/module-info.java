@@ -5,8 +5,6 @@ module dev.medzik.librepass.shared {
 
     exports dev.medzik.librepass.errors;
 
-    exports dev.medzik.librepass.responses;
-
     exports dev.medzik.librepass.types.adapters;
     exports dev.medzik.librepass.types.api;
     exports dev.medzik.librepass.types.cipher;

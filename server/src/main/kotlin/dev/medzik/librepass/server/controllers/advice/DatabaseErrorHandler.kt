@@ -1,6 +1,5 @@
 package dev.medzik.librepass.server.controllers.advice
 
-import dev.medzik.librepass.errors.ServerError
 import dev.medzik.librepass.server.utils.Response
 import org.hibernate.exception.ConstraintViolationException
 import org.springframework.dao.DataIntegrityViolationException
@@ -16,16 +15,11 @@ class DatabaseErrorHandler {
 
             // duplicate key
             if (cve?.sqlState == "23505") {
-                return makeResponseFromError(ServerError.Duplicated)
+                return makeResponseFromError(ServerException.Duplicated("database: duplicate key"))
             }
         }
 
         // unknown database error
-        return makeResponseFromError(ServerError.Database)
+        return makeResponseFromError(ServerException.Database("unknown database error"))
     }
-
-//    @ExceptionHandler(value = [UninitializedPropertyAccessException::class])
-//    fun handleUninitializedPropertyError(e: UninitializedPropertyAccessException): Response {
-//        return ResponseError.INVALID_BODY.toResponse()
-//    }
 }

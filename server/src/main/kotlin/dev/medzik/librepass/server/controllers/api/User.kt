@@ -2,9 +2,9 @@ package dev.medzik.librepass.server.controllers.api
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import dev.medzik.librepass.errors.*
 import dev.medzik.librepass.server.components.AuthorizedUser
 import dev.medzik.librepass.server.components.RequestIP
+import dev.medzik.librepass.server.controllers.advice.ServerException
 import dev.medzik.librepass.server.database.*
 import dev.medzik.librepass.server.ratelimit.AuthControllerRateLimitConfig
 import dev.medzik.librepass.server.ratelimit.BaseRateLimitConfig
@@ -119,15 +119,15 @@ class UserController
 
             val changeEmailTable =
                 emailChangeRepository.findById(UUID.fromString(userID)).orElse(null)
-                    ?: throw UserNotFoundException()
+                    ?: throw ServerException.UserNotFound()
 
             // check if the code is valid
             if (changeEmailTable.code != verificationCode)
-                throw EmailInvalidCodeException()
+                throw ServerException.EmailInvalidCode()
 
             // check if the code is expired
             if (changeEmailTable.codeExpiresAt.before(Date()))
-                throw EmailInvalidCodeException()
+                throw ServerException.EmailInvalidCode()
 
             val user = userRepository.findById(changeEmailTable.owner).get()
 
@@ -201,11 +201,11 @@ class UserController
         ) {
             // validate shared key with an old public key
             if (!validateSharedKey(user, oldSharedKey))
-                throw InvalidSharedKeyException()
+                throw ServerException.InvalidSharedKey()
 
             // validate shared key with a new public key
             if (!validateSharedKey(newPublicKey, newSharedKey))
-                throw InvalidSharedKeyException()
+                throw ServerException.InvalidSharedKey()
 
             // get all user cipher ids
             val cipherIds = cipherRepository.getAllIDs(user.id)
@@ -215,7 +215,7 @@ class UserController
             // (because `cipherIds` is a list of user cipher ids)
             ciphers.forEach { cipherData ->
                 if (!cipherIds.contains(cipherData.id))
-                    throw MissingCipherException()
+                    throw ServerException.MissingCipher()
             }
         }
 
@@ -225,7 +225,7 @@ class UserController
             @Valid @RequestBody request: SetupTwoFactorRequest
         ): Response {
             if (!validateSharedKey(user, request.sharedKey))
-                throw InvalidSharedKeyException()
+                throw ServerException.InvalidSharedKey()
 
             val totpParameters =
                 OTPParameters.builder()
@@ -235,7 +235,7 @@ class UserController
                     .build()
 
             if (!TOTPGenerator.verify(totpParameters, request.code))
-                throw InvalidTwoFactorException()
+                throw ServerException.InvalidTwoFactor()
 
             val recoveryCode = UUID.randomUUID().toString()
 
@@ -257,11 +257,11 @@ class UserController
             @Valid @RequestBody request: DeleteAccountRequest
         ): Response {
             if (!validateSharedKey(user, request.sharedKey))
-                throw InvalidSharedKeyException()
+                throw ServerException.InvalidSharedKey()
 
             if (user.twoFactorEnabled) {
                 if (request.code.isNullOrBlank())
-                    throw InvalidTwoFactorException()
+                    throw ServerException.InvalidTwoFactor()
 
                 val totpParameters =
                     OTPParameters.builder()
@@ -271,7 +271,7 @@ class UserController
                         .build()
 
                 if (!TOTPGenerator.verify(totpParameters, request.code))
-                    throw InvalidTwoFactorException()
+                    throw ServerException.InvalidTwoFactor()
             }
 
             collectionRepository.deleteAllByOwner(user.id)
@@ -289,6 +289,6 @@ class UserController
             if (!rateLimitEnabled) return
 
             if (!rateLimitConfig.resolveBucket(key).tryConsume(1))
-                throw RateLimitException()
+                throw ServerException.RateLimit()
         }
     }
