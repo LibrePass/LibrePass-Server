@@ -1,6 +1,5 @@
 package dev.medzik.librepass.server.controllers.advice
 
-import dev.medzik.librepass.errors.ServerError
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.MissingServletRequestParameterException
 import org.springframework.web.bind.annotation.ControllerAdvice
@@ -9,12 +8,15 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 
 @ControllerAdvice
 class InvalidBodyHandler {
-    @ExceptionHandler(value = [HttpMessageNotReadableException::class, MissingServletRequestParameterException::class])
-    fun handleInvalidRequestBody() = invalidBodyResponse()
+    @ExceptionHandler(value = [HttpMessageNotReadableException::class])
+    fun handleInvalidRequestBody() = invalidBodyResponse("not readable")
+
+    @ExceptionHandler(value = [MissingServletRequestParameterException::class])
+    fun handleMissingParameter() = invalidBodyResponse("missing parameter")
 
     /** Handle request validation exception, `@Valid` annotation */
     @ExceptionHandler(value = [HandlerMethodValidationException::class])
-    fun validationException() = invalidBodyResponse()
+    fun handleValidationException() = invalidBodyResponse("validation error")
 
-    private fun invalidBodyResponse() = makeResponseFromError(ServerError.InvalidBody)
+    private fun invalidBodyResponse(reason: String) = makeResponseFromError(ServerException.InvalidBody(reason))
 }

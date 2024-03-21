@@ -22,13 +22,13 @@ object ResponseHandler {
 
     fun generateErrorResponse(
         error: String,
-        status: Int
+        status: Int,
+        message: String?
     ): Response {
-        val map =
-            mapOf(
-                "error" to error,
-                "status" to status
-            )
+        val map = mutableMapOf<String, Any>()
+        map["error"] = error
+        map["status"] = status
+        if (message != null) map["message"] = message
 
         return createResponse(map, status)
     }
