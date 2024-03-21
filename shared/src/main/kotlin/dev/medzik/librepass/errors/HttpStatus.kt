@@ -1,9 +1,7 @@
-package dev.medzik.librepass.responses
+package dev.medzik.librepass.errors
 
 /**
- * HttpStatus represents the HTTP error status codes that can be returned by the API.
- *
- * @property code The HTTP status code.
+ * HttpStatus is a set of status codes that can be returned by the server.
  */
 enum class HttpStatus(val code: Int) {
     BAD_REQUEST(400),

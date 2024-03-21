@@ -1,6 +1,6 @@
 package dev.medzik.librepass.server.components
 
-import dev.medzik.librepass.errors.InvalidTokenException
+import dev.medzik.librepass.server.controllers.advice.ServerException
 import dev.medzik.librepass.server.database.TokenRepository
 import dev.medzik.librepass.server.database.UserRepository
 import dev.medzik.librepass.server.database.UserTable
@@ -46,12 +46,13 @@ class AuthorizedUserArgumentResolver
 
             val authorizationHeader =
                 request.getHeader("Authorization")
-                    ?: throw InvalidTokenException()
+                    ?: throw ServerException.InvalidToken()
             val token = authorizationHeader.removePrefix("Bearer ")
+            if (token.isBlank()) throw ServerException.InvalidToken()
 
             val tokenTable =
                 tokenRepository.findByIdOrNull(token)
-                    ?: throw InvalidTokenException()
+                    ?: throw ServerException.InvalidToken()
 
             val user =
                 userRepository
@@ -61,7 +62,7 @@ class AuthorizedUserArgumentResolver
 
             // check if user changed password after the token was created
             if (user.lastPasswordChange > tokenTable.created)
-                throw InvalidTokenException()
+                throw ServerException.InvalidToken()
 
             val ip =
                 if (ipHeader == "remoteAddr")
