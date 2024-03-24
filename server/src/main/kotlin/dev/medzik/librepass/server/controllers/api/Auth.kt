@@ -310,14 +310,14 @@ class AuthController
         @GetMapping("/verifyEmail")
         fun verifyEmail(
             @RequestIP ip: String,
-            @Valid @NotBlank @RequestParam("user") userId: String,
+            @Valid @NotBlank @RequestParam("user") userId: UUID,
             @Valid @NotBlank @RequestParam("code") verificationCode: String
         ): Response {
             consumeRateLimit(ip)
-            consumeRateLimit(userId)
+            consumeRateLimit(userId.toString())
 
             val user =
-                userRepository.findById(UUID.fromString(userId)).orElse(null)
+                userRepository.findById(userId).orElse(null)
                     ?: throw ServerException.UserNotFound()
 
             // check if user email is already verified
