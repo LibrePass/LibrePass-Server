@@ -34,4 +34,6 @@ sealed class ServerException(val error: ServerError, val errorMessage: String? =
     class UserNotFound : ServerException(ServerError.UserNotFound)
 
     data class Database(val reason: String) : ServerException(ServerError.Database, reason)
+
+    data class Mail(val reason: String) : ServerException(ServerError.Mail, reason)
 }

@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.HttpStatus
+import org.springframework.mail.MailException
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
@@ -292,17 +293,16 @@ class AuthController
                 userRepository.findByEmail(email)
                     ?: throw ServerException.UserNotFound()
 
-            // TODO
-//            try {
-            emailService.sendPasswordHint(
-                to = user.email,
-                hint = user.passwordHint
-            )
-//            } catch (e: Exception) {
-//                logger.error("Failed to send password hint", e)
-//
-//                return ResponseError.UNEXPECTED_SERVER_ERROR.toResponse()
-//            }
+            try {
+                emailService.sendPasswordHint(
+                    to = user.email,
+                    hint = user.passwordHint
+                )
+            } catch (e: MailException) {
+                logger.error("Failed to send password hint", e)
+
+                throw ServerException.Mail("failed to send email with password hint")
+            }
 
             return ResponseHandler.generateResponse(HttpStatus.OK)
         }
@@ -371,16 +371,16 @@ class AuthController
                 )
             )
 
-            coroutineScope.launch {
-                try {
-                    emailService.sendEmailVerification(
-                        to = email,
-                        userId = user.id.toString(),
-                        code = user.emailVerificationCode.toString()
-                    )
-                } catch (e: Throwable) {
-                    logger.error("Error sending email verification", e)
-                }
+            try {
+                emailService.sendEmailVerification(
+                    to = email,
+                    userId = user.id.toString(),
+                    code = user.emailVerificationCode.toString()
+                )
+            } catch (e: MailException) {
+                logger.error("Failed to resend verification email", e)
+
+                throw ServerException.Mail("failed to resend verification email")
             }
 
             return ResponseHandler.generateResponse(HttpStatus.OK)
