@@ -3,6 +3,7 @@ package dev.medzik.librepass.server.services
 import jakarta.mail.Message
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.mail.MailException
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Service
 
@@ -38,6 +39,7 @@ class EmailService
          * @param subject The subject of the email.
          * @param body The body of the email.
          */
+        @Throws(MailException::class)
         fun send(
             to: String,
             subject: String,
@@ -53,6 +55,7 @@ class EmailService
         }
 
         /** Email the given address with the given email verification code. */
+        @Throws(MailException::class)
         fun sendEmailVerification(
             to: String,
             userId: String,
@@ -69,6 +72,7 @@ class EmailService
         }
 
         /** Email the given address with the given change email verification code. */
+        @Throws(MailException::class)
         fun sendChangeEmailVerification(
             oldEmail: String,
             newEmail: String,
@@ -88,6 +92,7 @@ class EmailService
         }
 
         /** Email the given address with the new login. */
+        @Throws(MailException::class)
         fun sendNewLogin(
             to: String,
             ip: String
@@ -101,6 +106,7 @@ class EmailService
         }
 
         /** Email the given address with the password hint. */
+        @Throws(MailException::class)
         fun sendPasswordHint(
             to: String,
             hint: String?
