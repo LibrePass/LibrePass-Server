@@ -1,4 +1,4 @@
-package dev.medzik.librepass.server.components
+package dev.medzik.librepass.server.components.annotations
 
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.beans.factory.annotation.Autowired

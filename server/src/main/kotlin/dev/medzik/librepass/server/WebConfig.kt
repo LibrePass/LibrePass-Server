@@ -1,7 +1,7 @@
 package dev.medzik.librepass.server
 
-import dev.medzik.librepass.server.components.AuthorizedUserArgumentResolver
-import dev.medzik.librepass.server.components.RequestIPArgumentResolver
+import dev.medzik.librepass.server.components.annotations.AuthorizedUserArgumentResolver
+import dev.medzik.librepass.server.components.annotations.RequestIPArgumentResolver
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration

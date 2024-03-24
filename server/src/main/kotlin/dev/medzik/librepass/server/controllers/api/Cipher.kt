@@ -1,6 +1,6 @@
 package dev.medzik.librepass.server.controllers.api
 
-import dev.medzik.librepass.server.components.AuthorizedUser
+import dev.medzik.librepass.server.components.annotations.AuthorizedUser
 import dev.medzik.librepass.server.controllers.advice.ServerException
 import dev.medzik.librepass.server.database.CipherRepository
 import dev.medzik.librepass.server.database.CipherTable
