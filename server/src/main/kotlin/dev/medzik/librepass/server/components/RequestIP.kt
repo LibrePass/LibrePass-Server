@@ -36,10 +36,9 @@ class RequestIPArgumentResolver
                 webRequest.getNativeRequest(HttpServletRequest::class.java)
                     ?: return null
 
-            return if (ipHeader == "remoteAddr")
-                request.remoteAddr
-            else
-                request.getHeader(ipHeader)
-                    ?: request.remoteAddr
+            return when (ipHeader) {
+                "remoteAddr" -> request.remoteAddr
+                else -> request.getHeader(ipHeader)
+            }
         }
     }

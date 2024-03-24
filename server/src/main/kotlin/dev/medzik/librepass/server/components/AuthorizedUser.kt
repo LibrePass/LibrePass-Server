@@ -65,11 +65,10 @@ class AuthorizedUserArgumentResolver
                 throw ServerException.InvalidToken()
 
             val ip =
-                if (ipHeader == "remoteAddr")
-                    request.remoteAddr
-                else
-                    request.getHeader(ipHeader)
-                        ?: request.remoteAddr
+                when (ipHeader) {
+                    "remoteAddr" -> request.remoteAddr
+                    else -> request.getHeader(ipHeader)
+                }
 
             // check if the IP address has been changed
             // or if 5 minutes elapsed since the date of last use
