@@ -3,7 +3,7 @@ package dev.medzik.librepass.server.controllers.api
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import dev.medzik.libcrypto.X25519
-import dev.medzik.librepass.server.components.RequestIP
+import dev.medzik.librepass.server.components.annotations.RequestIP
 import dev.medzik.librepass.server.controllers.advice.ServerException
 import dev.medzik.librepass.server.database.TokenRepository
 import dev.medzik.librepass.server.database.TokenTable

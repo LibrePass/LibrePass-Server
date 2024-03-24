@@ -1,4 +1,4 @@
-package dev.medzik.librepass.server.schedulers
+package dev.medzik.librepass.server.components.schedulers
 
 import dev.medzik.librepass.server.database.TokenRepository
 import dev.medzik.librepass.server.database.UserRepository

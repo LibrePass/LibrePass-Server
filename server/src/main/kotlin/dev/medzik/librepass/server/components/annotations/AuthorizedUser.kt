@@ -1,4 +1,4 @@
-package dev.medzik.librepass.server.components
+package dev.medzik.librepass.server.components.annotations
 
 import dev.medzik.librepass.server.controllers.advice.ServerException
 import dev.medzik.librepass.server.database.TokenRepository
