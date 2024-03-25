@@ -10,7 +10,9 @@ import org.springframework.web.context.request.NativeWebRequest
 import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.method.support.ModelAndViewContainer
 
-/** Get client IP from request. */
+/**
+ * Gets IP address of the request. Returns [String].
+ */
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.VALUE_PARAMETER, AnnotationTarget.ANNOTATION_CLASS)
 annotation class RequestIP
@@ -29,10 +31,8 @@ class RequestIPArgumentResolver @Autowired constructor(
         mavContainer: ModelAndViewContainer?,
         webRequest: NativeWebRequest,
         binderFactory: WebDataBinderFactory?
-    ): String? {
-        val request =
-            webRequest.getNativeRequest(HttpServletRequest::class.java)
-                ?: return null
+    ): String {
+        val request = webRequest.getNativeRequest(HttpServletRequest::class.java) ?: throw IllegalStateException()
 
         return when (ipHeader) {
             "remoteAddr" -> request.remoteAddr
