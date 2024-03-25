@@ -46,16 +46,15 @@ class CollectionController @Autowired constructor(
     ): Response {
         val collections = collectionRepository.findAllByOwner(user.id)
 
-        val cipherCollections =
-            collections.map {
-                CipherCollection(
-                    id = it.id,
-                    owner = it.owner,
-                    name = it.name,
-                    created = it.created,
-                    lastModified = it.lastModified
-                )
-            }
+        val cipherCollections = collections.map {
+            CipherCollection(
+                id = it.id,
+                owner = it.owner,
+                name = it.name,
+                created = it.created,
+                lastModified = it.lastModified
+            )
+        }
 
         return ResponseHandler.generateResponse(
             data = cipherCollections,
@@ -72,14 +71,13 @@ class CollectionController @Autowired constructor(
             collectionRepository.findByIdAndOwner(id, user.id)
                 ?: throw ServerException.CollectionNotFound()
 
-        val cipherCollection =
-            CipherCollection(
-                id = collection.id,
-                owner = collection.owner,
-                name = collection.name,
-                created = collection.created,
-                lastModified = collection.lastModified
-            )
+        val cipherCollection = CipherCollection(
+            id = collection.id,
+            owner = collection.owner,
+            name = collection.name,
+            created = collection.created,
+            lastModified = collection.lastModified
+        )
 
         return ResponseHandler.generateResponse(cipherCollection, HttpStatus.OK)
     }
@@ -89,9 +87,7 @@ class CollectionController @Autowired constructor(
         @AuthorizedUser user: UserTable,
         @PathVariable id: UUID
     ): Response {
-        val collection =
-            collectionRepository.findByIdAndOwner(id, user.id)
-                ?: throw ServerException.CollectionNotFound()
+        val collection = collectionRepository.findByIdAndOwner(id, user.id) ?: throw ServerException.CollectionNotFound()
 
         collectionRepository.delete(collection)
 

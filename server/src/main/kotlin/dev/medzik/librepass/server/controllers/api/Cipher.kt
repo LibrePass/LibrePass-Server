@@ -85,22 +85,17 @@ class CipherController @Autowired constructor(
 
         val cipherIDs = cipherRepository.getAllIDs(user.id)
 
-        val ciphers =
-            cipherRepository.getAllByOwnerAndLastServerSync(
-                user = user.id,
-                date = Date(TimeUnit.SECONDS.toMillis(lastSyncUnixTimestamp))
-            )
+        val ciphers = cipherRepository.getAllByOwnerAndLastServerSync(
+            user = user.id,
+            date = Date(TimeUnit.SECONDS.toMillis(lastSyncUnixTimestamp))
+        )
 
-        val syncResponse =
-            SyncResponse(
-                // get ids of all ciphers
-                ids = cipherIDs,
-                // get all ciphers that were updated after timestamp
-                ciphers =
-                    ciphers
-                        // convert to encrypted ciphers
-                        .map { it.toEncryptedCipher() }
-            )
+        val syncResponse = SyncResponse(
+            // ids of all ciphers
+            ids = cipherIDs,
+            // all ciphers that were updated after timestamp
+            ciphers = ciphers.map { it.toEncryptedCipher() } // convert cipher table to encrypted ciphers
+        )
 
         return ResponseHandler.generateResponse(syncResponse, HttpStatus.OK)
     }
