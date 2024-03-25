@@ -113,7 +113,7 @@ class AuthController @Autowired constructor(
     @GetMapping("/preLogin")
     fun preLogin(
         @RequestIP ip: String,
-        @Valid @Email @RequestParam("email") email: String?
+        @Valid @Email @RequestParam("email") email: String
     ): Response {
         fun preLoginDefaultResponse(): Response {
             return ResponseHandler.generateResponse(
@@ -130,7 +130,7 @@ class AuthController @Autowired constructor(
 
         consumeRateLimit(ip)
 
-        if (email.isNullOrEmpty())
+        if (email.isEmpty())
             return preLoginDefaultResponse()
 
         val user =

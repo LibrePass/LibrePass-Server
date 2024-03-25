@@ -41,7 +41,7 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
         passwordHint: String? = null
     ) {
         // get required parameters from server for computing password hash
-        val serverPreLogin = preLogin(null)
+        val serverPreLogin = preLogin()
         val argon2Function = serverPreLogin.toArgon2()
 
         // compute password hash
@@ -71,11 +71,11 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
     /**
      * Gets the parameters required for authentication.
      *
-     * @param email The email address of the user.
-     * @return The parameters.
+     * @param email user's email address
+     * @return [PreLoginResponse]
      */
     @Throws(ClientException::class, ApiException::class)
-    fun preLogin(email: String?): PreLoginResponse {
+    fun preLogin(email: String = ""): PreLoginResponse {
         val response = client.get("$API_ENDPOINT/preLogin?email=$email")
         return JsonUtils.deserialize(response)
     }
