@@ -9,7 +9,7 @@ import dev.medzik.librepass.server.database.*
 import dev.medzik.librepass.server.ratelimit.AuthControllerRateLimitConfig
 import dev.medzik.librepass.server.ratelimit.BaseRateLimitConfig
 import dev.medzik.librepass.server.services.EmailService
-import dev.medzik.librepass.server.utils.LOOM
+import dev.medzik.librepass.server.utils.CustomDispatchers
 import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseHandler
 import dev.medzik.librepass.server.utils.Validator.validateSharedKey
@@ -19,7 +19,6 @@ import dev.medzik.otp.OTPType
 import dev.medzik.otp.TOTPGenerator
 import jakarta.validation.Valid
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -46,7 +45,7 @@ class UserController @Autowired constructor(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val rateLimit = AuthControllerRateLimitConfig()
-    private val coroutineScope = CoroutineScope(Dispatchers.LOOM)
+    private val coroutineScope = CoroutineScope(CustomDispatchers.LOOM)
 
     @PatchMapping("/email")
     fun changeEmail(
