@@ -4,10 +4,10 @@ import dev.medzik.librepass.client.Client
 import dev.medzik.librepass.client.errors.ApiException
 
 /**
- * Check if the API at the specified URL is valid.
+ * Check connection with the API server.
  *
- * @param apiUrl the URL of the API to check
- * @return `true` if the API is valid, `false` otherwise
+ * @param apiUrl server api url
+ * @return whether connection has been established and if the server is LibrePass
  */
 fun checkApiConnection(apiUrl: String): Boolean {
     val client = Client(apiUrl)

@@ -31,10 +31,10 @@ object Server {
 /**
  * HTTP Client for sending requests to the API.
  *
- * @param apiURL The URL of the API.
- * @param accessToken The access token to use for authorization.
+ * @param apiURL server api url
+ * @param accessToken access token to use for authorization
  */
-class Client(
+internal class Client(
     private val apiURL: String,
     private val accessToken: String? = null
 ) {
@@ -44,10 +44,7 @@ class Client(
             .build()
 
     /**
-     * Send a GET request to the API.
-     *
-     * @param endpoint The API endpoint to send the request to.
-     * @return The response from the API.
+     * Sends a GET request to the API.
      */
     @Throws(ClientException::class, ApiException::class)
     fun get(endpoint: String): String {
@@ -62,10 +59,7 @@ class Client(
     }
 
     /**
-     * Send a DELETE request to the API.
-     *
-     * @param endpoint The API endpoint to send the request to.
-     * @return The response from the API.
+     * Sends a DELETE request to the API.
      */
     @Throws(ClientException::class, ApiException::class)
     fun delete(endpoint: String): String {
@@ -80,11 +74,7 @@ class Client(
     }
 
     /**
-     * Send a DELETE request to the API.
-     *
-     * @param endpoint The API endpoint to send the request to.
-     * @param json The JSON to send in the request body.
-     * @return The response from the API.
+     * Sends a DELETE request to the API.
      */
     @Throws(ClientException::class, ApiException::class)
     fun delete(
@@ -102,11 +92,7 @@ class Client(
     }
 
     /**
-     * Send a POST request to the API.
-     *
-     * @param endpoint The API endpoint to send the request to.
-     * @param json The JSON to send in the request body.
-     * @return The response from the API.
+     * Sends a POST request to the API.
      */
     @Throws(ClientException::class, ApiException::class)
     fun post(
@@ -124,11 +110,7 @@ class Client(
     }
 
     /**
-     * Send a PATCH request to the API.
-     *
-     * @param endpoint The API endpoint to send the request to.
-     * @param json The JSON to send in the request body.
-     * @return The response from the API.
+     * Sends a PATCH request to the API.
      */
     @Throws(ClientException::class, ApiException::class)
     fun patch(
@@ -146,11 +128,7 @@ class Client(
     }
 
     /**
-     * Send a PUT request to the API.
-     *
-     * @param endpoint The API endpoint to send the request to.
-     * @param json The JSON to send in the request body.
-     * @return The response from the API.
+     * Sends a PUT request to the API.
      */
     @Throws(ClientException::class, ApiException::class)
     fun put(

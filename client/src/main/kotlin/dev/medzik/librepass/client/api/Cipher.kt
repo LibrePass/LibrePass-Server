@@ -12,9 +12,10 @@ import dev.medzik.librepass.types.cipher.EncryptedCipher
 import java.util.*
 
 /**
- * Cipher Client for the LibrePass API. This client is used to manage ciphers.
- * @param apiKey api key to use for authentication
- * @param apiUrl api url address (optional)
+ * Cipher Client for managing ciphers in the vault.
+ *
+ * @param apiKey user's api key
+ * @param apiUrl server api url (default: official production server)
  */
 class CipherClient(
     apiKey: String,
@@ -24,11 +25,11 @@ class CipherClient(
         private const val API_ENDPOINT = "/api/cipher"
 
         /**
-         * Get the favicon URL.
+         * Gets favicon url of the domain.
          *
-         * @param apiUrl The LibrePass API url to use (default [Server.PRODUCTION])
-         * @param domain The website domain.
-         * @return URL to the favicon image.
+         * @param apiUrl server api url (default: official production server)
+         * @param domain domain to get favicon from it
+         * @return url address to the favicon
          */
         @Suppress("unused")
         fun getFavicon(
@@ -40,11 +41,11 @@ class CipherClient(
     private val client = Client(apiUrl, apiKey)
 
     /**
-     * Save the cipher.
+     * Saves the cipher in the vault.
      *
-     * @param cipher The cipher to save.
-     * @param aesKey The key to use for encryption.
-     * @return ID of the cipher.
+     * @param cipher cipher to save
+     * @param aesKey key for cipher encryption
+     * @return [CipherIdResponse]
      */
     @Throws(ClientException::class, ApiException::class)
     fun save(
@@ -60,10 +61,10 @@ class CipherClient(
     }
 
     /**
-     * Save the cipher.
+     * Saves the cipher in the vault.
      *
-     * @param cipher The encrypted cipher to insert.
-     * @return ID of the cipher.
+     * @param cipher encrypted cipher to save
+     * @return [CipherIdResponse]
      */
     @Throws(ClientException::class, ApiException::class)
     fun save(cipher: EncryptedCipher): CipherIdResponse {
@@ -72,34 +73,10 @@ class CipherClient(
     }
 
     /**
-     * Inserts a new cipher.
+     * Retrieves cipher by its identifier.
      *
-     * @param cipher The cipher to insert.
-     * @param aesKey The key to use for encryption.
-     * @return ID of the cipher.
-     */
-    @Deprecated("Use save() instead", ReplaceWith("save(cipher, aesKey)"))
-    @Throws(ClientException::class, ApiException::class)
-    fun insert(
-        cipher: Cipher,
-        aesKey: ByteArray
-    ) = save(cipher, aesKey)
-
-    /**
-     * Inserts a new cipher.
-     *
-     * @param cipher The encrypted cipher to insert.
-     * @return ID of the cipher.
-     */
-    @Deprecated("Use save() instead", ReplaceWith("save(cipher)"))
-    @Throws(ClientException::class, ApiException::class)
-    fun insert(cipher: EncryptedCipher) = save(cipher)
-
-    /**
-     * Gets a cipher by its ID.
-     *
-     * @param id The cipher identifier.
-     * @return ID of the cipher.
+     * @param id cipher identifier
+     * @return [EncryptedCipher]
      */
     @Throws(ClientException::class, ApiException::class)
     fun get(id: UUID): EncryptedCipher {
@@ -107,10 +84,10 @@ class CipherClient(
     }
 
     /**
-     * Gets a cipher by its ID.
+     * Retrieves cipher by its identifier.
      *
-     * @param id The cipher identifier.
-     * @return The encrypted cipher.
+     * @param id cipher identifier
+     * @return [EncryptedCipher]
      */
     @Throws(ClientException::class, ApiException::class)
     fun get(id: String): EncryptedCipher {
@@ -119,9 +96,9 @@ class CipherClient(
     }
 
     /**
-     * Get all ciphers.
+     * Gets all ciphers in the user vault.
      *
-     * @return List of encrypted ciphers.
+     * @return list of [EncryptedCipher]
      */
     @Throws(ClientException::class, ApiException::class)
     fun getAll(): List<EncryptedCipher> {
@@ -130,10 +107,10 @@ class CipherClient(
     }
 
     /**
-     * Sync ciphers with the server.
+     * Synchronizes ciphers with the server.
      *
-     * @param lastSync The date of the last sync.
-     * @return The sync response.
+     * @param lastSync date of last successful synchronization
+     * @return [SyncResponse]
      */
     @Throws(ClientException::class, ApiException::class)
     fun sync(lastSync: Date): SyncResponse {
@@ -142,33 +119,9 @@ class CipherClient(
     }
 
     /**
-     * Updates a cipher.
+     * Deletes cipher from the user vault.
      *
-     * @param cipher The cipher to update.
-     * @param aesKey The key to use for encryption.
-     * @return ID of the cipher.
-     */
-    @Deprecated("Use save() instead", ReplaceWith("save(cipher, aesKey)"))
-    @Throws(ClientException::class, ApiException::class)
-    fun update(
-        cipher: Cipher,
-        aesKey: ByteArray
-    ) = save(cipher, aesKey)
-
-    /**
-     * Updates a cipher.
-     *
-     * @param cipher The cipher to update.
-     * @return ID of the cipher.
-     */
-    @Deprecated("Use save() instead", ReplaceWith("save(cipher)"))
-    @Throws(ClientException::class, ApiException::class)
-    fun update(cipher: EncryptedCipher) = save(cipher)
-
-    /**
-     * Deletes a cipher.
-     *
-     * @param id The cipher identifier.
+     * @param id cipher identifier
      */
     @Throws(ClientException::class, ApiException::class)
     fun delete(id: UUID) {
@@ -176,9 +129,9 @@ class CipherClient(
     }
 
     /**
-     * Deletes a cipher.
+     * Deletes cipher from the user vault.
      *
-     * @param id The cipher identifier.
+     * @param id cipher identifier
      */
     @Throws(ClientException::class, ApiException::class)
     fun delete(id: String) {
