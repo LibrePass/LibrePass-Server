@@ -18,85 +18,83 @@ import java.util.*
 
 @RestController
 @RequestMapping("/api/collection")
-class CollectionController
-    @Autowired
-    constructor(
-        private val collectionRepository: CollectionRepository
-    ) {
-        @PutMapping
-        fun saveCollection(
-            @AuthorizedUser user: UserTable,
-            @Valid @RequestBody collection: CreateCollectionRequest
-        ): Response {
-            if (collection.name.length > 32)
-                throw ServerException.InvalidCollection("name is too long")
+class CollectionController @Autowired constructor(
+    private val collectionRepository: CollectionRepository
+) {
+    @PutMapping
+    fun saveCollection(
+        @AuthorizedUser user: UserTable,
+        @Valid @RequestBody collection: CreateCollectionRequest
+    ): Response {
+        if (collection.name.length > 32)
+            throw ServerException.InvalidCollection("name is too long")
 
-            collectionRepository.save(
-                CollectionTable(
-                    id = collection.id,
-                    name = collection.name,
-                    owner = user.id
-                )
+        collectionRepository.save(
+            CollectionTable(
+                id = collection.id,
+                name = collection.name,
+                owner = user.id
             )
+        )
 
-            return ResponseHandler.generateResponse(CollectionIdResponse(collection.id), HttpStatus.CREATED)
-        }
-
-        @GetMapping
-        fun getAllCollections(
-            @AuthorizedUser user: UserTable
-        ): Response {
-            val collections = collectionRepository.findAllByOwner(user.id)
-
-            val cipherCollections =
-                collections.map {
-                    CipherCollection(
-                        id = it.id,
-                        owner = it.owner,
-                        name = it.name,
-                        created = it.created,
-                        lastModified = it.lastModified
-                    )
-                }
-
-            return ResponseHandler.generateResponse(
-                data = cipherCollections,
-                status = HttpStatus.OK
-            )
-        }
-
-        @GetMapping("/{id}")
-        fun getCollection(
-            @AuthorizedUser user: UserTable,
-            @PathVariable id: UUID
-        ): Response {
-            val collection =
-                collectionRepository.findByIdAndOwner(id, user.id)
-                    ?: throw ServerException.CollectionNotFound()
-
-            val cipherCollection =
-                CipherCollection(
-                    id = collection.id,
-                    owner = collection.owner,
-                    name = collection.name,
-                    created = collection.created,
-                    lastModified = collection.lastModified
-                )
-
-            return ResponseHandler.generateResponse(cipherCollection, HttpStatus.OK)
-        }
-
-        @DeleteMapping("/{id}")
-        fun deleteCollection(
-            @AuthorizedUser user: UserTable,
-            @PathVariable id: UUID
-        ): Response {
-            val collection =
-                collectionRepository.findByIdAndOwner(id, user.id)
-                    ?: throw ServerException.CollectionNotFound()
-
-            collectionRepository.delete(collection)
-
-            return ResponseHandler.generateResponse(CollectionIdResponse(collection.id), HttpStatus.OK)
-        }
+        return ResponseHandler.generateResponse(CollectionIdResponse(collection.id), HttpStatus.CREATED)
     }
+
+    @GetMapping
+    fun getAllCollections(
+        @AuthorizedUser user: UserTable
+    ): Response {
+        val collections = collectionRepository.findAllByOwner(user.id)
+
+        val cipherCollections =
+            collections.map {
+                CipherCollection(
+                    id = it.id,
+                    owner = it.owner,
+                    name = it.name,
+                    created = it.created,
+                    lastModified = it.lastModified
+                )
+            }
+
+        return ResponseHandler.generateResponse(
+            data = cipherCollections,
+            status = HttpStatus.OK
+        )
+    }
+
+    @GetMapping("/{id}")
+    fun getCollection(
+        @AuthorizedUser user: UserTable,
+        @PathVariable id: UUID
+    ): Response {
+        val collection =
+            collectionRepository.findByIdAndOwner(id, user.id)
+                ?: throw ServerException.CollectionNotFound()
+
+        val cipherCollection =
+            CipherCollection(
+                id = collection.id,
+                owner = collection.owner,
+                name = collection.name,
+                created = collection.created,
+                lastModified = collection.lastModified
+            )
+
+        return ResponseHandler.generateResponse(cipherCollection, HttpStatus.OK)
+    }
+
+    @DeleteMapping("/{id}")
+    fun deleteCollection(
+        @AuthorizedUser user: UserTable,
+        @PathVariable id: UUID
+    ): Response {
+        val collection =
+            collectionRepository.findByIdAndOwner(id, user.id)
+                ?: throw ServerException.CollectionNotFound()
+
+        collectionRepository.delete(collection)
+
+        return ResponseHandler.generateResponse(CollectionIdResponse(collection.id), HttpStatus.OK)
+    }
+}
