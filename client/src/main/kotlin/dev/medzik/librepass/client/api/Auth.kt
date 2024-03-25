@@ -16,9 +16,9 @@ import dev.medzik.librepass.utils.toHex
 import java.util.*
 
 /**
- * Auth Client for authenticating users with the LibrePass API.
+ * Authentication client for user authentications.
  *
- * @param apiUrl The API url address (default: official production server)
+ * @param apiUrl server api url (default: official production server)
  */
 class AuthClient(apiUrl: String = Server.PRODUCTION) {
     companion object {
@@ -28,11 +28,11 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
     private val client = Client(apiUrl)
 
     /**
-     * Register a new user.
+     * Creates a new user account.
      *
-     * @param email The email address of the user.
-     * @param password The user password.
-     * @param passwordHint The password hint for the password. (Optional but recommended)
+     * @param email email address of the user
+     * @param password user password
+     * @param passwordHint password hint for the password (optional but recommended)
      */
     @Throws(ClientException::class, ApiException::class)
     fun register(
@@ -41,26 +41,29 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
         passwordHint: String? = null
     ) {
         // get required parameters from server for computing password hash
-        val serverPreLogin = preLogin("")
-        val argon2Hasher = serverPreLogin.toArgon2()
+        val serverPreLogin = preLogin(null)
+        val argon2Function = serverPreLogin.toArgon2()
 
-        val passwordArgon2Hash = computePasswordHash(password, email, argon2Hasher)
-        val privateKey = passwordArgon2Hash.hash
+        // compute password hash
+        val passwordHash = computePasswordHash(password, email, argon2Function)
+        // set password hash as a x25519 private key
+        val privateKey = passwordHash.hash
+        // compute public key from the private key
         val publicKey = X25519.publicFromPrivate(privateKey)
 
+        // compute shared key for "handshake"
         val serverPublicKey = serverPreLogin.serverPublicKey.fromHex()
         val sharedKey = computeSharedKey(privateKey, serverPublicKey).toHex()
 
-        val request =
-            RegisterRequest(
-                email = email,
-                passwordHint = passwordHint,
-                sharedKey = sharedKey,
-                parallelism = passwordArgon2Hash.parallelism,
-                memory = passwordArgon2Hash.memory,
-                iterations = passwordArgon2Hash.iterations,
-                publicKey = publicKey.toHex()
-            )
+        val request = RegisterRequest(
+            email = email,
+            passwordHint = passwordHint,
+            sharedKey = sharedKey,
+            parallelism = passwordHash.parallelism,
+            memory = passwordHash.memory,
+            iterations = passwordHash.iterations,
+            publicKey = publicKey.toHex()
+        )
 
         client.post("$API_ENDPOINT/register", JsonUtils.serialize(request))
     }
@@ -72,17 +75,17 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
      * @return The parameters.
      */
     @Throws(ClientException::class, ApiException::class)
-    fun preLogin(email: String): PreLoginResponse {
+    fun preLogin(email: String?): PreLoginResponse {
         val response = client.get("$API_ENDPOINT/preLogin?email=$email")
         return JsonUtils.deserialize(response)
     }
 
     /**
-     * Login the user using password.
+     * Logging the user using password.
      *
-     * @param email The email address of the user.
+     * @param email user email address
      * @param password The user password.
-     * @return The authentication credentials of the user.
+     * @return authentication credentials of the user
      */
     @Throws(ClientException::class, ApiException::class)
     fun login(
@@ -104,10 +107,10 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
     /**
      * Login the user using [passwordHash] (private key).
      *
-     * @param email The email address of the user.
-     * @param passwordHash The password hash.
-     * @param preLogin The pre-login response data. (Optional, if not provided, sends request to the API)
-     * @return The authentication credentials of the user.
+     * @param email email address of the user
+     * @param passwordHash hash of user password
+     * @param preLogin pre-login response data (if not provided, sends request to the API)
+     * @return authentication credentials of the user
      */
     @Throws(ClientException::class, ApiException::class)
     fun login(
@@ -115,9 +118,13 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
         passwordHash: Argon2Hash,
         preLogin: PreLoginResponse? = null
     ): UserCredentials {
+        // get server public key
         val serverPublicKey = preLogin?.serverPublicKey ?: preLogin(email).serverPublicKey
+
+        // user keypair
         val privateKey = passwordHash.hash
         val publicKey = X25519.publicFromPrivate(privateKey)
+        // compute shared key for "handshake"
         val sharedKey = computeSharedKey(privateKey, serverPublicKey.fromHex())
 
         val request =
@@ -126,8 +133,11 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
                 sharedKey = sharedKey.toHex(),
             )
 
+        // send login request and extract user credentials
         val responseBody = client.post("$API_ENDPOINT/oauth?grantType=login", JsonUtils.serialize(request))
         val userCredentialsResponse = JsonUtils.deserialize<UserCredentialsResponse>(responseBody)
+
+        // compute key for vault encryption
         val aesKey = computeAesKey(privateKey)
 
         return UserCredentials(
@@ -141,10 +151,10 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
     }
 
     /**
-     * Verify the API key if the user has two-factor authentication enabled.
+     * Verifies the API key if the user has two-factor authentication enabled.
      *
-     * @param apiKey The API key.
-     * @param code The OTP code.
+     * @param apiKey api key returned by [login] endpoint
+     * @param code one-time code
      */
     @Throws(ClientException::class, ApiException::class)
     fun loginTwoFactor(
@@ -161,9 +171,9 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
     }
 
     /**
-     * Request a password hint, will be sent to your email address.
+     * Sends an email with user password hint.
      *
-     * @param email The email address of the user.
+     * @param email email address of the user
      */
     @Throws(ClientException::class, ApiException::class)
     fun requestPasswordHint(email: String) {
@@ -171,9 +181,9 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
     }
 
     /**
-     * Request a new email verification email.
+     * Resends a user verification email.
      *
-     * @param email The email address of the user.
+     * @param email email address of the user
      */
     @Throws(ClientException::class, ApiException::class)
     fun resendVerificationEmail(email: String) {
@@ -182,15 +192,15 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
 }
 
 /**
- * Credentials of the user.
+ * User credentials for authentication.
  *
- * @property userId The identifier of the user.
- * @property apiKey The user API key.
- * @property apiKeyVerified If false, you need to authenticate the API key with OTP code to use the API.
- *  (Only if the user enabled 2FA authentication)
- * @property publicKey The user's public key.
- * @property privateKey The user's private key.
- * @property aesKey The user's aes key.
+ * @property userId user unique identifier
+ * @property apiKey api key
+ * @property apiKeyVerified whether the api key is verified (true) or not (false) - false only when the user
+ * has enabled two-factor authentication but the api key is not verified using [AuthClient.loginTwoFactor] endpoint.
+ * @property publicKey public key of the user
+ * @property privateKey private key of the user
+ * @property aesKey key for vault encryption
  */
 data class UserCredentials(
     val userId: UUID,

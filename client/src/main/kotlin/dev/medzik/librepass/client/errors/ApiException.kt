@@ -4,10 +4,10 @@ import dev.medzik.librepass.errors.ServerError
 import dev.medzik.librepass.types.api.ResponseError
 
 /**
- * Thrown when the server returns an error.
+ * Throws when the server returns an error.
  *
- * @param status The HTTP status code returned by the server.
- * @param response The response returned by the server.
+ * @param status http status code
+ * @param response response from the api
  */
 class ApiException(
     val status: Number,

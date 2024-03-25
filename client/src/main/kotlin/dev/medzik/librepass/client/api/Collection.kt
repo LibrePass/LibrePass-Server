@@ -11,10 +11,10 @@ import dev.medzik.librepass.types.api.CreateCollectionRequest
 import java.util.*
 
 /**
- * Collection Client for managing collections.
+ * Collection Client for managing collections in the vault.
  *
- * @param apiKey The API key to use for authentication.
- * @param apiUrl The API url address (default official production server)
+ * @param apiKey user's api key
+ * @param apiUrl server api url (default: official production server)
  */
 class CollectionClient(
     apiKey: String,
