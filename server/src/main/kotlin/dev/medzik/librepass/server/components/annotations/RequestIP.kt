@@ -16,29 +16,27 @@ import org.springframework.web.method.support.ModelAndViewContainer
 annotation class RequestIP
 
 @Component
-class RequestIPArgumentResolver
-    @Autowired
-    constructor(
-        @Value("\${http.ip.header}")
-        private val ipHeader: String
-    ) : HandlerMethodArgumentResolver {
-        override fun supportsParameter(parameter: MethodParameter): Boolean {
-            return parameter.hasParameterAnnotation(RequestIP::class.java)
-        }
+class RequestIPArgumentResolver @Autowired constructor(
+    @Value("\${http.ip.header}")
+    private val ipHeader: String
+) : HandlerMethodArgumentResolver {
+    override fun supportsParameter(parameter: MethodParameter): Boolean {
+        return parameter.hasParameterAnnotation(RequestIP::class.java)
+    }
 
-        override fun resolveArgument(
-            parameter: MethodParameter,
-            mavContainer: ModelAndViewContainer?,
-            webRequest: NativeWebRequest,
-            binderFactory: WebDataBinderFactory?
-        ): String? {
-            val request =
-                webRequest.getNativeRequest(HttpServletRequest::class.java)
-                    ?: return null
+    override fun resolveArgument(
+        parameter: MethodParameter,
+        mavContainer: ModelAndViewContainer?,
+        webRequest: NativeWebRequest,
+        binderFactory: WebDataBinderFactory?
+    ): String? {
+        val request =
+            webRequest.getNativeRequest(HttpServletRequest::class.java)
+                ?: return null
 
-            return when (ipHeader) {
-                "remoteAddr" -> request.remoteAddr
-                else -> request.getHeader(ipHeader)
-            }
+        return when (ipHeader) {
+            "remoteAddr" -> request.remoteAddr
+            else -> request.getHeader(ipHeader)
         }
     }
+}
