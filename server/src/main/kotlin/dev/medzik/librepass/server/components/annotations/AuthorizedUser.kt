@@ -17,7 +17,9 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.method.support.ModelAndViewContainer
 import java.util.*
 
-/** Get authorized user from request. */
+/**
+ * Validates authorization token and returns [UserTable] if valid.
+ */
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.VALUE_PARAMETER, AnnotationTarget.ANNOTATION_CLASS)
 annotation class AuthorizedUser
@@ -38,9 +40,7 @@ class AuthorizedUserArgumentResolver @Autowired constructor(
         webRequest: NativeWebRequest,
         binderFactory: WebDataBinderFactory?
     ): UserTable {
-        val request =
-            webRequest.getNativeRequest(HttpServletRequest::class.java)
-                ?: throw IllegalStateException()
+        val request = webRequest.getNativeRequest(HttpServletRequest::class.java) ?: throw IllegalStateException()
 
         val authorizationHeader =
             request.getHeader("Authorization")

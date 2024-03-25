@@ -60,22 +60,21 @@ class UserController @Autowired constructor(
             ciphers = request.ciphers
         )
 
-        val emailChangeTable =
-            emailChangeRepository.save(
-                EmailChangeTable(
-                    owner = user.id,
-                    newEmail = request.newEmail,
-                    code = UUID.randomUUID().toString(),
-                    codeExpiresAt =
-                        Date.from(
-                            Calendar.getInstance().apply {
-                                add(Calendar.HOUR, 24)
-                            }.toInstant()
-                        ),
-                    newCiphers = Gson().toJson(request.ciphers),
-                    newPublicKey = request.newPublicKey
-                )
+        val emailChangeTable = emailChangeRepository.save(
+            EmailChangeTable(
+                owner = user.id,
+                newEmail = request.newEmail,
+                code = UUID.randomUUID().toString(),
+                codeExpiresAt =
+                Date.from(
+                    Calendar.getInstance().apply {
+                        add(Calendar.HOUR, 24)
+                    }.toInstant()
+                ),
+                newCiphers = Gson().toJson(request.ciphers),
+                newPublicKey = request.newPublicKey
             )
+        )
 
         if (!emailVerificationRequired) {
             verifyNewEmail(
@@ -114,9 +113,9 @@ class UserController @Autowired constructor(
             consumeRateLimit(userID)
         }
 
-        val changeEmailTable =
-            emailChangeRepository.findById(UUID.fromString(userID)).orElse(null)
-                ?: throw ServerException.UserNotFound()
+        val changeEmailTable = emailChangeRepository
+            .findById(UUID.fromString(userID))
+            .orElseThrow { ServerException.UserNotFound() }
 
         // check if the code is valid
         if (changeEmailTable.code != verificationCode)
@@ -135,11 +134,10 @@ class UserController @Autowired constructor(
             )
         )
 
-        val ciphers: List<ChangePasswordCipherData> =
-            Gson().fromJson(
-                changeEmailTable.newCiphers,
-                object : TypeToken<List<ChangePasswordCipherData>>() {}.type
-            )
+        val ciphers: List<ChangePasswordCipherData> = Gson().fromJson(
+            changeEmailTable.newCiphers,
+            object : TypeToken<List<ChangePasswordCipherData>>() {}.type
+        )
 
         for (cipher in ciphers) {
             cipherRepository.updateData(cipher.id, cipher.data)

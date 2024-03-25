@@ -72,27 +72,22 @@ class AuthController @Autowired constructor(
         if (!validateSharedKey(request.publicKey, request.sharedKey))
             throw ServerException.InvalidSharedKey()
 
-        val user =
-            userRepository.save(
-                UserTable(
-                    email = request.email.lowercase(),
-                    passwordHint = request.passwordHint,
-                    // Argon2 parameters
-                    parallelism = request.parallelism,
-                    memory = request.memory,
-                    iterations = request.iterations,
-                    // X25519 key pair
-                    publicKey = request.publicKey,
-                    // Email verification code
-                    emailVerificationCode = UUID.randomUUID().toString(),
-                    emailVerificationCodeExpiresAt =
-                        Date.from(
-                            Calendar.getInstance().apply {
-                                add(Calendar.HOUR, 24)
-                            }.toInstant()
-                        )
-                )
+        val tomorrow = Date.from(Calendar.getInstance().apply { add(Calendar.HOUR, 24) }.toInstant())
+        val user = userRepository.save(
+            UserTable(
+                email = request.email.lowercase(),
+                passwordHint = request.passwordHint,
+                // Argon2 parameters
+                parallelism = request.parallelism,
+                memory = request.memory,
+                iterations = request.iterations,
+                // X25519 key pair
+                publicKey = request.publicKey,
+                // Email verification code
+                emailVerificationCode = UUID.randomUUID().toString(),
+                emailVerificationCodeExpiresAt = tomorrow
             )
+        )
 
         coroutineScope.launch {
             try {
@@ -132,9 +127,8 @@ class AuthController @Autowired constructor(
         if (email.isEmpty())
             return preLoginDefaultResponse()
 
-        val user =
-            userRepository.findByEmail(email.lowercase())
-                ?: return preLoginDefaultResponse()
+        val user = userRepository.findByEmail(email.lowercase())
+            ?: return preLoginDefaultResponse()
 
         return ResponseHandler.generateResponse(
             PreLoginResponse(
@@ -189,9 +183,7 @@ class AuthController @Autowired constructor(
 
         consumeRateLimit(emailAddress)
 
-        val user =
-            userRepository.findByEmail(emailAddress)
-                ?: throw ServerException.UserNotFound()
+        val user = userRepository.findByEmail(emailAddress) ?: throw ServerException.UserNotFound()
 
         if (emailVerificationRequired && !user.emailVerified)
             throw ServerException.EmailNotVerified()
@@ -199,15 +191,14 @@ class AuthController @Autowired constructor(
         if (!validateSharedKey(user, request.sharedKey))
             throw ServerException.InvalidSharedKey()
 
-        val apiToken =
-            tokenRepository.save(
-                TokenTable(
-                    owner = user.id,
-                    lastIp = ip,
-                    // Allow use of an api key only if two-factor authentication has been successful
-                    confirmed = !user.twoFactorEnabled
-                )
+        val apiToken = tokenRepository.save(
+            TokenTable(
+                owner = user.id,
+                lastIp = ip,
+                // Account with enabled two-factor authentication must verify the code using grant_type=2fa
+                confirmed = !user.twoFactorEnabled
             )
+        )
 
         if (!user.twoFactorEnabled) {
             emailService.sendNewLogin(
@@ -231,16 +222,12 @@ class AuthController @Autowired constructor(
     ): Response {
         consumeRateLimit(request.apiKey)
 
-        val token =
-            tokenRepository.findByIdOrNull(request.apiKey)
-                ?: throw ServerException.InvalidToken()
+        val token = tokenRepository.findByIdOrNull(request.apiKey) ?: throw ServerException.InvalidToken()
 
         if (token.confirmed)
             return ResponseHandler.generateResponse(HttpStatus.OK)
 
-        val user =
-            userRepository.findByIdOrNull(token.owner)
-                ?: throw IllegalStateException()
+        val user = userRepository.findByIdOrNull(token.owner) ?: throw IllegalStateException()
 
         if (user.twoFactorSecret == null)
             return ResponseHandler.generateResponse(HttpStatus.OK)
@@ -274,11 +261,9 @@ class AuthController @Autowired constructor(
     @GetMapping("/passwordHint")
     fun requestPasswordHint(
         @RequestIP ip: String,
-        @Valid @NotBlank @Email @RequestParam("email") emailParam: String?
+        @Valid @NotBlank @Email @RequestParam("email") emailParam: String
     ): Response {
-        val email =
-            emailParam?.lowercase()
-                ?: throw ServerException.InvalidBody("email is required")
+        val email = emailParam.lowercase()
 
         consumeRateLimit(ip)
         consumeRateLimit(email)
@@ -286,9 +271,7 @@ class AuthController @Autowired constructor(
         consumeRateLimit(ip, rateLimitEmail)
         consumeRateLimit(email, rateLimitEmail)
 
-        val user =
-            userRepository.findByEmail(email)
-                ?: throw ServerException.UserNotFound()
+        val user = userRepository.findByEmail(email) ?: throw ServerException.UserNotFound()
 
         try {
             emailService.sendPasswordHint(
@@ -313,9 +296,7 @@ class AuthController @Autowired constructor(
         consumeRateLimit(ip)
         consumeRateLimit(userId.toString())
 
-        val user =
-            userRepository.findById(userId).orElse(null)
-                ?: throw ServerException.UserNotFound()
+        val user = userRepository.findById(userId).orElse(null) ?: throw ServerException.UserNotFound()
 
         // check if user email is already verified
         if (user.emailVerified)
@@ -354,9 +335,7 @@ class AuthController @Autowired constructor(
         consumeRateLimit(ip, rateLimitEmail)
         consumeRateLimit(email, rateLimitEmail)
 
-        val user =
-            userRepository.findByEmail(email)
-                ?: throw ServerException.UserNotFound()
+        val user = userRepository.findByEmail(email) ?: throw ServerException.UserNotFound()
 
         // check if user email is already verified
         if (user.emailVerified)
