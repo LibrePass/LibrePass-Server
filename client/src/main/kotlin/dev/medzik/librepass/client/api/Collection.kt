@@ -27,10 +27,10 @@ class CollectionClient(
     private val client = Client(apiUrl, apiKey)
 
     /**
-     * Insert collection.
+     * Creates a new collection.
      *
-     * @param name The collection name.
-     * @return ID of the cipher collection.
+     * @param name collection name
+     * @return [CollectionIdResponse]
      */
     @Throws(ClientException::class, ApiException::class)
     fun save(name: String): CollectionIdResponse {
@@ -40,30 +40,29 @@ class CollectionClient(
     }
 
     /**
-     * Update collection.
+     * Updates a collection.
      *
-     * @param id The collection id.
-     * @param name The collection name.
-     * @return ID of the cipher collection.
+     * @param id collection identifier
+     * @param name collection name
+     * @return [CollectionIdResponse]
      */
     @Throws(ClientException::class, ApiException::class)
     fun save(
         id: UUID,
         name: String
     ): CollectionIdResponse {
-        val request =
-            CreateCollectionRequest(
-                id = id,
-                name = name
-            )
+        val request = CreateCollectionRequest(
+            id = id,
+            name = name
+        )
         val response = client.put(API_ENDPOINT, JsonUtils.serialize(request))
         return JsonUtils.deserialize(response)
     }
 
     /**
-     * Get all collections.
+     * Gets all collections.
      *
-     * @return List of cipher collections.
+     * @return list of [CipherCollection]
      */
     @Throws(ClientException::class, ApiException::class)
     fun get(): List<CipherCollection> {
@@ -72,10 +71,10 @@ class CollectionClient(
     }
 
     /**
-     * Get collection by ID.
+     * Gets a collection.
      *
-     * @param id The collection identifier.
-     * @return The cipher collection.
+     * @param id collection identifier
+     * @return [CipherCollection]
      */
     @Throws(ClientException::class, ApiException::class)
     fun get(id: UUID): CipherCollection {
@@ -83,10 +82,10 @@ class CollectionClient(
     }
 
     /**
-     * Get collection by ID.
+     * Gets a collection.
      *
      * @param id collection identifier
-     * @return The cipher collection.
+     * @return [CipherCollection]
      */
     @Throws(ClientException::class, ApiException::class)
     fun get(id: String): CipherCollection {
@@ -95,9 +94,9 @@ class CollectionClient(
     }
 
     /**
-     * Delete collection.
+     * Deletes collection.
      *
-     * @param id The collection identifier.
+     * @param id collection identifier
      */
     @Throws(ClientException::class, ApiException::class)
     fun delete(id: UUID) {
@@ -105,9 +104,9 @@ class CollectionClient(
     }
 
     /**
-     * Delete collection.
+     * Deletes collection.
      *
-     * @param id The collection identifier.
+     * @param id collection identifier
      */
     @Throws(ClientException::class, ApiException::class)
     fun delete(id: String) {
