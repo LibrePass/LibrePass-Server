@@ -9,19 +9,15 @@ import java.util.*
 /** Repository for the [TokenTable]. */
 interface TokenRepository : CrudRepository<TokenTable, String> {
     /**
-     * Delete unused tokens that were used before the specified date.
-     *
-     * @param lastUsedBefore The tokens used before the specified date will be deleted.
+     * Deletes all unused tokens that were last used before the specified [date].
      */
     @Transactional
     @Modifying
     @Query("DELETE FROM #{#entityName} t WHERE t.lastUsed < :lastUsedBefore")
-    fun deleteUnused(lastUsedBefore: Date)
+    fun deleteUnused(date: Date)
 
     /**
-     * Delete all tokens owned by the user.
-     *
-     * @param owner The user identifier.
+     * Deletes all tokens owned by the user.
      */
     @Transactional
     @Modifying
