@@ -1,7 +1,5 @@
 package dev.medzik.librepass.server.ratelimit
 
-import io.github.bucket4j.BandwidthBuilder
-import io.github.bucket4j.Bucket
 import java.time.Duration
 
 /**
@@ -10,30 +8,18 @@ import java.time.Duration
  * Maximum of 20 tokens, refilled after one minute by 10 tokens.
  */
 class AuthControllerRateLimitConfig : BaseRateLimitConfig() {
-    override fun newBucket(): Bucket {
-        return Bucket.builder()
-            .addLimit {
-                    limit: BandwidthBuilder.BandwidthBuilderCapacityStage ->
-                limit.capacity(20)
-                    .refillGreedy(10, Duration.ofMinutes(1))
-            }
-            .build()
-    }
+    override val capacity: Long = 20
+    override val refill: Long = 10
+    override val refillDuration: Duration = Duration.ofMinutes(1)
 }
 
 /**
- * Rate limit configuration for AuthController email sending. (Currently used for sending email with user's password hint)
+ * Rate limit configuration for AuthController email sending. (Currently used only for sending email with user's password hint)
  *
  * Maximum of two tokens, refilled after five minutes by one token.
  */
 class AuthControllerEmailRateLimitConfig : BaseRateLimitConfig() {
-    override fun newBucket(): Bucket {
-        return Bucket.builder()
-            .addLimit {
-                    limit: BandwidthBuilder.BandwidthBuilderCapacityStage ->
-                limit.capacity(2)
-                    .refillGreedy(1, Duration.ofMinutes(5))
-            }
-            .build()
-    }
+    override val capacity: Long = 2
+    override val refill: Long = 1
+    override val refillDuration: Duration = Duration.ofMinutes(5)
 }
