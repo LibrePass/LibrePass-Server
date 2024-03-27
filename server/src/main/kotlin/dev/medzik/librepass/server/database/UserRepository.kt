@@ -9,17 +9,15 @@ import java.util.*
 /** Repository for the [UserTable]. */
 interface UserRepository : CrudRepository<UserTable, UUID> {
     /**
-     * Find user by [email].
+     * Finds user by [email].
      */
     fun findByEmail(email: String): UserTable?
 
     /**
-     * Delete accounts with unverified email addresses that were used before the specified date.
-     *
-     * @param createdBefore The accounts created before the specified date will be deleted.
+     * Deletes all accounts with unverified email addresses that were created before the specified [date].
      */
     @Transactional
     @Modifying
     @Query("DELETE FROM #{#entityName} u WHERE u.emailVerified = false AND u.created < :createdBefore")
-    fun deleteUnverifiedUsers(createdBefore: Date)
+    fun deleteUnverifiedUsers(date: Date)
 }
