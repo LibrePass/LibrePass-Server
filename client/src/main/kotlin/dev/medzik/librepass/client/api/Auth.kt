@@ -83,8 +83,8 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
     /**
      * Logging the user using password.
      *
-     * @param email user email address
-     * @param password The user password.
+     * @param email email address of the user
+     * @param password user password
      * @return authentication credentials of the user
      */
     @Throws(ClientException::class, ApiException::class)
