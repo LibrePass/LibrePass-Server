@@ -29,20 +29,15 @@ interface CipherRepository : CrudRepository<CipherTable, UUID> {
     fun countByOwner(user: UUID): Long
 
     /**
-     * Check if a cipher exists and is owned by the user.
-     * @param id The cipher identifier.
-     * @param owner THe user identifier.
-     * @return True if the cipher exists and is owned by the user, false otherwise.
+     * Check if a cipher exists and is owned by the [user].
      */
     fun existsByIdAndOwner(
-        @Param("id") id: UUID,
-        @Param("owner") owner: UUID
+        id: UUID,
+        user: UUID
     ): Boolean
 
     /**
-     * Get all cipher ids owned by the [user].
-     *
-     * @return A IDs list of all cipher owned by the user.
+     * Gets ids of all cipher owned by the [user].
      */
     @Query("SELECT c.id FROM #{#entityName} c WHERE c.owner = :user")
     fun getAllIDs(
@@ -50,10 +45,7 @@ interface CipherRepository : CrudRepository<CipherTable, UUID> {
     ): List<UUID>
 
     /**
-     * Update cipher data.
-     *
-     * @param id The cipher identifier.
-     * @param data The new cipher data.
+     * Updates the cipher table with the given [data].
      */
     @Transactional
     @Modifying
@@ -64,7 +56,7 @@ interface CipherRepository : CrudRepository<CipherTable, UUID> {
     )
 
     /**
-     * Delete all tokens owned by the [user].
+     * Deletes all ciphers owned by the [user].
      */
     @Transactional
     @Modifying

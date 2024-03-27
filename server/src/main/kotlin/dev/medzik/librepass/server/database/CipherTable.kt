@@ -13,6 +13,7 @@ data class CipherTable(
     @Id
     val id: UUID = UUID.randomUUID(),
     val owner: UUID,
+
     val type: Int,
     @Column(columnDefinition = "TEXT")
     @Max(5000)
