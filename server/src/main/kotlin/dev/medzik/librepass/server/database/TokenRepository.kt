@@ -13,7 +13,7 @@ interface TokenRepository : CrudRepository<TokenTable, String> {
      */
     @Transactional
     @Modifying
-    @Query("DELETE FROM #{#entityName} t WHERE t.lastUsed < :lastUsedBefore")
+    @Query("DELETE FROM #{#entityName} t WHERE t.lastUsed < :date")
     fun deleteUnused(date: Date)
 
     /**
