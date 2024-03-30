@@ -42,31 +42,24 @@ class AuthorizedUserArgumentResolver @Autowired constructor(
     ): UserTable {
         val request = webRequest.getNativeRequest(HttpServletRequest::class.java) ?: throw IllegalStateException()
 
-        val authorizationHeader =
-            request.getHeader("Authorization")
-                ?: throw ServerException.InvalidToken()
+        val authorizationHeader = request.getHeader("Authorization") ?: throw ServerException.InvalidToken()
         val token = authorizationHeader.removePrefix("Bearer ")
         if (token.isBlank()) throw ServerException.InvalidToken()
 
-        val tokenTable =
-            tokenRepository.findByIdOrNull(token)
-                ?: throw ServerException.InvalidToken()
+        val tokenTable = tokenRepository.findByIdOrNull(token) ?: throw ServerException.InvalidToken()
 
-        val user =
-            userRepository
-                .findById(tokenTable.owner)
-                .orElse(null)
-                ?: throw IllegalStateException()
+        val user = userRepository
+            .findById(tokenTable.owner)
+            .orElseThrow { IllegalStateException() }
 
         // check if user changed password after the token was created
         if (user.lastPasswordChange > tokenTable.created)
             throw ServerException.InvalidToken()
 
-        val ip =
-            when (ipHeader) {
-                "remoteAddr" -> request.remoteAddr
-                else -> request.getHeader(ipHeader)
-            }
+        val ip = when (ipHeader) {
+            "remoteAddr" -> request.remoteAddr
+            else -> request.getHeader(ipHeader)
+        }
 
         // check if the IP address has been changed
         // or if 5 minutes elapsed since the date of last use
