@@ -104,15 +104,16 @@ class CipherClientTests {
                 name = "test_cipher"
             )
         )
+        val encryptedTestCipher = EncryptedCipher(testCipher, aesKey)
 
-        val toUpdate = listOf(EncryptedCipher(testCipher, aesKey))
+        val toUpdate = listOf(encryptedTestCipher)
         val toDelete = firstResponse.ids
 
         val secondResponse = cipherClient.sync(lastSync, toUpdate, toDelete)
 
         assertEquals(1, secondResponse.ids.size)
         assertEquals(1, secondResponse.ciphers.size)
-        assertEquals(testCipher, secondResponse.ciphers[0])
+        assertEquals(encryptedTestCipher, secondResponse.ciphers[0])
 
         // wait for 1 second to make sure that the last sync time is different
         Thread.sleep(1000)
