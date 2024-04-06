@@ -2,6 +2,7 @@ package dev.medzik.librepass.client.api
 
 import dev.medzik.librepass.types.cipher.Cipher
 import dev.medzik.librepass.types.cipher.CipherType
+import dev.medzik.librepass.types.cipher.EncryptedCipher
 import dev.medzik.librepass.types.cipher.data.CipherLoginData
 import dev.medzik.librepass.types.cipher.data.CipherSecureNoteData
 import dev.medzik.librepass.utils.fromHex
@@ -56,16 +57,14 @@ class CipherClientTests {
 
     @Test
     fun insertCipher() {
-        val cipher =
-            Cipher(
-                id = UUID.randomUUID(),
-                owner = userId,
-                type = CipherType.Login,
-                loginData =
-                    CipherLoginData(
-                        name = "test_cipher"
-                    )
+        val cipher = Cipher(
+            id = UUID.randomUUID(),
+            owner = userId,
+            type = CipherType.Login,
+            loginData = CipherLoginData(
+                name = "test_cipher"
             )
+        )
 
         val response = cipherClient.save(cipher, aesKey)
 
@@ -92,6 +91,46 @@ class CipherClientTests {
         Thread.sleep(1000)
 
         val lastSync = Date()
+        val firstResponse = cipherClient.sync(lastSync, emptyList(), emptyList())
+
+        assert(firstResponse.ids.isNotEmpty())
+        assert(firstResponse.ciphers.isEmpty())
+
+        val testCipher = Cipher(
+            id = UUID.randomUUID(),
+            owner = userId,
+            type = CipherType.Login,
+            loginData = CipherLoginData(
+                name = "test_cipher"
+            )
+        )
+
+        val toUpdate = listOf(EncryptedCipher(testCipher, aesKey))
+        val toDelete = firstResponse.ids
+
+        val secondResponse = cipherClient.sync(lastSync, toUpdate, toDelete)
+
+        assertEquals(1, secondResponse.ids.size)
+        assertEquals(1, secondResponse.ciphers.size)
+        assertEquals(testCipher, secondResponse.ciphers[0])
+
+        // wait for 1 second to make sure that the last sync time is different
+        Thread.sleep(1000)
+
+        val thirdResponse = cipherClient.sync(Date(), emptyList(), emptyList())
+
+        assertEquals(1, thirdResponse.ids.size)
+        assertEquals(0, thirdResponse.ciphers.size)
+    }
+
+    @Test
+    fun oldSyncCiphers() {
+        insertCipher()
+
+        // wait for 1 second to make sure that the last sync time is different
+        Thread.sleep(1000)
+
+        val lastSync = Date()
         val response = cipherClient.sync(lastSync)
 
         assert(response.ids.isNotEmpty())
@@ -110,16 +149,14 @@ class CipherClientTests {
         // wait 1 second to make the date different
         Thread.sleep(1000)
 
-        val newCipher =
-            cipher.copy(
-                type = CipherType.SecureNote,
-                loginData = null,
-                secureNoteData =
-                    CipherSecureNoteData(
-                        title = "test_cipher",
-                        note = "test"
-                    )
+        val newCipher = cipher.copy(
+            type = CipherType.SecureNote,
+            loginData = null,
+            secureNoteData = CipherSecureNoteData(
+                title = "test_cipher",
+                note = "test"
             )
+        )
         cipherClient.save(newCipher.withUpdatedLastModified(), aesKey)
 
         val updatedCipher = cipherClient.get(cipherId)
