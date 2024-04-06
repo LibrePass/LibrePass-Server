@@ -11,6 +11,7 @@ import dev.medzik.librepass.server.utils.Response
 import dev.medzik.librepass.server.utils.ResponseHandler
 import dev.medzik.librepass.server.utils.Validator
 import dev.medzik.librepass.types.api.CipherIdResponse
+import dev.medzik.librepass.types.api.SyncRequest
 import dev.medzik.librepass.types.api.SyncResponse
 import dev.medzik.librepass.types.cipher.EncryptedCipher
 import jakarta.validation.Valid
@@ -33,6 +34,8 @@ class CipherController @Autowired constructor(
 ) {
     private val rateLimit = CipherControllerRateLimitConfig()
 
+    /** Backward compatibility */
+    @Deprecated("Use /sync endpoint")
     @PutMapping
     fun saveCipher(
         @AuthorizedUser user: UserTable,
@@ -62,6 +65,8 @@ class CipherController @Autowired constructor(
         )
     }
 
+    /** Backward compatibility */
+    @Deprecated("Use /sync endpoint")
     @GetMapping
     fun getAllCiphers(
         @AuthorizedUser user: UserTable
@@ -76,30 +81,73 @@ class CipherController @Autowired constructor(
         return ResponseHandler.generateResponse(response, HttpStatus.OK)
     }
 
+    /** Backward compatibility */
+    @Deprecated("Use POST method")
     @GetMapping("/sync")
     fun syncCiphers(
         @AuthorizedUser user: UserTable,
         @RequestParam("lastSync") lastSyncUnixTimestamp: Long
     ): Response {
+        val syncRequest = SyncRequest(
+            lastSyncTimestamp = lastSyncUnixTimestamp,
+            updated = emptyList(),
+            deleted = emptyList()
+        )
+
+        return syncCiphers(user, syncRequest)
+    }
+
+    @PostMapping("/sync")
+    fun syncCiphers(
+        @AuthorizedUser user: UserTable,
+        @RequestBody request: SyncRequest
+    ): Response {
         consumeRateLimit(user.id.toString())
 
-        val cipherIDs = cipherRepository.getAllIDs(user.id)
+        var ownedCiphers = cipherRepository.countByOwner(user.id)
+        val ownedCipherIDs = cipherRepository.getAllIDs(user.id)
 
-        val ciphers = cipherRepository.getAllByOwnerAndLastServerSync(
+        // valid all updated ciphers
+        for (cipher in request.updated) {
+            // check if protected data is hex
+            if (!Validator.hexValidator(cipher.protectedData)) throw ServerException.InvalidCipher("validation failed")
+
+            // check if the owner is correct
+            if (cipher.owner != user.id) throw ServerException.InvalidCipher("validation failed")
+
+            // check the user's cipher limit
+            if (ownedCipherIDs.contains(cipher.id)) {
+                ownedCiphers++
+
+                if (ownedCiphers > userCiphersLimit) {
+                    throw ServerException.InvalidCipher("current ciphers limit per user is $userCiphersLimit")
+                }
+            }
+        }
+
+        // delete ciphers from database
+        cipherRepository.deleteAllByIdInAndOwner(request.deleted, user.id)
+
+        // save ciphers into database
+        if (request.updated.isNotEmpty()) {
+            cipherRepository.saveAll(request.updated.map { CipherTable(it) } )
+        }
+
+        val updatedCiphers = cipherRepository.getAllByOwnerAndLastServerSync(
             user = user.id,
-            date = Date(TimeUnit.SECONDS.toMillis(lastSyncUnixTimestamp))
+            date = Date(TimeUnit.SECONDS.toMillis(request.lastSyncTimestamp))
         )
 
         val syncResponse = SyncResponse(
-            // ids of all ciphers
-            ids = cipherIDs,
-            // all ciphers that were updated after timestamp
-            ciphers = ciphers.map { it.toEncryptedCipher() } // convert cipher table to encrypted ciphers
+            ids = cipherRepository.getAllIDs(user.id),
+            ciphers = updatedCiphers.map { it.toEncryptedCipher() }
         )
 
         return ResponseHandler.generateResponse(syncResponse, HttpStatus.OK)
     }
 
+    /** Backward compatibility */
+    @Deprecated("Use /sync endpoint")
     @GetMapping("/{id}")
     fun getCipher(
         @AuthorizedUser user: UserTable,
@@ -118,8 +166,9 @@ class CipherController @Autowired constructor(
         return ResponseHandler.generateResponse(encryptedCipher, HttpStatus.OK)
     }
 
+    /** Backward compatibility */
+    @Deprecated("Use /sync endpoint")
     @PatchMapping("/{id}")
-    @Deprecated("Use `/save` instead", ReplaceWith("saveCipher(user, encryptedCipher)"))
     fun updateCipher(
         @AuthorizedUser user: UserTable,
         @PathVariable id: UUID,
@@ -128,6 +177,8 @@ class CipherController @Autowired constructor(
         return saveCipher(user, encryptedCipher)
     }
 
+    /** Backward compatibility */
+    @Deprecated("Use /sync endpoint")
     @DeleteMapping("/{id}")
     fun deleteCipher(
         @AuthorizedUser user: UserTable,

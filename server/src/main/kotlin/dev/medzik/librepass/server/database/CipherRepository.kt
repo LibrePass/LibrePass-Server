@@ -40,9 +40,7 @@ interface CipherRepository : CrudRepository<CipherTable, UUID> {
      * Gets ids of all cipher owned by the [user].
      */
     @Query("SELECT c.id FROM #{#entityName} c WHERE c.owner = :user")
-    fun getAllIDs(
-        @Param("user") user: UUID
-    ): List<UUID>
+    fun getAllIDs(@Param("user") user: UUID): List<UUID>
 
     /**
      * Updates the cipher table with the given [data].
@@ -61,4 +59,11 @@ interface CipherRepository : CrudRepository<CipherTable, UUID> {
     @Transactional
     @Modifying
     fun deleteAllByOwner(user: UUID)
+
+    /**
+     * Deletes multiple ciphers owned by the [user].
+     */
+    @Transactional
+    @Modifying
+    fun deleteAllByIdInAndOwner(id: List<UUID>, user: UUID)
 }
