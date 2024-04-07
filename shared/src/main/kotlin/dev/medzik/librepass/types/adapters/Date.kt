@@ -5,6 +5,9 @@ import java.lang.reflect.Type
 import java.util.*
 import java.util.concurrent.TimeUnit
 
+/**
+ * GSON adapter for serialization and deserialization Date into unix timestamp (in seconds).
+ */
 internal class DateAdapter : JsonSerializer<Date>, JsonDeserializer<Date> {
     override fun serialize(
         src: Date?,
