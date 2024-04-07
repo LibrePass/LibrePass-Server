@@ -126,7 +126,9 @@ class CipherController @Autowired constructor(
         }
 
         // delete ciphers from database
-        cipherRepository.deleteAllByIdInAndOwner(request.deleted, user.id)
+        if (request.deleted.isNotEmpty()) {
+            cipherRepository.deleteAllByIdInAndOwner(request.deleted, user.id)
+        }
 
         // save ciphers into database
         if (request.updated.isNotEmpty()) {
