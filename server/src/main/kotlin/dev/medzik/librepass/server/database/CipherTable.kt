@@ -46,16 +46,15 @@ data class CipherTable(
     )
 
     /** Convert to [EncryptedCipher] object. This is used to send data to the client. */
-    fun toEncryptedCipher() =
-        EncryptedCipher(
-            id = id,
-            owner = owner,
-            type = type,
-            protectedData = data,
-            favorite = favorite,
-            collection = collection,
-            rePrompt = rePrompt,
-            created = created,
-            lastModified = lastModified
-        )
+    fun toEncryptedCipher() = EncryptedCipher(
+        id = id,
+        owner = owner,
+        type = type,
+        protectedData = data,
+        favorite = favorite,
+        collection = collection,
+        rePrompt = rePrompt,
+        created = created,
+        lastModified = lastModified
+    )
 }
