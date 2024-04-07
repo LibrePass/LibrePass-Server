@@ -135,14 +135,18 @@ class CipherController @Autowired constructor(
             cipherRepository.saveAll(request.updated.map { CipherTable(it) } )
         }
 
-        val updatedCiphers = cipherRepository.getAllByOwnerAndLastServerSync(
-            user = user.id,
-            date = Date(TimeUnit.SECONDS.toMillis(request.lastSyncTimestamp))
-        )
+        val ciphers = if (request.lastSyncTimestamp > 0) {
+            cipherRepository.getAllByOwnerAndLastServerSync(
+                user = user.id,
+                date = Date(TimeUnit.SECONDS.toMillis(request.lastSyncTimestamp))
+            )
+        } else {
+            cipherRepository.getAllByOwner(user.id)
+        }
 
         val syncResponse = SyncResponse(
             ids = cipherRepository.getAllIDs(user.id),
-            ciphers = updatedCiphers.map { it.toEncryptedCipher() }
+            ciphers = ciphers.map { it.toEncryptedCipher() }
         )
 
         return ResponseHandler.generateResponse(syncResponse, HttpStatus.OK)
