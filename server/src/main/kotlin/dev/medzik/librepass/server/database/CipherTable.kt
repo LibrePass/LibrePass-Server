@@ -22,6 +22,9 @@ data class CipherTable(
     val collection: UUID? = null,
     val rePrompt: Boolean = false,
 
+    @Deprecated("Only for compatibility")
+    val version: Int = 1,
+
     @Temporal(TemporalType.TIMESTAMP)
     val created: Date = currentFixedDate(),
     @Temporal(TemporalType.TIMESTAMP)
