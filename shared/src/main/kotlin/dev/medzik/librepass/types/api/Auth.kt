@@ -4,15 +4,15 @@ import dev.medzik.libcrypto.Argon2
 import java.util.*
 
 /**
- * Request for register endpoint, used to register new users.
+ * Request for register endpoint, for registration new users.
  *
- * @property email The email address of the user.
- * @property passwordHint The password hint for password (optional but recommended).
+ * @property email The user's email address.
+ * @property passwordHint The hint for the user's password.
  * @property sharedKey The shared key with server, to verify the public key.
- * @property parallelism The number of threads to use for calculating argon2 hash.
- * @property memory The memory to use for calculating argon2 hash.
- * @property iterations The number of iterations for calculating argon2 hash.
- * @property publicKey The X25519 public key.
+ * @property parallelism The argon2id parallelism parameter.
+ * @property memory The argon2id memory parameter.
+ * @property iterations The argon2id iterations parameter.
+ * @property publicKey The X25519 public key of the user's password.
  */
 data class RegisterRequest(
     val email: String,
@@ -25,12 +25,13 @@ data class RegisterRequest(
 )
 
 /**
- * Response from preLogin endpoint, used to obtain parameters to calculate private key
+ * Response from preLogin endpoint, to obtain parameters for login endpoint.
+ * Argon2id parameters for computing password hash and server's public key for "handshake".
  *
- * @property parallelism The number of threads to use for calculating argon2 hash.
- * @property memory The memory to use for calculating argon2 hash.
- * @property iterations The number of iterations for calculating argon2 hash.
- * @property serverPublicKey The server's public key used to calculate the shared key with the server.
+ * @property parallelism The argon2id parallelism parameter.
+ * @property memory The argon2id memory parameter.
+ * @property iterations The argon2id iterations parameter.
+ * @property serverPublicKey The X25519 server's public key for handshaking.
  */
 data class PreLoginResponse(
     val parallelism: Int,
@@ -50,10 +51,10 @@ data class PreLoginResponse(
 }
 
 /**
- * Request for oauth endpoint, used to authenticate users.
+ * Request for oauth endpoint, for user authentication.
  *
- * @property email The email address of the user.
- * @property sharedKey The shared key with server, used for authentication.
+ * @property email The user's email address.
+ * @property sharedKey The shared key between the user and the server.
  */
 data class LoginRequest(
     val email: String,
@@ -61,10 +62,10 @@ data class LoginRequest(
 )
 
 /**
- * Request for oauth endpoint, used to verify login using OTP code.
+ * Request for oauth endpoint, for verification 2-factor authentication.
  *
- * @property apiKey The API key returned by the login endpoint.
- * @property code The OTP code.
+ * @property apiKey The user's API key returned by the login endpoint.
+ * @property code The current 2-fa code.
  */
 data class TwoFactorRequest(
     val apiKey: String,
@@ -74,10 +75,11 @@ data class TwoFactorRequest(
 /**
  * Response from oauth endpoint.
  *
- * @property userId The identifier of the user.
- * @property apiKey The API key.
- * @property verified If false, you need to authenticate the API key with OTP code to use the API. (Only if the user enabled
- *  2FA authentication)
+ * @property userId The user's identifier.
+ * @property apiKey The user's API key.
+ * @property verified If false, you need to authenticate the API key with TOTP code to verify the login.
+ * False always when the user has enabled 2-factor authentication.
+ * To verify the user's API key use oauth with the 2-fa grant type.
  */
 data class UserCredentialsResponse(
     val userId: UUID,

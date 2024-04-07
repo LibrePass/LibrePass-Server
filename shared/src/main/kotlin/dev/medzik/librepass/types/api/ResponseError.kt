@@ -1,11 +1,11 @@
 package dev.medzik.librepass.types.api
 
 /**
- * Response that contains API Error.
+ * API Error response.
  *
- * @property error error returned from the server
- * @property status http status code
- * @property message error message returned from the server
+ * @property error The error code.
+ * @property status The http status.
+ * @property message The message of the error.
  */
 data class ResponseError(
     val error: String,
