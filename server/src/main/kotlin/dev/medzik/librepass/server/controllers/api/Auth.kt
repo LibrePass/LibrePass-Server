@@ -290,7 +290,7 @@ class AuthController @Autowired constructor(
     @GetMapping("/verifyEmail")
     fun verifyEmail(
         @RequestIP ip: String,
-        @Valid @NotBlank @RequestParam("user") userId: UUID,
+        @RequestParam("user") userId: UUID,
         @Valid @NotBlank @RequestParam("code") verificationCode: String
     ): Response {
         consumeRateLimit(ip)
