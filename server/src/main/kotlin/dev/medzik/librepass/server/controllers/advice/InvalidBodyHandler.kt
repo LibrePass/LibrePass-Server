@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.method.annotation.HandlerMethodValidationException
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException
+import org.springframework.web.server.MethodNotAllowedException
 
 @ControllerAdvice
 class InvalidBodyHandler {
@@ -21,6 +22,9 @@ class InvalidBodyHandler {
 
     @ExceptionHandler(value = [MethodArgumentTypeMismatchException::class])
     fun handleArgumentTypeMismatch() = invalidBodyResponse("argument type mismatch")
+
+    @ExceptionHandler(value = [MethodNotAllowedException::class])
+    fun handleMethodNotAllowed() = invalidBodyResponse("method not allowed")
 
     private fun invalidBodyResponse(reason: String) = makeResponseFromError(ServerException.InvalidBody(reason))
 }
