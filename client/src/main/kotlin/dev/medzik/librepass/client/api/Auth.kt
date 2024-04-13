@@ -94,12 +94,11 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
     ): UserCredentials {
         val preLoginData = preLogin(email)
 
-        val passwordHash =
-            computePasswordHash(
-                password = password,
-                email = email,
-                argon2Function = preLoginData.toArgon2()
-            )
+        val passwordHash = computePasswordHash(
+            password = password,
+            email = email,
+            argon2Function = preLoginData.toArgon2()
+        )
 
         return login(email, passwordHash, preLoginData)
     }
@@ -127,11 +126,10 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
         // compute shared key for "handshake"
         val sharedKey = computeSharedKey(privateKey, serverPublicKey.fromHex())
 
-        val request =
-            LoginRequest(
-                email = email,
-                sharedKey = sharedKey.toHex(),
-            )
+        val request = LoginRequest(
+            email = email,
+            sharedKey = sharedKey.toHex(),
+        )
 
         // send login request and extract user credentials
         val responseBody = client.post("$API_ENDPOINT/oauth?grantType=login", JsonUtils.serialize(request))
@@ -161,11 +159,10 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
         apiKey: String,
         code: String
     ) {
-        val request =
-            TwoFactorRequest(
-                apiKey = apiKey,
-                code = code
-            )
+        val request = TwoFactorRequest(
+            apiKey = apiKey,
+            code = code
+        )
 
         client.post("$API_ENDPOINT/oauth?grantType=2fa", JsonUtils.serialize(request))
     }
