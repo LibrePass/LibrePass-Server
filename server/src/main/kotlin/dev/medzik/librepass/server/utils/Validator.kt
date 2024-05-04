@@ -1,6 +1,7 @@
 package dev.medzik.librepass.server.utils
 
-import dev.medzik.libcrypto.X25519
+import dev.medzik.hsauth.HSAuth
+import dev.medzik.hsauth.HSAuthVersion
 import dev.medzik.librepass.server.controllers.api.ServerPrivateKey
 import dev.medzik.librepass.server.database.UserTable
 import dev.medzik.librepass.utils.fromHex
@@ -22,8 +23,5 @@ object Validator {
     fun validateSharedKey(
         publicKey: String,
         sharedKey: String
-    ): Boolean {
-        val oldSharedKey = X25519.computeSharedSecret(ServerPrivateKey, publicKey.fromHex())
-        return sharedKey.fromHex().contentEquals(oldSharedKey)
-    }
+    ) = HSAuth(HSAuthVersion.V1).isValid(sharedKey, ServerPrivateKey, publicKey.fromHex())
 }
