@@ -113,6 +113,13 @@
             <version>1.0.0</version>
         </dependency>
 
+        <!-- Handshake Authentication -->
+        <dependency>
+            <groupId>dev.medzik</groupId>
+            <artifactId>hsauth</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
         <!-- LibrePass Shared -->
         <dependency>
             <groupId>dev.medzik.librepass</groupId>
