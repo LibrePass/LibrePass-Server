@@ -28,6 +28,13 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- Handshake Authentication -->
+        <dependency>
+            <groupId>dev.medzik</groupId>
+            <artifactId>hsauth</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
         <!-- Two-Factor Authentication -->
         <dependency>
             <groupId>dev.medzik</groupId>

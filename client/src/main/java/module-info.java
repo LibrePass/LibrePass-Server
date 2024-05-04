@@ -1,6 +1,7 @@
 module dev.medzik.librepass.client {
     requires dev.medzik.librepass.shared;
     requires dev.medzik.libcrypto;
+    requires dev.medzik.hsauth;
     requires okhttp3;
     requires com.google.gson;
     requires kotlin.stdlib;

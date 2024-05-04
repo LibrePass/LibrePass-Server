@@ -1,5 +1,7 @@
 package dev.medzik.librepass.client.api
 
+import dev.medzik.hsauth.HSAuth
+import dev.medzik.hsauth.HSAuthVersion
 import dev.medzik.libcrypto.Argon2Hash
 import dev.medzik.libcrypto.X25519
 import dev.medzik.librepass.client.Client
@@ -10,7 +12,6 @@ import dev.medzik.librepass.client.utils.JsonUtils
 import dev.medzik.librepass.types.api.*
 import dev.medzik.librepass.utils.Cryptography.computeAesKey
 import dev.medzik.librepass.utils.Cryptography.computePasswordHash
-import dev.medzik.librepass.utils.Cryptography.computeSharedKey
 import dev.medzik.librepass.utils.fromHex
 import dev.medzik.librepass.utils.toHex
 import java.util.*
@@ -46,14 +47,10 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
 
         // compute password hash
         val passwordHash = computePasswordHash(password, email, argon2Function)
-        // set password hash as a x25519 private key
         val privateKey = passwordHash.hash
-        // compute public key from the private key
         val publicKey = X25519.publicFromPrivate(privateKey)
 
-        // compute shared key for "handshake"
-        val serverPublicKey = serverPreLogin.serverPublicKey.fromHex()
-        val sharedKey = computeSharedKey(privateKey, serverPublicKey).toHex()
+        val sharedKey = HSAuth(HSAuthVersion.V1).generateKey(privateKey, serverPreLogin.serverPublicKey.fromHex())
 
         val request = RegisterRequest(
             email = email,
@@ -120,15 +117,14 @@ class AuthClient(apiUrl: String = Server.PRODUCTION) {
         // get server public key
         val serverPublicKey = preLogin?.serverPublicKey ?: preLogin(email).serverPublicKey
 
-        // user keypair
         val privateKey = passwordHash.hash
         val publicKey = X25519.publicFromPrivate(privateKey)
-        // compute shared key for "handshake"
-        val sharedKey = computeSharedKey(privateKey, serverPublicKey.fromHex())
+
+        val sharedKey = HSAuth(HSAuthVersion.V1).generateKey(privateKey, serverPublicKey.fromHex())
 
         val request = LoginRequest(
             email = email,
-            sharedKey = sharedKey.toHex(),
+            sharedKey = sharedKey,
         )
 
         // send login request and extract user credentials
