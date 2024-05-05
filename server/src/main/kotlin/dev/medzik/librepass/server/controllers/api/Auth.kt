@@ -234,17 +234,14 @@ class AuthController @Autowired constructor(
 
         consumeRateLimit(user.email)
 
-        val totpParameters =
-            OTPParameters.builder()
-                .type(OTPType.TOTP)
-                .secret(OTPParameters.Secret(user.twoFactorSecret))
-                .label(OTPParameters.Label(""))
-                .build()
+        val totpParameters = OTPParameters.builder()
+            .type(OTPType.TOTP)
+            .secret(OTPParameters.Secret(user.twoFactorSecret))
+            .build()
 
         if (!TOTPGenerator.verify(totpParameters, request.code) &&
             request.code != user.twoFactorRecoveryCode
-        )
-            throw ServerException.InvalidTwoFactor()
+        ) throw ServerException.InvalidTwoFactor()
 
         coroutineScope.launch {
             emailService.sendNewLogin(
