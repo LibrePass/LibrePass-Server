@@ -222,12 +222,10 @@ class UserController @Autowired constructor(
         if (!validateSharedKey(user, request.sharedKey))
             throw ServerException.InvalidSharedKey()
 
-        val totpParameters =
-            OTPParameters.builder()
-                .type(OTPType.TOTP)
-                .secret(OTPParameters.Secret(request.secret))
-                .label(OTPParameters.Label(""))
-                .build()
+        val totpParameters = OTPParameters.builder()
+            .type(OTPType.TOTP)
+            .secret(OTPParameters.Secret(request.secret))
+            .build()
 
         if (!TOTPGenerator.verify(totpParameters, request.code))
             throw ServerException.InvalidTwoFactor()
@@ -258,12 +256,10 @@ class UserController @Autowired constructor(
             if (request.code.isNullOrBlank())
                 throw ServerException.InvalidTwoFactor()
 
-            val totpParameters =
-                OTPParameters.builder()
-                    .type(OTPType.TOTP)
-                    .secret(OTPParameters.Secret(user.twoFactorSecret))
-                    .label(OTPParameters.Label(""))
-                    .build()
+            val totpParameters = OTPParameters.builder()
+                .type(OTPType.TOTP)
+                .secret(OTPParameters.Secret(user.twoFactorSecret))
+                .build()
 
             if (!TOTPGenerator.verify(totpParameters, request.code))
                 throw ServerException.InvalidTwoFactor()
