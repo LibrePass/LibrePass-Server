@@ -18,15 +18,6 @@ object Cryptography {
     /** Compute an AES key from the private key. */
     @JvmStatic
     fun computeAesKey(privateKey: ByteArray): ByteArray {
-        return computeSharedKey(privateKey, X25519.publicFromPrivate(privateKey))
-    }
-
-    /** Compute shared key from private and public keys. */
-    @JvmStatic
-    fun computeSharedKey(
-        privateKey: ByteArray,
-        publicKey: ByteArray
-    ): ByteArray {
-        return X25519.computeSharedSecret(privateKey, publicKey)
+        return X25519.computeSharedSecret(privateKey, X25519.publicFromPrivate(privateKey))
     }
 }
