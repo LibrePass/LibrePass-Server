@@ -1,5 +1,7 @@
 package dev.medzik.librepass.client.api
 
+import dev.medzik.hsauth.HSAuth
+import dev.medzik.hsauth.HSAuthVersion
 import dev.medzik.libcrypto.Aes
 import dev.medzik.libcrypto.Argon2
 import dev.medzik.libcrypto.Argon2Hash
@@ -12,7 +14,6 @@ import dev.medzik.librepass.client.utils.JsonUtils
 import dev.medzik.librepass.types.api.*
 import dev.medzik.librepass.utils.Cryptography.computeAesKey
 import dev.medzik.librepass.utils.Cryptography.computePasswordHash
-import dev.medzik.librepass.utils.Cryptography.computeSharedKey
 import dev.medzik.librepass.utils.fromHex
 import dev.medzik.librepass.utils.toHex
 
@@ -45,7 +46,10 @@ class UserClient(
         newEmail: String,
         password: String
     ) {
+        // get pre-login data
         val preLogin = AuthClient(apiUrl).preLogin(email)
+        // extract server public key from pre-login data
+        val serverPublicKey = preLogin.serverPublicKey.fromHex()
 
         // computes hash using old email address as salt
         val oldPasswordHash = computePasswordHash(
@@ -53,6 +57,7 @@ class UserClient(
             password = password,
             argon2Function = preLogin.toArgon2()
         )
+
         // computes hash using new email address as salt
         val newPasswordHash = computePasswordHash(
             email = newEmail,
@@ -62,14 +67,8 @@ class UserClient(
 
         val newPublicKey = X25519.publicFromPrivate(newPasswordHash.hash)
 
-        // get server public key
-        val serverPublicKey = preLogin.serverPublicKey.fromHex()
-
-        // compute shared key with an old private key and server public key
-        val oldSharedKey = computeSharedKey(oldPasswordHash.hash, serverPublicKey)
-
-        // compute shared key with a new private key and server public key
-        val newSharedKey = computeSharedKey(newPasswordHash.hash, serverPublicKey)
+        val oldSharedKey = HSAuth(HSAuthVersion.V1).generateKey(oldPasswordHash.hash, serverPublicKey)
+        val newSharedKey = HSAuth(HSAuthVersion.V1).generateKey(newPasswordHash.hash, serverPublicKey)
 
         val ciphers = reEncodeCipher(
             oldPasswordHash,
@@ -78,8 +77,8 @@ class UserClient(
 
         val request = ChangeEmailRequest(
             newEmail = newEmail,
-            oldSharedKey = oldSharedKey.toHex(),
-            newSharedKey = newSharedKey.toHex(),
+            oldSharedKey = oldSharedKey,
+            newSharedKey = newSharedKey,
             // X25519 public key
             newPublicKey = newPublicKey.toHex(),
             // ciphers data re-encrypted with new password
@@ -109,6 +108,8 @@ class UserClient(
     ) {
         // get pre-login data for the old password
         val oldPreLogin = AuthClient(apiUrl).preLogin(email)
+        // extract server public key from pre-login data
+        val serverPublicKey = oldPreLogin.serverPublicKey.fromHex()
 
         // compute password hash for the old password
         val oldPasswordHash = computePasswordHash(
@@ -126,13 +127,8 @@ class UserClient(
         // compute new public key
         val newPublicKey = X25519.publicFromPrivate(newPasswordHash.hash)
 
-        // get server public key
-        val serverPublicKey = oldPreLogin.serverPublicKey.fromHex()
-
-        // compute shared key with an old private key and server public key
-        val oldSharedKey = computeSharedKey(oldPasswordHash.hash, serverPublicKey)
-        // compute shared key with a new private key and server public key
-        val newSharedKey = computeSharedKey(newPasswordHash.hash, serverPublicKey)
+        val oldSharedKey = HSAuth(HSAuthVersion.V1).generateKey(oldPasswordHash.hash, serverPublicKey)
+        val newSharedKey = HSAuth(HSAuthVersion.V1).generateKey(newPasswordHash.hash, serverPublicKey)
 
         // re-encode ciphers due to new encryption key
         val ciphers = reEncodeCipher(
@@ -141,9 +137,9 @@ class UserClient(
         )
 
         val request = ChangePasswordRequest(
-            oldSharedKey = oldSharedKey.toHex(),
+            oldSharedKey = oldSharedKey,
             newPasswordHint = newPasswordHint,
-            newSharedKey = newSharedKey.toHex(),
+            newSharedKey = newSharedKey,
             // Argon2id parameters
             parallelism = newPasswordHash.parallelism,
             memory = newPasswordHash.memory,
@@ -170,7 +166,7 @@ class UserClient(
         // compute a new aes key
         val newAesKey = computeAesKey(newPasswordHash.hash)
 
-        // re-encrypt ciphers data with new encryption key
+        // re-encrypt ciphers data with the new encryption key
         val cipherClient = CipherClient(apiKey, apiUrl)
         val ciphers = mutableListOf<ChangePasswordCipherData>()
         cipherClient.getAll().forEach { cipher ->
@@ -212,14 +208,13 @@ class UserClient(
         )
 
         val serverPublicKey = preLogin.serverPublicKey.fromHex()
-        val sharedKey = computeSharedKey(passwordHash.hash, serverPublicKey)
+        val sharedKey = HSAuth(HSAuthVersion.V1).generateKey(passwordHash.hash, serverPublicKey)
 
-        val request =
-            SetupTwoFactorRequest(
-                sharedKey = sharedKey.toHex(),
-                secret = secret,
-                code = code
-            )
+        val request = SetupTwoFactorRequest(
+            sharedKey = sharedKey,
+            secret = secret,
+            code = code
+        )
 
         val response = client.post(
             "$API_ENDPOINT/setup/2fa",
@@ -249,10 +244,10 @@ class UserClient(
         )
 
         val serverPublicKey = preLogin.serverPublicKey.fromHex()
-        val sharedKey = computeSharedKey(passwordHash.hash, serverPublicKey)
+        val sharedKey = HSAuth(HSAuthVersion.V1).generateKey(passwordHash.hash, serverPublicKey)
 
         val request = DeleteAccountRequest(
-            sharedKey = sharedKey.toHex(),
+            sharedKey = sharedKey,
             code = tfaCode
         )
 
