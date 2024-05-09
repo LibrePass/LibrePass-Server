@@ -16,6 +16,7 @@ import dev.medzik.librepass.utils.Cryptography.computeAesKey
 import dev.medzik.librepass.utils.Cryptography.computePasswordHash
 import dev.medzik.librepass.utils.fromHex
 import dev.medzik.librepass.utils.toHex
+import java.util.*
 
 /**
  * User Client for manage user settings.
@@ -169,7 +170,7 @@ class UserClient(
         // re-encrypt ciphers data with the new encryption key
         val cipherClient = CipherClient(apiKey, apiUrl)
         val ciphers = mutableListOf<ChangePasswordCipherData>()
-        cipherClient.getAll().forEach { cipher ->
+        cipherClient.sync(Date(0), emptyList(), emptyList()).ciphers.forEach { cipher ->
             // decrypt cipher data with an old aes key
             val oldData = Aes.decrypt(Aes.GCM, oldAesKey, cipher.protectedData)
 
