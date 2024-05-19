@@ -54,6 +54,8 @@ class AuthController @Autowired constructor(
     private val rateLimitEnabled: Boolean,
     @Value("\${email.verification.required}")
     private val emailVerificationRequired: Boolean,
+    @Value("\${email.newLogin}")
+    private val sendNewLoginEmail: Boolean,
     @Value("\${web.url}")
     private val webUrl: String
 ) {
@@ -200,11 +202,13 @@ class AuthController @Autowired constructor(
             )
         )
 
-        if (!user.twoFactorEnabled) {
-            emailService.sendNewLogin(
-                to = user.email,
-                ip = ip
-            )
+        if (!user.twoFactorEnabled && sendNewLoginEmail) {
+            coroutineScope.launch {
+                emailService.sendNewLogin(
+                    to = user.email,
+                    ip = ip
+                )
+            }
         }
 
         return ResponseHandler.generateResponse(
@@ -243,11 +247,13 @@ class AuthController @Autowired constructor(
             request.code != user.twoFactorRecoveryCode
         ) throw ServerException.InvalidTwoFactor()
 
-        coroutineScope.launch {
-            emailService.sendNewLogin(
-                to = user.email,
-                ip = ip
-            )
+        if (sendNewLoginEmail) {
+            coroutineScope.launch {
+                emailService.sendNewLogin(
+                    to = user.email,
+                    ip = ip
+                )
+            }
         }
 
         tokenRepository.save(token.copy(confirmed = true))
