@@ -204,10 +204,14 @@ class AuthController @Autowired constructor(
 
         if (!user.twoFactorEnabled && sendNewLoginEmail) {
             coroutineScope.launch {
-                emailService.sendNewLogin(
-                    to = user.email,
-                    ip = ip
-                )
+                try {
+                    emailService.sendNewLogin(
+                        to = user.email,
+                        ip = ip
+                    )
+                } catch (e: Throwable) {
+                    logger.error("Error sending email verification", e)
+                }
             }
         }
 
@@ -249,10 +253,14 @@ class AuthController @Autowired constructor(
 
         if (sendNewLoginEmail) {
             coroutineScope.launch {
-                emailService.sendNewLogin(
-                    to = user.email,
-                    ip = ip
-                )
+                try {
+                    emailService.sendNewLogin(
+                        to = user.email,
+                        ip = ip
+                    )
+                } catch (e: Throwable) {
+                    logger.error("Error sending email verification", e)
+                }
             }
         }
 
