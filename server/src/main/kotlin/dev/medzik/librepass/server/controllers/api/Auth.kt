@@ -113,15 +113,15 @@ class AuthController @Autowired constructor(
     ): Response {
         fun preLoginDefaultResponse(): Response {
             return ResponseHandler.generateResponse(
-                PreLoginResponse(
+
+            PreLoginResponse(
                     // Default Argon2 parameters
                     parallelism = 3,
                     memory = 65536,
                     iterations = 4,
                     // Server X5519 public key
                     serverPublicKey = ServerPublicKey.toHex()
-                )
-            )
+                ))
         }
 
         consumeRateLimit(ip)

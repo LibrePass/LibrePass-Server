@@ -65,8 +65,7 @@ class UserController @Autowired constructor(
                 owner = user.id,
                 newEmail = request.newEmail,
                 code = UUID.randomUUID().toString(),
-                codeExpiresAt =
-                Date.from(
+                codeExpiresAt = Date.from(
                     Calendar.getInstance().apply {
                         add(Calendar.HOUR, 24)
                     }.toInstant()
