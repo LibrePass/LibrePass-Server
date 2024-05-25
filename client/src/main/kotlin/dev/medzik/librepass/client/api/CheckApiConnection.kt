@@ -1,8 +1,6 @@
 package dev.medzik.librepass.client.api
 
-import com.google.gson.JsonSyntaxException
 import dev.medzik.librepass.client.Client
-import dev.medzik.librepass.client.errors.ApiException
 
 /**
  * Check connection with the API server.
@@ -15,9 +13,7 @@ fun checkApiConnection(apiUrl: String): Boolean {
     try {
         val response = client.get("/actuator/info")
         return response.contains("\"group\":\"dev.medzik.librepass\"")
-    } catch (e: ApiException) {
-        return false
-    } catch (e: JsonSyntaxException) {
+    } catch (e: Exception) {
         return false
     }
 }
