@@ -18,7 +18,7 @@ enum class ServerError(val statusCode: HttpStatus, val error: String) {
     MissingCipher(HttpStatus.BAD_REQUEST, "LP-Missing-Cipher"),
     NotFound(HttpStatus.NOT_FOUND, "LP-404"),
     RateLimit(HttpStatus.TOO_MANY_REQUESTS, "LP-RateLimit"),
-    UserNotFound(HttpStatus.BAD_REQUEST, "LP-User-404"),
+    UserNotFound(HttpStatus.NOT_FOUND, "LP-User-404"),
     Database(HttpStatus.INTERNAL_SERVER_ERROR, "LP-Database-Error"),
     Mail(HttpStatus.INTERNAL_SERVER_ERROR, "LP-Mail-Error")
 }
