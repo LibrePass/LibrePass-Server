@@ -49,7 +49,7 @@
         <kotlin.version>2.0.0</kotlin.version>
         <coroutines.version>1.8.1</coroutines.version>
 
-        <junit.jupiter.version>5.10.3</junit.jupiter.version>
+        <junit.jupiter.version>5.11.0</junit.jupiter.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
